@@ -68,17 +68,17 @@
 ---
 
 ## Phase 5: Client Decision Queue UI (Minimal Executive View) `[M]`
-- [ ] **5.1**: Build dedicated mobile-first single-column layout for Client View (`/client`). `[M]`
-- [ ] **5.2**: Implement Client Morning Brief header banner ("3 decisions need you, 12 handled by Maya"). `[M]`
-- [ ] **5.3**: Build `<DecisionCard />` in Fraunces serif typography (Question, 3 bullets context, deadline, consequence). `[M]`
-- [ ] **5.4**: Implement Decision Action Bar:
+- [x] **5.1**: Build dedicated mobile-first single-column layout for Client View (`/client`). `[M]`
+- [x] **5.2**: Implement Client Morning Brief header banner ("3 decisions need you, 12 handled by Maya"). `[M]`
+- [x] **5.3**: Build `<DecisionCard />` in Fraunces serif typography (Question, 3 bullets context, deadline, consequence). `[M]`
+- [x] **5.4**: Implement Decision Action Bar:
   - `[Approve Maya's Draft]`
   - `[Reply Myself]`
   - `[Hand to Maya]` (with optional note dialog)
   - `[Snooze 24h]`
   - `[Mark Handled]` `[M]`
-- [ ] **5.5**: Add touch swipe gestures on mobile (Swipe Right = Hand to Maya, Swipe Left = Mark Handled). `[I]`
-- [ ] **5.6**: Build instant optimistic state updates reflecting client decisions. `[M]`
+- [x] **5.5**: Add touch swipe gestures on mobile (Swipe Right = Hand to Maya, Swipe Left = Mark Handled). `[I]`
+- [x] **5.6**: Build instant optimistic state updates reflecting client decisions. `[M]`
 
 ---
 
