@@ -4,6 +4,7 @@ import { useAuth } from '../features/auth/AuthContext.jsx';
 import { api } from '../lib/api.js';
 import { DecisionCard } from '../components/DecisionCard.jsx';
 import Avatar from '../components/Avatar.jsx';
+import AccountMenu from '../components/AccountMenu.jsx';
 import {
   Sparkles,
   CheckCircle2,
@@ -109,7 +110,7 @@ export function ClientQueue() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={loadClientQueue}
             className="p-2 rounded-full border border-black/[0.06] bg-white hover:bg-ink-50 text-ink-500 hover:text-ink-900 shadow-soft transition cursor-pointer active:scale-95"
@@ -117,6 +118,8 @@ export function ClientQueue() {
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
+
+          <AccountMenu />
         </div>
       </header>
 

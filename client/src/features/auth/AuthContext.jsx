@@ -62,33 +62,6 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function switchRole(targetRole) {
-    setLoading(true);
-    try {
-      const payload = {};
-      if (typeof targetRole === 'string' && targetRole.trim()) {
-        payload.role = targetRole.trim();
-        payload.targetRole = targetRole.trim();
-      }
-      const res = await api.post('/auth/switch-role', payload);
-      if (res.ok && res.data?.user) {
-        setUser(res.data.user);
-        try {
-          const meRes = await api.get('/auth/me');
-          if (meRes.ok && meRes.data?.user) {
-            setUser(meRes.data.user);
-            setClient(meRes.data.client || null);
-          }
-        } catch {
-          // Keep user from switch role
-        }
-      }
-      return res;
-    } finally {
-      setLoading(false);
-    }
-  }
-
   async function signup(payload) {
     const res = await api.post('/auth/signup', payload);
     if (res.ok && res.data?.user) {
@@ -115,7 +88,6 @@ export function AuthProvider({ children }) {
         loading,
         login,
         demoLogin,
-        switchRole,
         signup,
         logout,
         refreshSession,

@@ -217,58 +217,6 @@ export async function demoLogin(req, res, next) {
 }
 
 /**
- * Switch role between Maya and Priya during demo
- */
-export async function switchRole(req, res, next) {
-  try {
-    const rawTarget = String(req.body?.targetRole || req.body?.role || '').toLowerCase();
-    const currentRole = req.user?.role || 'assistant';
-    let targetRole;
-    if (rawTarget.includes('client') || rawTarget.includes('priya')) {
-      targetRole = 'client';
-    } else if (rawTarget.includes('assistant') || rawTarget.includes('maya')) {
-      targetRole = 'assistant';
-    } else {
-      targetRole = currentRole === 'assistant' ? 'client' : 'assistant';
-    }
-    const targetEmail = targetRole === 'client' ? 'priya@vortexdynamics.com' : 'maya@vortexdynamics.com';
-
-    let targetUser = await store.findUserByEmail(targetEmail);
-    if (!targetUser) {
-      await store.initSeedData?.();
-      targetUser = await store.findUserByEmail(targetEmail);
-    }
-
-    if (!targetUser) {
-      return res.status(404).json({
-        ok: false,
-        error: { message: 'Target role user not found', code: 'USER_NOT_FOUND' },
-      });
-    }
-
-    const token = signToken({ userId: targetUser._id, role: targetUser.role, orgId: targetUser.orgId });
-    setAuthCookie(res, token);
-
-    return res.status(200).json({
-      ok: true,
-      data: {
-        user: {
-          _id: targetUser._id,
-          email: targetUser.email,
-          name: targetUser.name,
-          role: targetUser.role,
-          orgId: targetUser.orgId,
-          clientId: targetUser.clientId,
-        },
-        token,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
-}
-
-/**
  * Retrieve current user session and linked client details
  */
 export async function getMe(req, res, next) {

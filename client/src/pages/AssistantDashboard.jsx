@@ -11,6 +11,7 @@ import { PlaybookModal } from '../components/PlaybookModal.jsx';
 import { ActivityLogDrawer } from '../components/ActivityLogDrawer.jsx';
 import { LabelBadge } from '../components/LabelBadge.jsx';
 import Avatar from '../components/Avatar.jsx';
+import AccountMenu from '../components/AccountMenu.jsx';
 import {
   Inbox,
   UserCheck,
@@ -298,6 +299,11 @@ export function AssistantDashboard() {
           >
             <Mail className="h-3.5 w-3.5" />
           </Link>
+
+          <div className="h-4 w-px bg-borderMuted mx-1" />
+
+          {/* Account Menu */}
+          <AccountMenu />
         </div>
       </header>
 

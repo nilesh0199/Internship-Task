@@ -15,6 +15,7 @@ import {
   Building,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import AccountMenu from '../components/AccountMenu.jsx';
 
 export function AccountsPage() {
   const [accounts, setAccounts] = useState([]);
@@ -141,9 +142,12 @@ export function AccountsPage() {
             </Link>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-black/[0.06] shadow-soft text-ink-700 text-xs font-semibold">
-            <ShieldCheck className="h-3.5 w-3.5 text-accent" />
-            <span>AES-256-GCM Encrypted Token Storage</span>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-black/[0.06] shadow-soft text-ink-700 text-xs font-semibold">
+              <ShieldCheck className="h-3.5 w-3.5 text-accent" />
+              <span>AES-256-GCM Encrypted Token Storage</span>
+            </div>
+            <AccountMenu />
           </div>
         </div>
 

@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from '../features/auth/AuthContext.jsx';
 import { Login } from '../pages/Login.jsx';
 import { Signup } from '../pages/Signup.jsx';
 import { Onboarding } from '../pages/Onboarding.jsx';
-import { RoleSwitcher } from '../components/RoleSwitcher.jsx';
 import { AssistantDashboard } from '../pages/AssistantDashboard.jsx';
 import { ClientQueue } from '../pages/ClientQueue.jsx';
 import { AccountsPage } from '../pages/AccountsPage.jsx';
@@ -54,18 +53,22 @@ function RootRoute() {
 
 function FloatingControls() {
   const { user } = useAuth();
+  const location = useLocation();
 
-  // Floating switcher & prototype disclosure available for active authenticated sessions
   if (!user) {
     return null;
   }
 
-  return (
-    <>
-      <RoleSwitcher />
-      <PrototypeHelpPopover />
-    </>
-  );
+  // Keep PrototypeHelpPopover on app pages, not on landing page or public auth pages
+  const isPublicPage =
+    ['/', '/login', '/signup', '/forgot-password'].includes(location.pathname) ||
+    location.pathname.startsWith('/invite');
+
+  if (isPublicPage) {
+    return null;
+  }
+
+  return <PrototypeHelpPopover />;
 }
 
 export function AppRoutes() {

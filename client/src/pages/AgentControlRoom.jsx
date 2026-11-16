@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import AccountMenu from '../components/AccountMenu.jsx';
 import {
   Bot,
   Sparkles,
@@ -200,6 +201,8 @@ export function AgentControlRoom() {
             <Play className={`h-3.5 w-3.5 fill-white ${runningAgents ? 'animate-spin' : ''}`} />
             <span>{runningAgents ? 'Running agents...' : 'Run agents now'}</span>
           </button>
+
+          <AccountMenu />
         </div>
       </header>
 
