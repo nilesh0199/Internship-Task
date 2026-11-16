@@ -29,13 +29,13 @@
 ---
 
 ## Phase 2: Provider Adapters & Email Sync Pipeline `[M]`
-- [ ] **2.1**: Implement base `EmailProviderAdapter` interface in `/server/src/providers/`. `[M]`
-- [ ] **2.2**: Implement `DemoProvider` serving the seeded threads and handling `POST /api/demo/inject-message`. `[M]`
-- [ ] **2.3**: Implement `GmailProvider` with Google OAuth2 handshake and thread normalization. `[M]`
-- [ ] **2.4**: Implement `OutlookProvider` with Microsoft Graph OAuth2 flow and conversation grouping. `[M]`
-- [ ] **2.5**: Implement Sync Controller (`POST /api/sync/trigger`) with status transitions (`idle` -> `syncing` -> `idle|error`). `[M]`
-- [ ] **2.6**: Implement Account Management & Disconnect endpoints (Revoke + Purge options). `[M]`
-- [ ] **2.7**: Build initial sync limit guardrail (max 30 threads per sync). `[M]`
+- [x] **2.1**: Implement base `EmailProviderAdapter` interface in `/server/src/providers/`. `[M]`
+- [x] **2.2**: Implement `DemoProvider` serving the seeded threads and handling `POST /api/demo/simulate-message`. `[M]`
+- [x] **2.3**: Implement `GmailProvider` with Google OAuth2 handshake and thread normalization. `[M]`
+- [x] **2.4**: Implement `OutlookProvider` with Microsoft Graph OAuth2 flow and conversation grouping. `[M]`
+- [x] **2.5**: Implement Sync Controller (`POST /api/sync/trigger`) with status transitions (`idle` -> `syncing` -> `idle|error`). `[M]`
+- [x] **2.6**: Implement Account Management & Disconnect endpoints (Revoke + Purge options). `[M]`
+- [x] **2.7**: Build initial sync limit guardrail (max 30 threads per sync). `[M]`
 
 ---
 

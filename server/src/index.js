@@ -7,6 +7,7 @@ import { connectDB } from './config/db.js';
 import { logger } from './utils/logger.js';
 import { errorHandler, apiRateLimiter } from './middleware/index.js';
 import authRoutes from './routes/authRoutes.js';
+import providerRoutes from './routes/providerRoutes.js';
 
 const app = express();
 const PORT = env.PORT;
@@ -49,6 +50,7 @@ app.get('/api/health', (req, res) => {
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
+app.use('/api', providerRoutes);
 
 // Centralized error handler
 app.use(errorHandler);
