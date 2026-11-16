@@ -94,11 +94,11 @@
 ---
 
 ## Phase 7: UI Polish, State Completeness & Responsive Testing `[M]`
-- [ ] **7.1**: Implement custom Shimmer Skeletons for Thread List, Thread Detail, and Decision Cards. `[M]`
-- [ ] **7.2**: Implement clean Empty States for all segments (Inbox Zero graphic and reassuring copy). `[M]`
-- [ ] **7.3**: Implement inline Error States with retry actions for network and AI timeouts. `[M]`
-- [ ] **7.4**: Implement Sonner toasts with 5-second undo support on label changes and archiving. `[M]`
-- [ ] **7.5**: Verify full responsiveness: Desktop (3-pane), Tablet (2-pane collapsible), Mobile (single pane + bottom action bar). `[M]`
+- [x] **7.1**: Implement custom Shimmer Skeletons for Thread List, Thread Detail, and Decision Cards. `[M]`
+- [x] **7.2**: Implement clean Empty States for all segments (Inbox Zero graphic and reassuring copy). `[M]`
+- [x] **7.3**: Implement inline Error States with retry actions for network and AI timeouts. `[M]`
+- [x] **7.4**: Implement Sonner toasts with 5-second undo support on label changes and archiving. `[M]`
+- [x] **7.5**: Verify full responsiveness: Desktop (3-pane), Tablet (2-pane collapsible), Mobile (single pane + bottom action bar). `[M]`
 
 ---
 

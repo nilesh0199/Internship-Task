@@ -8,6 +8,7 @@ import { RoleSwitcher } from '../components/RoleSwitcher.jsx';
 import { AssistantDashboard } from '../pages/AssistantDashboard.jsx';
 import { ClientQueue } from '../pages/ClientQueue.jsx';
 import { AccountsPage } from '../pages/AccountsPage.jsx';
+import { PrototypeHelpPopover } from '../components/PrototypeHelpPopover.jsx';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -84,6 +85,7 @@ export function AppRoutes() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <RoleSwitcher />
+        <PrototypeHelpPopover />
       </AuthProvider>
     </BrowserRouter>
   );
