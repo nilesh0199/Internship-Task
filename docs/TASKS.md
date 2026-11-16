@@ -103,7 +103,18 @@
 ---
 
 ## Phase 8: Deployment, Demo Script Verification & Final Delivery `[M]`
-- [ ] **8.1**: Configure `render.yaml` for backend deployment to Render. `[M]`
-- [ ] **8.2**: Configure Vercel build settings for client deployment (`/client`). `[M]`
-- [ ] **8.3**: Rehearse 3-minute demo script against `/docs/DEMO_SCRIPT.md` with simulated message injector. `[M]`
-- [ ] **8.4**: Update root `README.md` with complete setup instructions, env var checklist, and demo instructions. `[M]`
+- [x] **8.1**: Configure `render.yaml` for backend deployment to Render. `[M]`
+- [x] **8.2**: Configure Vercel build settings for client deployment (`/client`). `[M]`
+- [x] **8.3**: Rehearse 3-minute demo script against `/docs/DEMO_SCRIPT.md` with simulated message injector. `[M]`
+- [x] **8.4**: Update root `README.md` with complete setup instructions, env var checklist, and demo instructions. `[M]`
+
+---
+
+## Known Issues & Prototype Reviewer Guidance
+
+1. **Email Sending Safety Flag**:
+   - `SEND_ENABLED=false` is enforced by default. Outbound actions simulate transmission, log to the immutable Activity Log, and transition thread states cleanly.
+2. **Offline Resilience**:
+   - The server boots instantly with an in-memory repository if `MONGODB_URI` is unset. Providing a MongoDB Atlas URI automatically enables persistent Atlas collection syncing.
+3. **Live Reclassification**:
+   - Use the simulated message injector buttons on the Accounts page (`/settings/accounts`) or via API (`POST /api/demo/simulate-message`) to trigger real-time reclassification on Acme Corp (escalates to Client), Tahoe Hotel (resolves to No Reply), or Board Prep (detects calendar conflict).

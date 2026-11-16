@@ -15,6 +15,9 @@ const app = express();
 const PORT = env.PORT;
 const CLIENT_URL = env.CLIENT_URL;
 
+// Trust reverse proxy for deployment on Render/Heroku
+app.set('trust proxy', 1);
+
 // Security and utility middleware
 app.use(helmet());
 app.use(
@@ -38,8 +41,8 @@ app.use('/api', apiRateLimiter);
 // Connect database (with automatic fallback to in-memory store)
 connectDB();
 
-// Base health check endpoint
-app.get('/api/health', (req, res) => {
+// Base health check endpoint (compatible with UptimeRobot & Render health checks)
+app.get(['/api/health', '/healthz'], (req, res) => {
   res.status(200).json({
     ok: true,
     service: 'ReplyRight API',
