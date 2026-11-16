@@ -109,6 +109,12 @@ export async function signup(req, res, next) {
     const token = signToken({ userId: user._id, role: user.role, orgId: user.orgId });
     setAuthCookie(res, token);
 
+    // Ensure demo agent runs are hydrated on first demo login
+    const existingRuns = await store.getAgentRuns({ orgId: user.orgId, limit: 1 });
+    if (!existingRuns || existingRuns.length === 0) {
+      await store.initSeedData?.();
+    }
+
     return res.status(201).json({
       ok: true,
       data: {
@@ -147,6 +153,12 @@ export async function login(req, res, next) {
     const token = signToken({ userId: user._id, role: user.role, orgId: user.orgId });
     setAuthCookie(res, token);
 
+    // Ensure demo agent runs are hydrated on first demo login
+    const existingRuns = await store.getAgentRuns({ orgId: user.orgId, limit: 1 });
+    if (!existingRuns || existingRuns.length === 0) {
+      await store.initSeedData?.();
+    }
+
     return res.status(200).json({
       ok: true,
       data: {
@@ -183,6 +195,12 @@ export async function demoLogin(req, res, next) {
 
     const token = signToken({ userId: user._id, role: user.role, orgId: user.orgId });
     setAuthCookie(res, token);
+
+    // Ensure demo agent runs are hydrated on first demo login
+    const existingRuns = await store.getAgentRuns({ orgId: user.orgId, limit: 1 });
+    if (!existingRuns || existingRuns.length === 0) {
+      await store.initSeedData?.();
+    }
 
     logger.info({ role: user.role, email: user.email }, '[Auth] Demo login successful');
 
