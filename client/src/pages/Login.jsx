@@ -51,13 +51,22 @@ export function Login() {
       <div className="w-full max-w-md">
         {/* Brand Header */}
         <div className="text-center mb-8 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-black/[0.06] shadow-2xs text-ink-700 text-xs font-semibold">
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
-            <span>AI Executive Inbox Prototype</span>
-          </div>
-          <h1 className="text-4xl font-serif font-bold text-ink-900 tracking-tight">
-            Daybook Mail
-          </h1>
+          <Link
+            to="/"
+            className="inline-flex flex-col items-center group hover:opacity-90 transition cursor-pointer"
+            title="Daybook Mail — Return to home"
+          >
+            <div className="h-10 w-10 rounded-2xl bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-lg shadow-soft group-hover:scale-105 transition-transform mb-3">
+              D
+            </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-black/[0.06] shadow-2xs text-ink-700 text-xs font-semibold mb-2">
+              <Sparkles className="h-3.5 w-3.5 text-accent" />
+              <span>AI Executive Inbox Prototype</span>
+            </div>
+            <h1 className="text-4xl font-serif font-bold text-ink-900 tracking-tight group-hover:text-ink-700 transition-colors">
+              Daybook Mail
+            </h1>
+          </Link>
           <p className="text-xs text-ink-500 max-w-xs mx-auto leading-relaxed">
             A daybook for your inbox. Daily executive triage & decision queue.
           </p>

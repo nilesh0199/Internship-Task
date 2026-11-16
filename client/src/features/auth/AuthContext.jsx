@@ -65,7 +65,12 @@ export function AuthProvider({ children }) {
   async function switchRole(targetRole) {
     setLoading(true);
     try {
-      const res = await api.post('/auth/switch-role', targetRole ? { targetRole } : {});
+      const payload = {};
+      if (targetRole) {
+        payload.role = targetRole;
+        payload.targetRole = targetRole;
+      }
+      const res = await api.post('/auth/switch-role', payload);
       if (res.ok && res.data?.user) {
         setUser(res.data.user);
         try {

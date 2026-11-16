@@ -37,7 +37,7 @@ function ProtectedRoute({ children, allowedRoles }) {
 }
 
 function RootRoute() {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center">
@@ -48,18 +48,14 @@ function RootRoute() {
       </div>
     );
   }
-  if (!user) {
-    return <Landing />;
-  }
-  return <Navigate to={user.role === 'client' ? '/client' : '/assistant'} replace />;
+  return <Landing />;
 }
 
 function FloatingControls() {
   const { user } = useAuth();
-  const location = useLocation();
 
-  // Suppress on landing page or when not logged in
-  if (!user || location.pathname === '/') {
+  // Floating switcher & prototype disclosure available for active authenticated sessions
+  if (!user) {
     return null;
   }
 

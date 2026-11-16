@@ -36,6 +36,18 @@ export function Signup() {
     <div className="min-h-screen bg-[#FAF8F5] flex flex-col justify-center items-center px-4 py-12 select-none">
       <div className="w-full max-w-md">
         <div className="text-center mb-8 space-y-2">
+          <Link
+            to="/"
+            className="inline-flex flex-col items-center group hover:opacity-90 transition cursor-pointer mb-2"
+            title="Daybook Mail — Return to home"
+          >
+            <div className="h-10 w-10 rounded-2xl bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-lg shadow-soft group-hover:scale-105 transition-transform mb-3">
+              D
+            </div>
+            <span className="font-serif font-bold text-lg text-ink-900 tracking-tight group-hover:text-ink-700 transition-colors">
+              Daybook Mail
+            </span>
+          </Link>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-black/[0.06] shadow-2xs text-ink-700 text-xs font-semibold">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
             <span>Assistant Workspace Setup</span>

@@ -12,7 +12,7 @@ const NAV_LINKS = [
 ];
 
 export default function LandingNav() {
-  const { demoLogin } = useAuth();
+  const { user, demoLogin } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -115,32 +115,65 @@ export default function LandingNav() {
 
         {/* Desktop Action Buttons */}
         <div className="hidden sm:flex items-center gap-3">
-          <Link
-            to="/login"
-            className="text-xs font-semibold text-ink-700 hover:text-ink-900 min-h-[44px] px-3.5 flex items-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-full"
-          >
-            Sign in
-          </Link>
-          <button
-            onClick={handleQuickDemo}
-            disabled={loading}
-            className="min-h-[44px] px-4 py-2 rounded-full bg-accent hover:bg-accent-hover text-white text-xs font-semibold flex items-center gap-1.5 shadow-soft transition active:scale-[0.98] disabled:opacity-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>{loading ? 'Booting...' : 'Try the demo'}</span>
-          </button>
+          {user ? (
+            <>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/[0.04] border border-black/[0.06] text-xs font-semibold text-ink-800">
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    user.role === 'assistant' ? 'bg-label-assistant' : 'bg-label-client'
+                  }`}
+                />
+                <span>{user.name || (user.role === 'assistant' ? 'Maya Lin' : 'Priya Sharma')}</span>
+                <span className="text-[10px] text-ink-400 font-normal capitalize">({user.role})</span>
+              </div>
+              <Link
+                to={user.role === 'client' ? '/client' : '/assistant'}
+                className="min-h-[44px] px-4 py-2 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-soft transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+              >
+                <span>{user.role === 'client' ? 'Decision Queue' : 'Workspace'}</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-xs font-semibold text-ink-700 hover:text-ink-900 min-h-[44px] px-3.5 flex items-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 rounded-full"
+              >
+                Sign in
+              </Link>
+              <button
+                onClick={handleQuickDemo}
+                disabled={loading}
+                className="min-h-[44px] px-4 py-2 rounded-full bg-accent hover:bg-accent-hover text-white text-xs font-semibold flex items-center gap-1.5 shadow-soft transition active:scale-[0.98] disabled:opacity-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>{loading ? 'Booting...' : 'Try the demo'}</span>
+              </button>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger Button */}
         <div className="flex items-center gap-2 sm:hidden">
-          <button
-            onClick={handleQuickDemo}
-            disabled={loading}
-            className="min-h-[40px] px-3 py-1.5 rounded-full bg-accent text-white text-[11px] font-semibold flex items-center gap-1 shadow-soft"
-          >
-            <Sparkles className="h-3 w-3" />
-            <span>Demo</span>
-          </button>
+          {user ? (
+            <Link
+              to={user.role === 'client' ? '/client' : '/assistant'}
+              className="min-h-[40px] px-3 py-1.5 rounded-full bg-ink-900 text-white text-[11px] font-semibold flex items-center gap-1 shadow-soft"
+            >
+              <span>{user.role === 'client' ? 'Queue' : 'Workspace'}</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          ) : (
+            <button
+              onClick={handleQuickDemo}
+              disabled={loading}
+              className="min-h-[40px] px-3 py-1.5 rounded-full bg-accent text-white text-[11px] font-semibold flex items-center gap-1 shadow-soft"
+            >
+              <Sparkles className="h-3 w-3" />
+              <span>Demo</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -168,24 +201,37 @@ export default function LandingNav() {
             ))}
           </nav>
           <div className="pt-2 border-t border-black/[0.05] flex flex-col gap-2">
-            <Link
-              to="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="min-h-[44px] flex items-center justify-center rounded-full border border-black/[0.08] text-xs font-semibold text-ink-800 hover:bg-black/[0.02]"
-            >
-              Sign in
-            </Link>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                handleQuickDemo();
-              }}
-              disabled={loading}
-              className="min-h-[44px] flex items-center justify-center gap-2 rounded-full bg-accent text-white text-xs font-semibold shadow-soft"
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>{loading ? 'Booting...' : 'Launch Live Demo as Maya'}</span>
-            </button>
+            {user ? (
+              <Link
+                to={user.role === 'client' ? '/client' : '/assistant'}
+                onClick={() => setMobileMenuOpen(false)}
+                className="min-h-[44px] flex items-center justify-center gap-2 rounded-full bg-ink-900 text-white text-xs font-semibold shadow-soft"
+              >
+                <span>Go to {user.role === 'client' ? 'Decision Queue' : 'Assistant Workspace'}</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="min-h-[44px] flex items-center justify-center rounded-full border border-black/[0.08] text-xs font-semibold text-ink-800 hover:bg-black/[0.02]"
+                >
+                  Sign in
+                </Link>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleQuickDemo();
+                  }}
+                  disabled={loading}
+                  className="min-h-[44px] flex items-center justify-center gap-2 rounded-full bg-accent text-white text-xs font-semibold shadow-soft"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>{loading ? 'Booting...' : 'Launch Live Demo as Maya'}</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

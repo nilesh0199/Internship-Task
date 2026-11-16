@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext.jsx';
 import {
   Sparkles,
@@ -73,17 +73,29 @@ export function Onboarding() {
       <div className="w-full max-w-2xl bg-white border border-black/[0.06] rounded-3xl shadow-card p-8 md:p-10 space-y-6">
         {/* Progress Header */}
         <div className="flex items-center justify-between pb-5 border-b border-borderMuted/60">
-          <div>
-            <span className="text-xs font-semibold text-accent uppercase tracking-wider">
-              Step {step} of 5
-            </span>
-            <h1 className="text-xl md:text-2xl font-serif font-bold text-ink-900 mt-0.5 tracking-tight">
-              {step === 1 && 'Welcome to Daybook Mail'}
-              {step === 2 && 'Confirm Executive Client Profile'}
-              {step === 3 && 'Connect Mailbox'}
-              {step === 4 && 'Configure Client Playbook'}
-              {step === 5 && 'Initial Mailbox Synchronization'}
-            </h1>
+          <div className="flex items-center gap-3.5">
+            <Link
+              to="/"
+              className="flex items-center gap-2 group hover:opacity-85 transition cursor-pointer"
+              title="Daybook Mail — Return to home"
+            >
+              <div className="h-8 w-8 rounded-xl bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-sm shadow-soft group-hover:scale-105 transition-transform">
+                D
+              </div>
+            </Link>
+            <div className="h-6 w-px bg-borderMuted hidden sm:block" />
+            <div>
+              <span className="text-xs font-semibold text-accent uppercase tracking-wider">
+                Step {step} of 5
+              </span>
+              <h1 className="text-xl md:text-2xl font-serif font-bold text-ink-900 mt-0.5 tracking-tight">
+                {step === 1 && 'Welcome to Daybook Mail'}
+                {step === 2 && 'Confirm Executive Client Profile'}
+                {step === 3 && 'Connect Mailbox'}
+                {step === 4 && 'Configure Client Playbook'}
+                {step === 5 && 'Initial Mailbox Synchronization'}
+              </h1>
+            </div>
           </div>
 
           <div className="flex items-center gap-1.5">

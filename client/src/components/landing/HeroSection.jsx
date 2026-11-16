@@ -149,7 +149,7 @@ const COLUMN_3_CARDS = [
 ];
 
 export default function HeroSection() {
-  const { demoLogin } = useAuth();
+  const { user, demoLogin } = useAuth();
   const navigate = useNavigate();
   const [loadingRole, setLoadingRole] = useState(null);
   const containerRef = useRef(null);
@@ -266,13 +266,27 @@ export default function HeroSection() {
           variants={itemVariants}
           className="pt-2 flex flex-wrap items-center justify-center gap-3"
         >
+          {user ? (
+            <button
+              onClick={() => navigate(user.role === 'client' ? '/client' : '/assistant')}
+              className="min-h-[44px] px-6 py-3 rounded-full bg-accent hover:bg-accent-hover text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            >
+              <span>
+                Open {user.role === 'client' ? 'Decision Queue' : 'Workspace'} ({user.name || (user.role === 'client' ? 'Priya' : 'Maya')})
+              </span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : null}
+
           <button
             onClick={() => handleDemoLaunch('assistant')}
             disabled={!!loadingRole}
-            className="min-h-[44px] px-6 py-3 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            className={`min-h-[44px] px-5 py-3 rounded-full ${
+              user ? 'bg-white hover:bg-ink-50 border border-black/[0.09] text-ink-800' : 'bg-ink-900 hover:bg-ink-800 text-white shadow-card hover:shadow-card-hover'
+            } text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`}
           >
             <span>{loadingRole === 'assistant' ? 'Booting Maya...' : 'Try Demo as Assistant'}</span>
-            <ArrowRight className="h-4 w-4" />
+            {!user && <ArrowRight className="h-4 w-4" />}
           </button>
 
           <button
@@ -284,12 +298,14 @@ export default function HeroSection() {
             <span>{loadingRole === 'client' ? 'Booting Priya...' : 'Try Demo as Client'}</span>
           </button>
 
-          <button
-            onClick={() => navigate('/login')}
-            className="min-h-[44px] px-4 py-3 rounded-full text-ink-600 hover:text-ink-900 text-xs sm:text-sm font-semibold transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          >
-            Sign in & Connect
-          </button>
+          {!user && (
+            <button
+              onClick={() => navigate('/login')}
+              className="min-h-[44px] px-4 py-3 rounded-full text-ink-600 hover:text-ink-900 text-xs sm:text-sm font-semibold transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            >
+              Sign in & Connect
+            </button>
+          )}
         </motion.div>
 
         {/* Hero Visual: Drifting Cards Collage */}

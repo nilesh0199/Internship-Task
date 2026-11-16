@@ -228,19 +228,21 @@ export function AssistantDashboard() {
       {/* Top Floating App Bar */}
       <header className="h-16 bg-white/85 backdrop-blur-md border-b border-borderMuted/70 px-5 flex items-center justify-between flex-shrink-0 z-10 select-none">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-xl bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-sm shadow-soft">
-            D
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-serif font-bold text-base text-ink-900 tracking-tight">
-                Daybook Mail
-              </span>
-              <span className="text-[10px] font-semibold tracking-wide text-label-assistant bg-label-assistantBg px-2 py-0.5 rounded-full border border-label-assistant/20 hidden sm:inline">
-                Assistant Workspace
-              </span>
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 group hover:opacity-90 transition cursor-pointer"
+            title="Daybook Mail — Return to home"
+          >
+            <div className="h-8 w-8 rounded-xl bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-sm shadow-soft group-hover:scale-105 transition-transform">
+              D
             </div>
-          </div>
+            <span className="font-serif font-bold text-base text-ink-900 tracking-tight group-hover:text-ink-700 transition-colors">
+              Daybook Mail
+            </span>
+          </Link>
+          <span className="text-[10px] font-semibold tracking-wide text-label-assistant bg-label-assistantBg px-2 py-0.5 rounded-full border border-label-assistant/20 hidden sm:inline">
+            Assistant Workspace
+          </span>
         </div>
 
         {/* Global Search & Command Palette trigger */}

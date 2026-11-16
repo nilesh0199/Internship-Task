@@ -111,15 +111,20 @@ export default function LandingFooter() {
 
         {/* Bottom Footer Details */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-black/[0.05] text-xs text-ink-500">
-          <div className="flex items-center gap-3">
-            <div className="h-7 w-7 rounded-lg bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-xs">
+          <Link
+            to="/"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-3 group hover:opacity-85 transition cursor-pointer"
+            title="Daybook Mail — Return to top"
+          >
+            <div className="h-7 w-7 rounded-lg bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-xs group-hover:scale-105 transition-transform">
               D
             </div>
             <div>
-              <span className="font-serif font-bold text-ink-900 text-sm">Daybook Mail</span>
+              <span className="font-serif font-bold text-ink-900 text-sm group-hover:text-ink-700 transition-colors">Daybook Mail</span>
               <span className="ml-2 text-ink-400">— A daybook for your inbox.</span>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-6 flex-wrap justify-center">
             <button
