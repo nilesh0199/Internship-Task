@@ -19,12 +19,12 @@
 ---
 
 ## Phase 1: Authentication, Roles & Data Models `[M]`
-- [ ] **1.1**: Implement MongoDB connection with graceful connection pooling in `/server/src/config/db.js`. `[M]`
-- [ ] **1.2**: Define Mongoose schemas in `/server/src/models/` (`User`, `Client`, `ConnectedAccount`, `Thread`, `Message`, `Classification`, `ClassificationEvent`, `Correction`, `Draft`, `ActivityLog`). `[M]`
-- [ ] **1.3**: Implement AES-256-GCM token encryption and decryption utilities in `/server/src/utils/crypto.js`. `[M]`
-- [ ] **1.4**: Implement JWT authentication middleware and `HttpOnly` cookie session management. `[M]`
-- [ ] **1.5**: Implement Seed Runner script (`npm run seed`) to load Priya, Maya, and the 40 demo threads into MongoDB Atlas. `[M]`
-- [ ] **1.6**: Add basic role-switching utility / demo login endpoints (`POST /api/auth/demo-login?role=assistant|client`). `[M]`
+- [x] **1.1**: Implement MongoDB connection with graceful connection pooling in `/server/src/config/db.js`. `[M]`
+- [x] **1.2**: Define Mongoose schemas in `/server/src/models/` (`User`, `Client`, `ConnectedAccount`, `Thread`, `Message`, `Classification`, `ClassificationEvent`, `Correction`, `Draft`, `ActivityLog`). `[M]`
+- [x] **1.3**: Implement AES-256-GCM token encryption and decryption utilities in `/server/src/utils/crypto.js`. `[M]`
+- [x] **1.4**: Implement JWT authentication middleware and `HttpOnly` cookie session management. `[M]`
+- [x] **1.5**: Implement Seed Runner script (`npm run seed`) to load Priya, Maya, and the 40 demo threads into MongoDB Atlas. `[M]`
+- [x] **1.6**: Add basic role-switching utility / demo login endpoints (`POST /api/auth/demo-login?role=assistant|client`). `[M]`
 
 ---
 

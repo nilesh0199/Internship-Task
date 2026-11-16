@@ -1,2 +1,11 @@
-// Mongoose schema models placeholder (User, Client, ConnectedAccount, Thread, Message, Classification, Draft, ActivityLog)
-export {};
+export { User } from './User.js';
+export { Client } from './Client.js';
+export { ConnectedAccount } from './ConnectedAccount.js';
+export { Thread } from './Thread.js';
+export { Message } from './Message.js';
+export { Classification } from './Classification.js';
+export { ClassificationEvent } from './ClassificationEvent.js';
+export { Correction } from './Correction.js';
+export { Draft } from './Draft.js';
+export { ActivityLog } from './ActivityLog.js';
+export { Invite } from './Invite.js';
