@@ -343,30 +343,56 @@ export function AgentControlRoom() {
             {agents.map((agent) => {
               const Icon = AGENT_ICONS[agent.id] || Bot;
               const colorCls = AGENT_COLORS[agent.id] || 'bg-ink-100 text-ink-700';
+              const isFiltered = agentFilter === agent.id;
 
               return (
                 <div
                   key={agent.id}
-                  className="bg-white border border-black/[0.06] rounded-3xl p-6 shadow-card space-y-4 flex flex-col justify-between"
+                  className={`bg-white border rounded-3xl p-6 shadow-card space-y-4 flex flex-col justify-between transition-all duration-200 ${
+                    isFiltered
+                      ? 'border-accent ring-2 ring-accent/30 shadow-md'
+                      : 'border-black/[0.06] hover:border-black/15'
+                  }`}
                 >
                   <div className="space-y-3">
-                    {/* Header: Icon, Name, and Enable Toggle */}
+                    {/* Header: Icon, Name (Click to filter feed), and Enable Toggle */}
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = isFiltered ? 'all' : agent.id;
+                          setAgentFilter(next);
+                          toast.info(
+                            next === 'all'
+                              ? 'Showing all agent activity'
+                              : `Filtered activity feed to ${agent.name}`
+                          );
+                          document.getElementById('activity-feed')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="flex items-center gap-2.5 text-left group cursor-pointer"
+                        title={`Click to filter live activity feed to ${agent.name}`}
+                      >
                         <div
-                          className={`h-9 w-9 rounded-2xl flex items-center justify-center border ${colorCls}`}
+                          className={`h-9 w-9 rounded-2xl flex items-center justify-center border ${colorCls} group-hover:scale-105 transition-transform`}
                         >
                           <Icon className="h-5 w-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-serif font-bold text-ink-900 tracking-tight">
-                            {agent.name}
-                          </h4>
-                          <span className="text-[10px] text-ink-400 block font-mono">
-                            id: {agent.id}
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="text-sm font-serif font-bold text-ink-900 tracking-tight group-hover:text-accent transition-colors">
+                              {agent.name}
+                            </h4>
+                            {isFiltered && (
+                              <span className="text-[10px] bg-accent/10 text-accent font-semibold px-1.5 py-0.2 rounded-full font-mono">
+                                active filter
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-ink-400 block font-mono group-hover:text-ink-600 transition-colors">
+                            id: {agent.id} · click to filter feed
                           </span>
                         </div>
-                      </div>
+                      </button>
 
                       {/* Enable Switch */}
                       <button
@@ -462,7 +488,7 @@ export function AgentControlRoom() {
         {/* ================================================================= */}
         {/* 3. Live Activity Feed                                            */}
         {/* ================================================================= */}
-        <div className="bg-white border border-black/[0.06] rounded-3xl p-6 md:p-8 shadow-card space-y-5">
+        <div id="activity-feed" className="bg-white border border-black/[0.06] rounded-3xl p-6 md:p-8 shadow-card space-y-5 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-borderMuted/60">
             <div>
               <div className="flex items-center gap-2">
