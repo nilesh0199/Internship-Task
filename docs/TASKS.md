@@ -40,16 +40,16 @@
 ---
 
 ## Phase 3: Multi-Tier AI Classification Pipeline `[M]`
-- [ ] **3.1**: Implement Zod validation schema for classification output in `/server/src/ai/schemas.js`. `[M]`
-- [ ] **3.2**: Implement Stage 1 Deterministic Prefilters (`List-Unsubscribe`, `Precedence: bulk`, system senders) in `/server/src/ai/prefilters.js`. `[M]`
-- [ ] **3.3**: Implement Stage 2 Playbook Context Assembler (VIPs, topic matrices, recent 10 corrections). `[M]`
-- [ ] **3.4**: Implement Stage 3 Primary LLM Invocation with Google Gemini 2.0 Flash (`@google/genai`). `[M]`
-- [ ] **3.5**: Implement Secondary LLM Fallback with Groq SDK (`llama-3.3-70b-versatile`). `[M]`
-- [ ] **3.6**: Implement Rule Heuristics Fallback Engine when LLMs are unavailable (`"AI unavailable, used rules"`). `[M]`
-- [ ] **3.7**: Implement Stage 5 In-Code Safety Guardrails (VIP immunity, legal/financial threshold overrides). `[M]`
-- [ ] **3.8**: Implement Confidence Threshold Routing (>=0.80 auto-apply, 0.55-0.79 flag, <0.55 needs review). `[M]`
-- [ ] **3.9**: Implement Classification Event logger and thread caching mechanism. `[M]`
-- [ ] **3.10**: Build manual override controller and "Make this a rule" Playbook synthesizer (`POST /api/playbook/add-rule`). `[M]`
+- [x] **3.1**: Implement Zod validation schema for classification output in `/server/src/ai/schemas.js`. `[M]`
+- [x] **3.2**: Implement Stage 1 Deterministic Prefilters (`List-Unsubscribe`, `Precedence: bulk`, system senders) in `/server/src/ai/prefilters.js`. `[M]`
+- [x] **3.3**: Implement Stage 2 Playbook Context Assembler (VIPs, topic matrices, recent 10 corrections). `[M]`
+- [x] **3.4**: Implement Stage 3 Primary LLM Invocation with Google Gemini 2.0 Flash (`@google/genai`). `[M]`
+- [x] **3.5**: Implement Secondary LLM Fallback with Groq SDK (`llama-3.3-70b-versatile`). `[M]`
+- [x] **3.6**: Implement Rule Heuristics Fallback Engine when LLMs are unavailable (`"AI unavailable, used rules"`). `[M]`
+- [x] **3.7**: Implement Stage 5 In-Code Safety Guardrails (VIP immunity, legal/financial threshold overrides). `[M]`
+- [x] **3.8**: Implement Confidence Threshold Routing (>=0.80 auto-apply, 0.55-0.79 flag, <0.55 needs review). `[M]`
+- [x] **3.9**: Implement Classification Event logger and thread caching mechanism. `[M]`
+- [x] **3.10**: Build manual override controller and "Make this a rule" Playbook synthesizer (`POST /api/playbook/add-rule`). `[M]`
 
 ---
 

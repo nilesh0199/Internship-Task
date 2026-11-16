@@ -8,6 +8,8 @@ import { logger } from './utils/logger.js';
 import { errorHandler, apiRateLimiter } from './middleware/index.js';
 import authRoutes from './routes/authRoutes.js';
 import providerRoutes from './routes/providerRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
+import threadRoutes from './routes/threadRoutes.js';
 
 const app = express();
 const PORT = env.PORT;
@@ -51,6 +53,8 @@ app.get('/api/health', (req, res) => {
 // Mount Routes
 app.use('/api/auth', authRoutes);
 app.use('/api', providerRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api', threadRoutes);
 
 // Centralized error handler
 app.use(errorHandler);
