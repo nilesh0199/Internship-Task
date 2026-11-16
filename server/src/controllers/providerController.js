@@ -4,6 +4,7 @@ import { store } from '../services/store.js';
 import { GmailProvider } from '../providers/gmail/GmailProvider.js';
 import { OutlookProvider } from '../providers/outlook/OutlookProvider.js';
 import { DemoProvider } from '../providers/demo/DemoProvider.js';
+import { ingestProviderThreads } from '../services/ingest.js';
 import { encryptToken } from '../utils/crypto.js';
 import { logger } from '../utils/logger.js';
 
@@ -62,21 +63,20 @@ export async function googleCallback(req, res, next) {
 
     const decoded = jwt.verify(state, env.JWT_SECRET);
     const provider = new GmailProvider();
-    const { tokens, email } = await provider.exchangeCode(code);
+    const { tokens, email, displayName } = await provider.exchangeCode(code);
 
     const refreshCipher = encryptToken(tokens.refresh_token || '');
-    const accessCipher = encryptToken(tokens.access_token || '');
 
     const account = await store.addConnectedAccount({
       orgId: decoded.orgId,
       clientId: decoded.clientId,
       provider: 'gmail',
       emailAddress: email,
+      displayName: displayName || email.split('@')[0],
       status: 'idle',
       lastSyncedAt: new Date(),
       scopes: ['gmail.readonly', 'gmail.send'],
       auth: {
-        accessTokenCipher: accessCipher.cipherText,
         refreshTokenCipher: refreshCipher.cipherText,
         iv: refreshCipher.iv,
         authTag: refreshCipher.authTag,
@@ -84,12 +84,18 @@ export async function googleCallback(req, res, next) {
       },
     });
 
-    // Run initial sync (limit 30)
+    // Run initial ingestion of latest 30 threads
     provider.account = account;
     try {
-      await provider.sync({ limit: 30 });
+      const syncRes = await provider.sync({ limit: 30 });
+      await ingestProviderThreads({
+        account,
+        rawThreads: syncRes.threads,
+        orgId: decoded.orgId,
+        clientId: decoded.clientId,
+      });
     } catch (syncErr) {
-      logger.warn({ syncErr: syncErr.message }, '[GoogleOAuth] Initial sync completed with warning');
+      logger.warn({ syncErr: syncErr.message }, '[GoogleOAuth] Initial ingestion completed with warning');
     }
 
     return res.redirect(`${env.CLIENT_URL}/settings/accounts?success=google_connected`);
@@ -149,26 +155,40 @@ export async function microsoftCallback(req, res, next) {
 
     const decoded = jwt.verify(state, env.JWT_SECRET);
     const provider = new OutlookProvider();
-    const { tokens, email } = await provider.exchangeCode(code);
+    const { tokens, email, displayName } = await provider.exchangeCode(code);
 
     const refreshCipher = encryptToken(tokens.refresh_token || '');
-    const accessCipher = encryptToken(tokens.access_token || '');
 
-    await store.addConnectedAccount({
+    const account = await store.addConnectedAccount({
       orgId: decoded.orgId,
       clientId: decoded.clientId,
       provider: 'outlook',
       emailAddress: email,
+      displayName: displayName || email.split('@')[0],
       status: 'idle',
       lastSyncedAt: new Date(),
       scopes: ['Mail.Read', 'Mail.Send', 'offline_access'],
       auth: {
-        accessTokenCipher: accessCipher.cipherText,
         refreshTokenCipher: refreshCipher.cipherText,
         iv: refreshCipher.iv,
         authTag: refreshCipher.authTag,
+        expiresAt: tokens.expires_in ? new Date(Date.now() + tokens.expires_in * 1000) : null,
       },
     });
+
+    // Run initial ingestion of latest 30 threads
+    provider.account = account;
+    try {
+      const syncRes = await provider.sync({ limit: 30 });
+      await ingestProviderThreads({
+        account,
+        rawThreads: syncRes.threads,
+        orgId: decoded.orgId,
+        clientId: decoded.clientId,
+      });
+    } catch (syncErr) {
+      logger.warn({ syncErr: syncErr.message }, '[MicrosoftOAuth] Initial ingestion completed with warning');
+    }
 
     return res.redirect(`${env.CLIENT_URL}/settings/accounts?success=microsoft_connected`);
   } catch (err) {
@@ -192,7 +212,14 @@ export async function listAccounts(req, res, next) {
       error: a.error || null,
       createdAt: a.createdAt,
     }));
-    return res.status(200).json({ ok: true, data: sanitized });
+    return res.status(200).json({
+      ok: true,
+      data: sanitized,
+      config: {
+        googleConfigured: !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
+        microsoftConfigured: !!(env.MICROSOFT_CLIENT_ID && env.MICROSOFT_CLIENT_SECRET),
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -226,6 +253,19 @@ export async function syncAccount(req, res, next) {
     let result = { threads: [], messagesCount: 0 };
     try {
       result = await provider.sync({ limit: 30 });
+
+      // Run ingestion for real external accounts (Gmail, Outlook)
+      if (account.provider === 'gmail' || account.provider === 'outlook') {
+        const ingestRes = await ingestProviderThreads({
+          account,
+          rawThreads: result.threads,
+          orgId: req.user.orgId,
+          clientId: req.user.clientId,
+        });
+        result.threads = new Array(ingestRes.threadsCount);
+        result.messagesCount = ingestRes.messagesCount;
+      }
+
       await store.updateConnectedAccount(account._id, {
         status: 'idle',
         lastSyncedAt: new Date(),

@@ -51,6 +51,7 @@ export function AssistantDashboard() {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [counts, setCounts] = useState({});
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [providerFilter, setProviderFilter] = useState('all');
 
   // Modals & Drawers
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -398,22 +399,37 @@ export function AssistantDashboard() {
             </div>
           )}
 
-          {/* Thread List Filter Input */}
-          <div className="px-3 py-2 border-b border-borderMuted/60 flex items-center gap-2 bg-white/60">
-            <Search className="h-3.5 w-3.5 text-ink-400 ml-1 flex-shrink-0" />
-            <input
-              id="thread-search-input"
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter by sender, keyword..."
-              className="w-full text-xs bg-transparent focus:outline-none placeholder:text-ink-400 text-ink-900 font-medium tracking-tight"
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="text-xs text-ink-400 hover:text-ink-700 px-1 font-medium">
-                Clear
-              </button>
-            )}
+          {/* Thread List Filter Input & Source Selector */}
+          <div className="px-3 py-2 border-b border-borderMuted/60 flex items-center justify-between gap-2 bg-white/60">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <Search className="h-3.5 w-3.5 text-ink-400 ml-1 flex-shrink-0" />
+              <input
+                id="thread-search-input"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Filter threads..."
+                className="w-full text-xs bg-transparent focus:outline-none placeholder:text-ink-400 text-ink-900 font-medium tracking-tight"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="text-xs text-ink-400 hover:text-ink-700 px-1 font-medium">
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {/* Source Account Filter (Gmail vs Demo vs All) */}
+            <select
+              value={providerFilter}
+              onChange={(e) => setProviderFilter(e.target.value)}
+              className="text-[11px] font-medium bg-ink-100/80 border border-black/[0.06] rounded-lg px-2 py-1 text-ink-700 focus:outline-none cursor-pointer flex-shrink-0"
+              title="Filter by connected mailbox source"
+            >
+              <option value="all">All Sources</option>
+              <option value="gmail">Gmail Only</option>
+              <option value="outlook">Outlook Only</option>
+              <option value="demo">Demo Only</option>
+            </select>
           </div>
 
           {/* Thread Card Scroll Area */}
@@ -428,18 +444,20 @@ export function AssistantDashboard() {
                   </div>
                 ))}
               </div>
-            ) : threads.length === 0 ? (
+            ) : (providerFilter === 'all' ? threads : threads.filter((t) => t.provider === providerFilter)).length === 0 ? (
               <div className="py-20 text-center space-y-2 px-6">
                 <div className="h-12 w-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
                   <CheckCheck className="h-6 w-6" />
                 </div>
                 <h3 className="text-sm font-serif font-bold text-ink-900">Inbox Zero</h3>
                 <p className="text-xs text-ink-500 leading-relaxed max-w-xs mx-auto">
-                  No conversations match the current segment filter. Everything is triaged and in place.
+                  {providerFilter !== 'all'
+                    ? `No conversations found for ${providerFilter} source in this segment.`
+                    : 'No conversations match the current segment filter. Everything is triaged.'}
                 </p>
               </div>
             ) : (
-              threads.map((thread) => (
+              (providerFilter === 'all' ? threads : threads.filter((t) => t.provider === providerFilter)).map((thread) => (
                 <ThreadRow
                   key={thread._id}
                   thread={thread}

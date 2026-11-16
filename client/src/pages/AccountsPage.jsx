@@ -22,6 +22,10 @@ export function AccountsPage() {
   const [syncingId, setSyncingId] = useState(null);
   const [simulating, setSimulating] = useState(false);
   const [storageMode, setStorageMode] = useState(null);
+  const [oauthConfig, setOauthConfig] = useState({
+    googleConfigured: true,
+    microsoftConfigured: true,
+  });
 
   useEffect(() => {
     loadAccounts();
@@ -41,6 +45,9 @@ export function AccountsPage() {
       const res = await api.get('/accounts');
       if (res.ok) {
         setAccounts(res.data || []);
+        if (res.config) {
+          setOauthConfig(res.config);
+        }
       }
     } catch (err) {
       toast.error('Failed to load connected accounts: ' + err.message);
@@ -214,15 +221,26 @@ export function AccountsPage() {
                         </div>
 
                         {acc.error && (
-                          <div className="mt-2.5 p-3 rounded-2xl bg-red-50/90 border border-red-200 text-xs text-red-700 flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                            <span>{acc.error.message || 'Synchronization failed'}</span>
-                            <button
-                              onClick={() => handleSync(acc)}
-                              className="ml-auto underline font-semibold text-xs cursor-pointer"
-                            >
-                              Retry
-                            </button>
+                          <div className="mt-2.5 p-3 rounded-2xl bg-red-50/90 border border-red-200 text-xs text-red-700 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                              <span>{acc.error.message || 'Synchronization failed'}</span>
+                            </div>
+                            {acc.error.code === 'RECONNECT_REQUIRED' ? (
+                              <a
+                                href={acc.provider === 'gmail' ? '/api/connect/google' : '/api/connect/microsoft'}
+                                className="px-3 py-1 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition shadow-xs"
+                              >
+                                Reconnect {acc.provider === 'gmail' ? 'Gmail' : 'Outlook'}
+                              </a>
+                            ) : (
+                              <button
+                                onClick={() => handleSync(acc)}
+                                className="ml-auto underline font-semibold text-xs cursor-pointer"
+                              >
+                                Retry
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -267,20 +285,41 @@ export function AccountsPage() {
 
           {/* Connect New Mailbox Actions */}
           <div className="pt-4 border-t border-borderMuted/60 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <a
-              href="/api/connect/google"
-              className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl border border-black/[0.06] bg-white hover:bg-ink-50 text-xs font-semibold text-ink-900 transition shadow-soft active:scale-95"
-            >
-              <Mail className="h-4 w-4 text-red-500" />
-              <span>Connect Google Workspace (Gmail)</span>
-            </a>
-            <a
-              href="/api/connect/microsoft"
-              className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl border border-black/[0.06] bg-white hover:bg-ink-50 text-xs font-semibold text-ink-900 transition shadow-soft active:scale-95"
-            >
-              <Mail className="h-4 w-4 text-blue-500" />
-              <span>Connect Microsoft Outlook (365)</span>
-            </a>
+            {oauthConfig.googleConfigured ? (
+              <a
+                href="/api/connect/google"
+                className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl border border-black/[0.06] bg-white hover:bg-ink-50 text-xs font-semibold text-ink-900 transition shadow-soft active:scale-95"
+              >
+                <Mail className="h-4 w-4 text-red-500" />
+                <span>Connect Google Workspace (Gmail)</span>
+              </a>
+            ) : (
+              <div
+                title="Google OAuth credentials (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET) not configured on server. See README for setup instructions."
+                className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl border border-dashed border-ink-300 bg-ink-50 text-xs font-semibold text-ink-400 cursor-not-allowed select-none"
+              >
+                <Mail className="h-4 w-4 text-ink-300" />
+                <span>Connect Gmail (Credentials Missing in .env)</span>
+              </div>
+            )}
+
+            {oauthConfig.microsoftConfigured ? (
+              <a
+                href="/api/connect/microsoft"
+                className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl border border-black/[0.06] bg-white hover:bg-ink-50 text-xs font-semibold text-ink-900 transition shadow-soft active:scale-95"
+              >
+                <Mail className="h-4 w-4 text-blue-500" />
+                <span>Connect Microsoft Outlook (365)</span>
+              </a>
+            ) : (
+              <div
+                title="Microsoft Graph OAuth credentials (MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET) not configured on server. See README for setup instructions."
+                className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl border border-dashed border-ink-300 bg-ink-50 text-xs font-semibold text-ink-400 cursor-not-allowed select-none"
+              >
+                <Mail className="h-4 w-4 text-ink-300" />
+                <span>Connect Outlook (Credentials Missing in .env)</span>
+              </div>
+            )}
           </div>
         </div>
 

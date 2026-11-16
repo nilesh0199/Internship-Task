@@ -339,6 +339,16 @@ export const store = {
     return memoryClients.find((c) => c._id === id) || memoryClients[0] || null;
   },
 
+  async createClient(clientData) {
+    const id = clientData._id || 'client_' + Date.now();
+    const doc = { _id: id, ...clientData, createdAt: new Date(), updatedAt: new Date() };
+    if (isRealDBConnected()) {
+      return await Client.create(doc);
+    }
+    memoryClients.push(doc);
+    return doc;
+  },
+
   async updatePlaybook(clientId, playbookUpdates) {
     if (isRealDBConnected()) {
       return await Client.findByIdAndUpdate(
@@ -425,6 +435,22 @@ export const store = {
     return doc;
   },
 
+  async findThreadByProviderId(providerThreadId, connectedAccountId) {
+    if (isRealDBConnected()) {
+      return await Thread.findOne({
+        providerThreadId,
+        $or: [{ connectedAccountId }, { accountId: connectedAccountId }],
+      }).lean();
+    }
+    return (
+      memoryThreads.find(
+        (t) =>
+          t.providerThreadId === providerThreadId &&
+          (t.connectedAccountId === connectedAccountId || t.accountId === connectedAccountId)
+      ) || null
+    );
+  },
+
   // Messages
   async getMessagesByThreadId(threadId) {
     if (isRealDBConnected()) {
@@ -433,6 +459,25 @@ export const store = {
     return memoryMessages
       .filter((m) => m.threadId === threadId)
       .sort((a, b) => new Date(a.date) - new Date(b.date));
+  },
+
+  async findMessageByProviderId(providerMessageId) {
+    if (isRealDBConnected()) {
+      return await Message.findOne({ providerMessageId }).lean();
+    }
+    return memoryMessages.find((m) => m.providerMessageId === providerMessageId) || null;
+  },
+
+  async updateMessage(id, updates) {
+    if (isRealDBConnected()) {
+      return await Message.findByIdAndUpdate(id, { $set: updates }, { new: true }).lean();
+    }
+    const idx = memoryMessages.findIndex((m) => m._id === id || m.id === id);
+    if (idx !== -1) {
+      memoryMessages[idx] = { ...memoryMessages[idx], ...updates, updatedAt: new Date() };
+      return memoryMessages[idx];
+    }
+    return null;
   },
 
   async addMessage(messageData) {

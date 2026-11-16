@@ -21,8 +21,20 @@ export function Onboarding() {
 
   const [step, setStep] = useState(1);
   const [selectedMailbox, setSelectedMailbox] = useState('demo');
+  const [oauthConfig, setOauthConfig] = useState({ googleConfigured: false, microsoftConfigured: false });
   const [syncProgress, setSyncProgress] = useState(0);
   const [syncStatusText, setSyncStatusText] = useState('Connecting to mailbox...');
+
+  useEffect(() => {
+    api
+      .get('/accounts')
+      .then((res) => {
+        if (res?.config) {
+          setOauthConfig(res.config);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Playbook settings state with sensible defaults
   const [playbookState, setPlaybookState] = useState({
@@ -252,7 +264,14 @@ export function Onboarding() {
                   className="mt-1"
                 />
                 <div className="flex-1">
-                  <span className="text-xs font-bold text-ink-900 tracking-tight">Google Workspace / Gmail</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-ink-900 tracking-tight">Google Workspace / Gmail</span>
+                    {!oauthConfig.googleConfigured && (
+                      <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/80">
+                        Requires OAuth keys in server/.env
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-ink-500 mt-1 leading-relaxed">
                     Connect real Gmail account via OAuth2 (<code className="text-[11px] font-mono">gmail.readonly</code> + <code className="text-[11px] font-mono">gmail.send</code>).
                   </p>
@@ -276,7 +295,14 @@ export function Onboarding() {
                   className="mt-1"
                 />
                 <div className="flex-1">
-                  <span className="text-xs font-bold text-ink-900 tracking-tight">Microsoft Outlook / 365</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-ink-900 tracking-tight">Microsoft Outlook / 365</span>
+                    {!oauthConfig.microsoftConfigured && (
+                      <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/80">
+                        Requires Azure keys in server/.env
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-ink-500 mt-1 leading-relaxed">
                     Connect real Outlook account via Microsoft Graph API (<code className="text-[11px] font-mono">Mail.Read</code> + <code className="text-[11px] font-mono">Mail.Send</code>).
                   </p>

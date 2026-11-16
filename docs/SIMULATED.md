@@ -13,6 +13,7 @@
 | **Email Dispatch Gate** | **Gated / Simulated** | Gated by `SEND_ENABLED=false` environment variable. When false, clicking "Send" logs a `EMAIL_SENT_SIMULATED` event in `activityLog` and transitions thread status without dispatching real SMTP/MIME packets. | Setting `SEND_ENABLED=true` enables real dispatch via Google Gmail API (`users.messages.send`) or Microsoft Graph (`/me/sendMail`). |
 | **SMS / Mobile Push Nudges** | **Simulated UI** | Aging nudges (>24h/48h) trigger in-app toast alerts and amber aging badges in Maya's workspace. | Twilio SMS API or Apple APNs / Firebase Cloud Messaging (FCM). |
 | **Calendar Scheduling** | **Extracted / Read-Only** | Meeting dates and conflicts are extracted and highlighted in the UI from email bodies; calendar conflict detection checks against other extracted thread events. | Full two-way read/write sync with Google Calendar API and Outlook Calendar API. |
+| **Microsoft Outlook Connector** | **Implemented to Spec / Credential Pending** | Microsoft Graph OAuth2 authorization flow, refresh token exchange, and message normalization implemented in `OutlookProvider.js` and wired to `ingestProviderThreads`. Requires live Azure application registration (`MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`) to execute against live Office 365 tenants. | Live Azure Entra ID tenant registration with delegated `Mail.Read`, `Mail.Send`, `offline_access` permissions. |
 
 ---
 

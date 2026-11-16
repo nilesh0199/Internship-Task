@@ -89,6 +89,21 @@ export function ThreadRow({ thread, isSelected, onClick }) {
         <div className="flex items-center gap-1.5 flex-wrap">
           <LabelBadge label={thread.currentLabel} size="xs" />
 
+          {/* Source Account Provider Chip */}
+          {thread.provider === 'gmail' ? (
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200/60 uppercase tracking-wider">
+              Gmail
+            </span>
+          ) : thread.provider === 'outlook' ? (
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200/60 uppercase tracking-wider">
+              Outlook
+            </span>
+          ) : (
+            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-ink-100/70 text-ink-500 uppercase tracking-wider">
+              Demo
+            </span>
+          )}
+
           {thread.isWaiting && (
             <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60 font-medium">
               <Clock className="h-2.5 w-2.5" />

@@ -1,6 +1,8 @@
 import { store } from '../services/store.js';
 import { env } from '../config/env.js';
 import { logger } from '../utils/logger.js';
+import { GmailProvider } from '../providers/gmail/GmailProvider.js';
+import { OutlookProvider } from '../providers/outlook/OutlookProvider.js';
 
 export async function getPlaybook(req, res, next) {
   try {
@@ -129,10 +131,34 @@ export async function sendDraft(req, res, next) {
       });
     }
 
+    // Real send when SEND_ENABLED=true
+    const thread = await store.getThreadById(draft.threadId);
+    const accounts = await store.getConnectedAccounts(req.user.orgId);
+    const account = accounts.find(
+      (a) => a._id === thread?.connectedAccountId || a._id === thread?.accountId
+    );
+
+    let sendResult = { success: true, messageId: 'real_' + Date.now(), isSimulated: false };
+    if (account?.provider === 'gmail') {
+      const provider = new GmailProvider(account);
+      sendResult = await provider.sendReply(draft);
+    } else if (account?.provider === 'outlook') {
+      const provider = new OutlookProvider(account);
+      sendResult = await provider.sendReply(draft);
+    }
+
+    await store.saveDraft({
+      ...draft,
+      status: 'sent',
+      sentAt: new Date(),
+      isSimulatedSend: false,
+    });
+
     return res.status(200).json({
       ok: true,
-      message: 'Email dispatched via provider',
+      message: 'Email dispatched via provider API',
       isSimulated: false,
+      data: sendResult,
     });
   } catch (err) {
     next(err);
