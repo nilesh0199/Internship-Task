@@ -758,6 +758,11 @@ export const store = {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   },
 
+  async getDraftByThreadId(threadId) {
+    const drafts = await this.getDraftsByThreadId(threadId);
+    return drafts && drafts.length > 0 ? drafts[0] : null;
+  },
+
   async getAgentProposals(orgId) {
     if (isRealDBConnected()) {
       return await Draft.find({

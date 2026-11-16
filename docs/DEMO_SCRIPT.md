@@ -86,7 +86,18 @@ Before beginning the walkthrough, here is the transparent breakdown of simulated
 
 ---
 
-### Scene 6: Live Reflection & Draft Dispatch (2:15 – 2:35)
+### Scene 5B: The Agent Control Room & Zero-Trust Safety (2:15 – 2:45)
+- **Visual**: In Maya's workspace header or sidebar, click **"Agent Control Room"** (`/agents`).
+- **Visual**: Show the top funnel strip: *"40 emails in. 24 handled by agents. 9 need you (Maya). 7 need Priya."*
+- **Action**: Highlight the 6 specialized agent cards (Triage, Scheduling, Follow-up, Drafting, Digest, Guardian).
+- **Action**: Toggle an agent's autonomy level between *Off*, *Propose*, and *Auto*.
+- **Action**: Scroll to the Live Activity Feed and point out a Guardian reversal entry: *"Guardian reversed: Auto-file blocked (Sender on VIP list)"*. Click **"Undo"** on any auto-handled action to demonstrate 1-click reversibility.
+- **Voice-Over**:
+  > *"Behind the scenes, inbox management isn't handled by a black box—it's run by a collective of six specialized agents. Here in the Agent Control Room, Maya oversees the team: Triage auto-files noise, Scheduling flags calendar overlaps and proposes conflict-free slots, Follow-up drafts check-ins on stale waiting threads, and Drafting prepares context-aware replies. But the crown jewel is the Guardian Agent: a zero-trust safety net that independently audits every autonomous action. If an email mentions a VIP sender, wire terms, or contract signatures, Guardian immediately reverses the auto-file and escalates it for human review. Autonomy you can actually trust."*
+
+---
+
+### Scene 6: Live Reflection & Draft Dispatch (2:45 – 3:05)
 - **Visual**: Switch back to desktop `/assistant`.
 - **Action**: Show that the Acme Corp thread now displays a green status badge: `Draft Approved by Priya`.
 - **Action**: Maya clicks **"Send Approved Email"**. The toast confirms simulated transmission and writes an entry into the immutable Activity Log.

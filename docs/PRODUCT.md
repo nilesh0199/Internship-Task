@@ -154,6 +154,22 @@ Every thread includes an auditable history pane showing its complete lifecycle:
 A distilled greeting at the top of Priya's decision queue:
 > *"Good morning, Priya. Today: **3 decisions** require your signoff, **12 threads** were resolved autonomously by Maya, and **5 threads** are waiting on external replies."*
 
+### 6.12. Specialized Autonomous Agent Collective
+Instead of a monolithic black-box classifier, Daybook Mail operates six specialized autonomous agents:
+1. **Triage Agent (`triage`)**: Routes incoming messages, assigns queue owners, and auto-files newsletters/receipts to Quiet Folder.
+2. **Scheduling Agent (`scheduling`)**: Extracts meeting times, identifies calendar conflicts, and prepares draft reschedule notices.
+3. **Follow-Up Agent (`followup`)**: Monitors stale threads in "Waiting for Response" and drafts check-in nudges.
+4. **Drafting Agent (`drafting`)**: Pre-drafts routine administrative responses for assistant one-click approval.
+5. **Digest Agent (`digest`)**: Prepares the client morning decision brief and daily executive briefing summaries.
+6. **Guardian Agent (`guardian`)**: Zero-trust compliance auditor that audits all auto-handled actions against VIP lists and risk keywords (wire, contract, $500+), instantly reversing risky actions to `NEEDS_REVIEW`.
+
+### 6.13. Agent Control Room (`/agents`)
+A centralized management console for assistants:
+- **Daily Funnel Summary Strip**: Tracks total emails in, emails handled autonomously, items needing the assistant, and items needing the client, plus an honest formula-based time saved calculation (~40s per auto-handled email).
+- **Per-Agent Autonomy Controls**: Toggle each agent between `Off`, `Propose` (drafts/prepares for review), and `Auto` (applies action with Undo).
+- **Live Activity Feed**: Real-time event log with human-readable explanations, execution latency, LLM vs rule indicator, and instant **1-Click Undo**.
+- **Zero-Send Hard Safety Gate**: Agents can never transmit external messages; sending always requires explicit human confirmation.
+
 ---
 
 ## 7. Product Roadmap (Future Phases — Post-Prototype)

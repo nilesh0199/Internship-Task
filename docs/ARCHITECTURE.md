@@ -105,6 +105,17 @@
   5. *Heuristic Fallback Engine*: Rule-based fallback if all LLMs are unreachable.
   6. *Hard Guardrails*: In-code safety checks that prevent dangerous classifications (e.g., VIP senders or high-value contracts can never be marked `NO_REPLY_NEEDED`).
 
+### 2.6. Specialized Autonomous Agent Subsystem (`/server/src/agents`)
+- **Architecture**: A cooperative multi-agent system inheriting from `BaseAgent` orchestrated with concurrency limits (3), individual timeouts (5s), and try/catch fault isolation:
+  - `TriageAgent`: Executes classification, routes to workspace/queue, and auto-files newsletters with undo.
+  - `SchedulingAgent`: Extracts dates/times, detects conflicts, and generates reschedule proposals.
+  - `FollowUpAgent`: Monitors stale threads waiting on third parties and drafts follow-up inquiries.
+  - `DraftingAgent`: Prepares routine replies for human authorization.
+  - `DigestAgent`: Generates structured morning briefing cards for the executive.
+  - `GuardianAgent`: Inspects auto-handled actions against VIP lists and compliance patterns, reversing dangerous auto-files to `NEEDS_REVIEW`.
+- **Zero-Send Invariant**: No agent possesses email sending authority. Dispatch strictly requires explicit human action.
+- **Auditability & 1-Click Undo**: Every agent mutation records an `AgentRun` entry with an undo payload enabling instant reversal via `POST /api/agents/runs/:id/undo`.
+
 ---
 
 ## 3. Data Flow: Thread Ingestion to Decision

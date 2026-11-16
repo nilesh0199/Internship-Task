@@ -28,6 +28,26 @@ export function RoleSwitcher() {
         }
       }
     } catch (err) {
+      // Fallback to demoLogin so reviewers are never stranded
+      try {
+        const demoRes = await demoLogin(targetRole);
+        if (demoRes?.ok && demoRes.data?.user) {
+          const nextRole = demoRes.data.user.role;
+          toast.info(
+            nextRole === 'client'
+              ? 'Switched to Priya Sharma (Client Decision Queue)'
+              : 'Switched to Maya Lin (Assistant Workspace)'
+          );
+          if (nextRole === 'client') {
+            navigate('/client');
+          } else {
+            navigate('/assistant');
+          }
+          return;
+        }
+      } catch {
+        // Fallback failed as well
+      }
       toast.error('Failed to switch persona: ' + (err.message || 'Unknown error'));
     } finally {
       setSwitching(false);

@@ -16,10 +16,19 @@ import { authRequired, roleRequired, validate, authRateLimiter } from '../middle
 
 const router = express.Router();
 
-const SwitchRoleSchema = z.object({
-  role: z.enum(['assistant', 'client']).optional(),
-  targetRole: z.enum(['assistant', 'client']).optional(),
-});
+const SwitchRoleSchema = z
+  .union([
+    z
+      .object({
+        role: z.string().optional(),
+        targetRole: z.string().optional(),
+      })
+      .passthrough(),
+    z.undefined(),
+    z.null(),
+  ])
+  .optional()
+  .default({});
 
 const InviteClientSchema = z.object({
   email: z.string().email().optional(),

@@ -120,6 +120,17 @@
 
 ---
 
+## Phase 10: Specialized Autonomous Agent Collective `[M]`
+- [x] **10.1**: Build BaseAgent interface, policy manager (`getAgentAutonomy`, kill switch `AGENTS_ENABLED`), and orchestrator pipeline with concurrency limits & per-agent timeouts. `[M]`
+- [x] **10.2**: Create `AgentRun` model and persistence layer in Mongoose & in-memory store with `addAgentRun`, `getAgentRuns`, `getAgentStats`, and `undoAgentRun`. `[M]`
+- [x] **10.3**: Implement the 6 specialized agents: `TriageAgent` (routes & auto-files noise), `SchedulingAgent` (conflict detection & reschedule drafts), `FollowUpAgent` (stale waiting & client decision nudges), `DraftingAgent` (context-aware reply proposals), `DigestAgent` (daily metrics & morning brief), and `GuardianAgent` (zero-trust safety audit & automatic reversal). `[M]`
+- [x] **10.4**: Wire agents into ingestion pipeline (`ingestProviderThreads`), live message simulator (`simulateInboundMessage`), and client decisions (`clientDecision`). `[M]`
+- [x] **10.5**: Build REST endpoints: `GET /api/agents`, `PUT /api/agents/:id`, `GET /api/agents/runs`, `POST /api/agents/run`, `POST /api/agents/runs/:id/undo`, `GET /api/agents/summary`, `GET /api/agents/digest`, and `GET /api/agents/stream`. `[M]`
+- [x] **10.6**: Build UI: Agent Control Room page (`/agents`), sidebar "Agent Proposals" segment, thread detail "Handled by agents" merged timeline with 1-click Undo, At-A-Glance strip agent count, client Morning Brief live integration, and landing page collective section. `[M]`
+- [x] **10.7**: Seed demo runs and write comprehensive test suite in `server/test/agents.test.js` covering safety, zero-send autonomy, guardian reversals, and undo capabilities. `[M]`
+
+---
+
 ## Known Issues & Prototype Reviewer Guidance
 
 1. **Email Sending Safety Flag**:

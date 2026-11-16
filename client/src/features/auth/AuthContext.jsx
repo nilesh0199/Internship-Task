@@ -66,9 +66,9 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const payload = {};
-      if (targetRole) {
-        payload.role = targetRole;
-        payload.targetRole = targetRole;
+      if (typeof targetRole === 'string' && targetRole.trim()) {
+        payload.role = targetRole.trim();
+        payload.targetRole = targetRole.trim();
       }
       const res = await api.post('/auth/switch-role', payload);
       if (res.ok && res.data?.user) {

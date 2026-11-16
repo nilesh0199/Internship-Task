@@ -221,11 +221,16 @@ export async function demoLogin(req, res, next) {
  */
 export async function switchRole(req, res, next) {
   try {
+    const rawTarget = String(req.body?.targetRole || req.body?.role || '').toLowerCase();
     const currentRole = req.user?.role || 'assistant';
-    const targetRole =
-      req.body?.targetRole ||
-      req.body?.role ||
-      (currentRole === 'assistant' ? 'client' : 'assistant');
+    let targetRole;
+    if (rawTarget.includes('client') || rawTarget.includes('priya')) {
+      targetRole = 'client';
+    } else if (rawTarget.includes('assistant') || rawTarget.includes('maya')) {
+      targetRole = 'assistant';
+    } else {
+      targetRole = currentRole === 'assistant' ? 'client' : 'assistant';
+    }
     const targetEmail = targetRole === 'client' ? 'priya@vortexdynamics.com' : 'maya@vortexdynamics.com';
 
     let targetUser = await store.findUserByEmail(targetEmail);

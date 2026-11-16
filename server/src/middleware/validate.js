@@ -5,7 +5,8 @@
  */
 export function validate(schema, source = 'body') {
   return (req, res, next) => {
-    const result = schema.safeParse(req[source]);
+    const rawData = req[source] !== undefined ? req[source] : (source === 'body' || source === 'query' ? {} : req[source]);
+    const result = schema.safeParse(rawData);
     if (!result.success) {
       return res.status(400).json({
         ok: false,
