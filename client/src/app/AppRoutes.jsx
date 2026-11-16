@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from '../features/auth/AuthContext.jsx';
 import { Login } from '../pages/Login.jsx';
 import { Signup } from '../pages/Signup.jsx';
@@ -9,6 +9,7 @@ import { AssistantDashboard } from '../pages/AssistantDashboard.jsx';
 import { ClientQueue } from '../pages/ClientQueue.jsx';
 import { AccountsPage } from '../pages/AccountsPage.jsx';
 import { PrototypeHelpPopover } from '../components/PrototypeHelpPopover.jsx';
+import { Landing } from '../pages/Landing.jsx';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -35,11 +36,39 @@ function ProtectedRoute({ children, allowedRoles }) {
   return children;
 }
 
-function RootRedirect() {
+function RootRoute() {
   const { user, loading } = useAuth();
-  if (loading) return null;
-  if (!user) return <Navigate to="/login" replace />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-6 w-6 rounded-full border-2 border-ink-300 border-t-accent animate-spin" />
+          <span className="text-xs text-ink-500">Loading session...</span>
+        </div>
+      </div>
+    );
+  }
+  if (!user) {
+    return <Landing />;
+  }
   return <Navigate to={user.role === 'client' ? '/client' : '/assistant'} replace />;
+}
+
+function FloatingControls() {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  // Suppress on landing page or when not logged in
+  if (!user || location.pathname === '/') {
+    return null;
+  }
+
+  return (
+    <>
+      <RoleSwitcher />
+      <PrototypeHelpPopover />
+    </>
+  );
 }
 
 export function AppRoutes() {
@@ -47,7 +76,7 @@ export function AppRoutes() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<RootRedirect />} />
+          <Route path="/" element={<RootRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route
@@ -84,8 +113,7 @@ export function AppRoutes() {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <RoleSwitcher />
-        <PrototypeHelpPopover />
+        <FloatingControls />
       </AuthProvider>
     </BrowserRouter>
   );
