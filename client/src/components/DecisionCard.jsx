@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Avatar from './Avatar.jsx';
 import {
   Clock,
   AlertCircle,
@@ -42,9 +43,7 @@ export function DecisionCard({ thread, draft, onAction }) {
       {/* Top Metadata Strip: Sender, Date, Urgency Chip */}
       <div className="flex items-center justify-between text-xs text-ink-500 border-b border-borderMuted/60 pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="h-7 w-7 rounded-full bg-ink-100 text-ink-800 font-bold text-xs flex items-center justify-center">
-            {sender[0].toUpperCase()}
-          </div>
+          <Avatar name={sender} size="sm" />
           <span className="font-bold text-ink-900 tracking-tight">{sender}</span>
           <span>•</span>
           <span className="text-ink-400 font-mono text-[11px]">{receivedDate}</span>

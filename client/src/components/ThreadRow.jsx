@@ -1,6 +1,7 @@
 import React from 'react';
 import { LabelBadge } from './LabelBadge.jsx';
 import { ConfidenceDots } from './ConfidenceDots.jsx';
+import Avatar from './Avatar.jsx';
 import { Star, Clock, Calendar, CheckCheck, Paperclip } from 'lucide-react';
 
 export function ThreadRow({ thread, isSelected, onClick }) {
@@ -37,9 +38,7 @@ export function ThreadRow({ thread, isSelected, onClick }) {
           {!thread.isRead ? (
             <span className="h-2 w-2 rounded-full bg-blue-600 ring-4 ring-blue-100 flex-shrink-0" />
           ) : (
-            <div className="h-5 w-5 rounded-full bg-ink-100/90 text-ink-600 text-[10px] font-semibold flex items-center justify-center flex-shrink-0">
-              {initials}
-            </div>
+            <Avatar name={sender} size="xs" />
           )}
 
           {isVip && (

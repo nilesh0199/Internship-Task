@@ -19,7 +19,7 @@ const ClassificationEventSchema = new mongoose.Schema(
     },
     triggerMessageId: { type: String, default: null },
     actorId: { type: String, default: null },
-    actorName: { type: String, default: 'ReplyRight AI' },
+    actorName: { type: String, default: 'Daybook AI' },
     reason: { type: String, required: true },
   },
   { timestamps: true }

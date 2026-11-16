@@ -166,7 +166,7 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
                   <div className="rounded-2xl bg-[#F0FDFA] border border-teal-200/60 p-4 max-w-[92%] text-xs text-ink-900 space-y-3 shadow-2xs">
                     <div className="flex items-center gap-1.5 text-[11px] font-semibold text-label-assistant">
                       <Sparkles className="h-3.5 w-3.5" />
-                      <span>ReplyRight AI Assistant</span>
+                      <span>Daybook AI Assistant</span>
                     </div>
                     <div className="leading-relaxed whitespace-pre-wrap">{m.text}</div>
 

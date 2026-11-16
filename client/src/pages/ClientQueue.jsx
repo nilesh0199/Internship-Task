@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../features/auth/AuthContext.jsx';
 import { api } from '../lib/api.js';
 import { DecisionCard } from '../components/DecisionCard.jsx';
+import Avatar from '../components/Avatar.jsx';
 import {
   Sparkles,
   CheckCircle2,
@@ -74,12 +75,10 @@ export function ClientQueue() {
       {/* Top Floating Client Header */}
       <header className="h-16 bg-white/85 backdrop-blur-md border-b border-borderMuted/70 px-6 md:px-12 flex items-center justify-between sticky top-0 z-20 select-none">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-label-clientBg text-label-client flex items-center justify-center font-serif font-bold text-sm ring-2 ring-white shadow-xs">
-            PS
-          </div>
+          <Avatar name={user?.name || 'Priya Sharma'} email={user?.email} size="md" />
           <div>
             <h1 className="text-sm font-serif font-bold text-ink-900 leading-tight tracking-tight">
-              Priya Sharma
+              {user?.name || 'Priya Sharma'}
             </h1>
             <span className="text-[10px] uppercase font-bold tracking-wider text-label-client">
               Decision Queue

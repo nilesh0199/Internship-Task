@@ -126,7 +126,7 @@ export class DemoProvider extends EmailProviderAdapter {
       newLabel,
       triggerType: 'DEMO_INJECTION',
       triggerMessageId: injectedMsg.id,
-      actorName: 'ReplyRight Demo Live Injector',
+      actorName: 'Daybook Demo Live Injector',
       reason: scenario.newReason,
     });
 

@@ -1,6 +1,6 @@
-# INTEGRATIONS & EMAIL PROVIDERS — ReplyRight
+# INTEGRATIONS & EMAIL PROVIDERS — Daybook Mail
 
-> **Architecture Note**: ReplyRight abstracts external email services behind a uniform `EmailProviderAdapter` interface. Three implementations are supported: **Demo Mailbox** (local simulation & injection), **Gmail** (Google Workspace API), and **Outlook** (Microsoft Graph API).
+> **Architecture Note**: Daybook Mail abstracts external email services behind a uniform `EmailProviderAdapter` interface. Three implementations are supported: **Demo Mailbox** (local simulation & injection), **Gmail** (Google Workspace API), and **Outlook** (Microsoft Graph API).
 
 ---
 
@@ -96,7 +96,7 @@ export class EmailProviderAdapter {
   - `offline_access`
 - **Normalization**:
   - Groups messages by `conversationId`.
-  - Normalizes Graph message schemas into canonical ReplyRight Thread and Message models.
+  - Normalizes Graph message schemas into canonical Daybook Mail Thread and Message models.
 
 ---
 
@@ -149,7 +149,7 @@ When an account is disconnected:
 
 ### A. Google Cloud Console (Gmail Integration)
 1. Navigate to [Google Cloud Console](https://console.cloud.google.com/).
-2. Create project: `ReplyRight-Prototype`.
+2. Create project: `Daybook-Mail-Prototype`.
 3. Enable **Gmail API** in APIs & Services.
 4. Configure **OAuth Consent Screen**:
    - User Type: **External**.
@@ -169,7 +169,7 @@ When an account is disconnected:
 ### B. Microsoft Azure Portal (Outlook Integration)
 1. Navigate to [Azure Portal - App Registrations](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade).
 2. Click **New registration**:
-   - Name: `ReplyRight`.
+   - Name: `Daybook Mail`.
    - Supported account types: *Accounts in any organizational directory (Any Microsoft Entra ID / Multitenant) and personal Microsoft accounts*.
    - Redirect URI (Web): `http://localhost:5000/api/auth/microsoft/callback`.
 3. Under **Certificates & secrets**, create a new Client Secret.

@@ -1,6 +1,6 @@
-# SIMULATED FEATURES & MOCK ARCHITECTURE REGISTRY — ReplyRight
+# SIMULATED FEATURES & MOCK ARCHITECTURE REGISTRY — Daybook Mail
 
-> **Protocol**: This document serves as the living, authoritative record of all simulated features, mock adapters, and safety gates within the ReplyRight prototype. Whenever a new feature is stubbed or simulated during development, it must be logged here immediately.
+> **Protocol**: This document serves as the living, authoritative record of all simulated features, mock adapters, and safety gates within the Daybook Mail prototype. Whenever a new feature is stubbed or simulated during development, it must be logged here immediately.
 
 ---
 
@@ -19,4 +19,4 @@
 ## 2. Safety Gate Guidelines for Agents
 
 - **Rule 1**: Never toggle `SEND_ENABLED=true` in testing or demonstration environments unless specifically instructed by the repository owner with designated sandbox test inboxes.
-- **Rule 2**: When adding new features in later phases (e.g. multi-tenant invites, Slack webhooks), log the simulated behavior in this document before marking the phase task complete in [`/docs/TASKS.md`](file:///d:/Nilesh/internship%20task/docs/TASKS.md).
+- **Rule 2**: When adding new features in later phases (e.g. multi-tenant invites, Slack webhooks), log the simulated behavior in this document before marking the phase task complete in [`/docs/TASKS.md`](TASKS.md).

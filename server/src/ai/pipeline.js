@@ -116,7 +116,7 @@ export async function runClassificationPipeline(thread, messages = [], forceReru
       newLabel: finalResult.label,
       triggerType: forceRerun ? 'MANUAL_OVERRIDE' : 'INITIAL_SYNC',
       triggerMessageId: latestMessageId,
-      actorName: `ReplyRight AI (${finalResult.model || 'Gemini 2.0'})`,
+      actorName: `Daybook AI (${finalResult.model || 'Gemini 2.0'})`,
       reason: finalResult.reason,
     });
   }

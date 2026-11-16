@@ -10,6 +10,7 @@ import { CommandPaletteModal } from '../components/CommandPaletteModal.jsx';
 import { PlaybookModal } from '../components/PlaybookModal.jsx';
 import { ActivityLogDrawer } from '../components/ActivityLogDrawer.jsx';
 import { LabelBadge } from '../components/LabelBadge.jsx';
+import Avatar from '../components/Avatar.jsx';
 import {
   Inbox,
   UserCheck,
@@ -227,12 +228,12 @@ export function AssistantDashboard() {
       <header className="h-16 bg-white/85 backdrop-blur-md border-b border-borderMuted/70 px-5 flex items-center justify-between flex-shrink-0 z-10 select-none">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-xl bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-sm shadow-soft">
-            R
+            D
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-serif font-bold text-base text-ink-900 tracking-tight">
-                ReplyRight
+                Daybook Mail
               </span>
               <span className="text-[10px] font-semibold tracking-wide text-label-assistant bg-label-assistantBg px-2 py-0.5 rounded-full border border-label-assistant/20 hidden sm:inline">
                 Assistant Workspace
@@ -295,9 +296,7 @@ export function AssistantDashboard() {
           {/* Client Boss Profile Card */}
           <div className="m-3 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card">
             <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-full bg-label-clientBg text-label-client font-serif font-bold text-xs flex items-center justify-center ring-2 ring-white shadow-xs flex-shrink-0">
-                PS
-              </div>
+              <Avatar name={client?.name || 'Priya Sharma'} email={client?.email} size="md" />
               <div className="truncate">
                 <div className="text-xs font-bold text-ink-900 truncate tracking-tight">
                   {client?.name || 'Priya Sharma'}

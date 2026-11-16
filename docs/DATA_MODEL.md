@@ -1,4 +1,4 @@
-# DATA MODEL SPECIFICATION — ReplyRight
+# DATA MODEL SPECIFICATION — Daybook Mail
 
 > **Architecture Note**: Data is stored in MongoDB Atlas and modeled with Mongoose. All inbox segments are dynamic query views over a single `threads` collection. Tokens and sensitive secrets are encrypted at rest using AES-256-GCM.
 
@@ -330,7 +330,7 @@ const ClassificationEventSchema = new mongoose.Schema({
   },
   triggerMessageId: { type: String, default: null },
   actorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }, // Null if automated AI
-  actorName: { type: String, default: 'ReplyRight AI' },
+  actorName: { type: String, default: 'Daybook AI' },
   reason: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });

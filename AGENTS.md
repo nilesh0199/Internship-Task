@@ -1,17 +1,17 @@
 # AGENTS.md — Master Directives & Operating Manual
 
-> **Scope**: This document defines the non-negotiable operational principles, technical standards, security policies, and workflow protocols for any AI agent or engineer contributing to the **ReplyRight** (Personal Assistant Inbox) repository.
+> **Scope**: This document defines the non-negotiable operational principles, technical standards, security policies, and workflow protocols for any AI agent or engineer contributing to the **Daybook Mail** (Personal Assistant Inbox) repository.
 
 ---
 
 ## 1. Prime Directives & Workflow
 
 1. **Documentation First**:
-   - Always read [`/docs`](file:///d:/Nilesh/internship%20task/docs) before architecting, modifying, or creating code.
-   - Execute strictly phase-by-phase according to [`/docs/TASKS.md`](file:///d:/Nilesh/internship%20task/docs/TASKS.md).
+   - Always read [`/docs`](docs) before architecting, modifying, or creating code.
+   - Execute strictly phase-by-phase according to [`/docs/TASKS.md`](docs/TASKS.md).
    - Never skip forward across phases. Upon completing all acceptance items in a task or phase:
-     1. Tick off completed tasks in [`/docs/TASKS.md`](file:///d:/Nilesh/internship%20task/docs/TASKS.md).
-     2. Document any mock data, stubbed integrations, or simulated features in [`/docs/SIMULATED.md`](file:///d:/Nilesh/internship%20task/docs/SIMULATED.md).
+     1. Tick off completed tasks in [`/docs/TASKS.md`](docs/TASKS.md).
+     2. Document any mock data, stubbed integrations, or simulated features in [`/docs/SIMULATED.md`](docs/SIMULATED.md).
      3. Commit the change with a clear, conventional commit message (e.g., `feat(auth): add jwt middleware and session cookies`).
 
 2. **Zero Assumptions & Communication**:
@@ -106,7 +106,7 @@
 
 ## 6. Commit & Task Discipline
 
-- Before marking a task complete in [`/docs/TASKS.md`](file:///d:/Nilesh/internship%20task/docs/TASKS.md), verify locally:
+- Before marking a task complete in [`/docs/TASKS.md`](docs/TASKS.md), verify locally:
   1. `npm run dev` boots cleanly without errors.
   2. All edge cases (loading, empty, error, fallback) are verified.
   3. Tests or manual verification steps pass.

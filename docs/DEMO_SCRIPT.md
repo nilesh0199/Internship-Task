@@ -1,4 +1,4 @@
-# DEMO SCRIPT & LIVE WALKTHROUGH — ReplyRight
+# DEMO SCRIPT & LIVE WALKTHROUGH — Daybook Mail
 
 > **Target Duration**: 3 Minutes (180 Seconds)  
 > **Audience**: Technical Reviewers, Executive Assistants, Product Leads  
@@ -39,7 +39,7 @@ Before beginning the walkthrough, here is the transparent breakdown of simulated
 - **Visual**: Open browser at `http://localhost:5173/`. Show the clean, editorial landing page. Click **"Settings & Accounts"**.
 - **Action**: Highlight the Connected Accounts card showing Google Gmail, Microsoft Outlook, and the Demo Mailbox. Point to the green sync pill (`"Synced 1m ago"`).
 - **Voice-Over**:
-  > *"Executive Assistants don't just manage an inbox—they manage their boss's professional life. But today, assistants drown in 200+ emails a day with one paralyzing ambiguity: who is supposed to reply to this? Welcome to ReplyRight. We support live OAuth for Gmail and Outlook, but for this demo, let's explore our pre-loaded executive environment for founder Priya Sharma and her assistant Maya."*
+  > *"Executive Assistants don't just manage an inbox—they manage their boss's professional life. But today, assistants drown in 200+ emails a day with one paralyzing ambiguity: who is supposed to reply to this? Welcome to Daybook Mail. We support live OAuth for Gmail and Outlook, but for this demo, let's explore our pre-loaded executive environment for founder Priya Sharma and her assistant Maya."*
 
 ---
 
@@ -108,4 +108,4 @@ Before beginning the walkthrough, here is the transparent breakdown of simulated
 - **Visual**: Click on the **"Quiet Folder"** segment in the sidebar.
 - **Visual**: Show the banner: *"Quiet folder audited: 8 newsletters and receipts muted. Nothing critical slipped through today."*
 - **Voice-Over**:
-  > *"Finally, the Quiet Folder: every automated newsletter and receipt is auditable with the exact reason it was muted, giving assistants total peace of mind. That is ReplyRight—turning inbox chaos into clear, collaborative decisions."*
+  > *"Finally, the Quiet Folder: every automated newsletter and receipt is auditable with the exact reason it was muted, giving assistants total peace of mind. That is Daybook Mail—turning inbox chaos into clear, collaborative decisions."*

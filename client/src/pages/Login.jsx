@@ -56,10 +56,10 @@ export function Login() {
             <span>AI Executive Inbox Prototype</span>
           </div>
           <h1 className="text-4xl font-serif font-bold text-ink-900 tracking-tight">
-            ReplyRight
+            Daybook Mail
           </h1>
           <p className="text-xs text-ink-500 max-w-xs mx-auto leading-relaxed">
-            Personal Assistant Inbox & Client Decision Queue
+            A daybook for your inbox. Daily executive triage & decision queue.
           </p>
         </div>
 

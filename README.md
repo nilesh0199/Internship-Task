@@ -1,8 +1,8 @@
-# ReplyRight — Personal Assistant Inbox
+# Daybook Mail — A daybook for your inbox
 
 > **An AI-powered email management and decision orchestration dashboard for Personal Assistants managing their executive's inbox.**
 
-ReplyRight bridges the gap between high-volume administrative triage and executive decision-making. Instead of forcing busy executives to read long email chains or leaving assistants uncertain about who owns the next reply, ReplyRight uses an intelligent, risk-aware AI pipeline to categorize every conversation into **`ASSISTANT_TO_REPLY`**, **`CLIENT_TO_REPLY`**, **`NO_REPLY_NEEDED`**, or **`NEEDS_REVIEW`**.
+Daybook Mail bridges the gap between high-volume administrative triage and executive decision-making. Instead of forcing busy executives to read long email chains or leaving assistants uncertain about who owns the next reply, Daybook Mail uses an intelligent, risk-aware AI pipeline to categorize every conversation into **`ASSISTANT_TO_REPLY`**, **`CLIENT_TO_REPLY`**, **`NO_REPLY_NEEDED`**, or **`NEEDS_REVIEW`**.
 
 ---
 

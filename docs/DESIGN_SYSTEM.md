@@ -1,7 +1,7 @@
-# DESIGN SYSTEM & UI/UX SPECIFICATION — ReplyRight
+# DESIGN SYSTEM & UI/UX SPECIFICATION — Daybook Mail
 
 > **Aesthetic Philosophy**: *Calm, editorial, high-trust.*  
-> ReplyRight intentionally rejects generic neon gradients and hyperactive SaaS tropes in favor of an understated, warm editorial aesthetic reminiscent of high-end Swiss publications and minimalist Scandinavian tools. The visual tone instills calm clarity in an otherwise chaotic email environment.
+> Daybook Mail intentionally rejects generic neon gradients and hyperactive SaaS tropes in favor of an understated, warm editorial aesthetic reminiscent of high-end Swiss publications and minimalist Scandinavian tools. The visual tone instills calm clarity in an otherwise chaotic email environment.
 
 ---
 

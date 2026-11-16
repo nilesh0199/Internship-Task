@@ -1,6 +1,6 @@
-# ARCHITECTURE SPECIFICATION — ReplyRight
+# ARCHITECTURE SPECIFICATION — Daybook Mail
 
-> **System Overview**: ReplyRight is designed as a modular, decoupled full-stack architecture built on Node 20 (ES Modules) and React 18. It separates high-throughput assistant triage from distilled executive decision-making while operating against a single authoritative MongoDB store and a multi-provider ingestion engine.
+> **System Overview**: Daybook Mail is designed as a modular, decoupled full-stack architecture built on Node 20 (ES Modules) and React 18. It separates high-throughput assistant triage from distilled executive decision-making while operating against a single authoritative MongoDB store and a multi-provider ingestion engine.
 
 ---
 

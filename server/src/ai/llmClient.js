@@ -51,7 +51,7 @@ function buildPrompt(thread, messages, playbook = {}, corrections = []) {
     .map((r) => `- [${r.disposition}] ${r.topic}: ${r.description || ''}`)
     .join('\n');
 
-  return `You are ReplyRight AI, an intelligent executive email triage engine for assistant Maya managing client ${
+  return `You are Daybook AI, an intelligent executive email triage engine for assistant Maya managing client ${
     playbook.name || 'Priya Sharma'
   }'s inbox.
 Classify who owns the next reply for this thread and structure decisions.

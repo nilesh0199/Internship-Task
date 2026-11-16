@@ -51,7 +51,7 @@ export function PrototypeHelpPopover() {
                 </div>
                 <div>
                   <h3 className="text-base font-serif font-bold text-ink-900 leading-tight">
-                    ReplyRight Prototype Guide
+                    Daybook Mail Prototype Guide
                   </h3>
                   <span className="text-[10px] text-ink-400 font-medium uppercase tracking-wider">
                     Evaluation Architecture Disclosure

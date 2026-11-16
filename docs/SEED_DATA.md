@@ -1,4 +1,4 @@
-# SEED DATA SPECIFICATION — ReplyRight Demo Environment
+# SEED DATA SPECIFICATION — Daybook Mail Demo Environment
 
 > **Context**: The demo dataset provides 40 realistic, deeply contextualized email threads simulating the inbox of **Priya Sharma** (Founder & CEO of *Vortex Dynamics*, an AI robotics enterprise) managed by her Executive Assistant, **Maya Lin**.
 
@@ -90,4 +90,4 @@ Three threads include predefined follow-up messages stored in `/server/src/seed/
 ## 5. Storage Location
 
 The complete JSON structure with all 40 full multi-message threads and follow-up payloads is maintained at:
-[`/server/src/seed/threads.json`](file:///d:/Nilesh/internship%20task/server/src/seed/threads.json)
+[`server/src/seed/threads.json`](../server/src/seed/threads.json)

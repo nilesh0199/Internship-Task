@@ -1,4 +1,4 @@
-# AI & DECISION ENGINE SPECIFICATION — ReplyRight
+# AI & DECISION ENGINE SPECIFICATION — Daybook Mail
 
 > **Core Purpose**: Transform unstructured email communications into deterministic, actionable classifications and decision objects. The AI engine powers the primary value proposition: answering *who* must reply, *why*, and *by when*, while guaranteeing safety and zero system crashes.
 

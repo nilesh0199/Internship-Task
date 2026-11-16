@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: replyright-server
+    name: daybook-server
     env: node
     plan: free
     region: oregon

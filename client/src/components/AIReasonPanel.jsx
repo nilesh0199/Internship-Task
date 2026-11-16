@@ -263,7 +263,7 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
             <div key={evt._id} className="relative pl-3 text-xs space-y-0.5">
               <div className="absolute -left-[17px] top-1.5 h-2 w-2 rounded-full bg-ink-400 ring-4 ring-[#FAF8F5]" />
               <div className="flex items-center gap-1 font-semibold text-ink-900">
-                <span className="capitalize">{evt.actorName || 'ReplyRight AI'}</span>
+                <span className="capitalize">{evt.actorName || 'Daybook AI'}</span>
                 <span className="text-ink-400 font-normal">changed to</span>
                 <LabelBadge label={evt.newLabel} size="xs" />
               </div>

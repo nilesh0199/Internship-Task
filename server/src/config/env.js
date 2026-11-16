@@ -8,7 +8,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   CLIENT_URL: z.string().default('http://localhost:5173'),
   MONGODB_URI: z.string().optional().default(''),
-  JWT_SECRET: z.string().default('replyright_super_secure_jwt_secret_demo_32_characters_minimum'),
+  JWT_SECRET: z.string().default('daybook_super_secure_jwt_secret_demo_32_characters_minimum'),
   TOKEN_ENCRYPTION_KEY: z.string().default('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'),
   SEND_ENABLED: z.string().default('false').transform((val) => val === 'true'),
   GEMINI_API_KEY: z.string().optional().default(''),

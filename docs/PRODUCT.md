@@ -1,6 +1,6 @@
-# PRODUCT SPECIFICATION — ReplyRight (Personal Assistant Inbox)
+# PRODUCT SPECIFICATION — Daybook Mail (A daybook for your inbox)
 
-> **Vision**: An intelligent email orchestration workspace built specifically for Executive Assistants (EAs/PAs) and their busy Executive Clients. ReplyRight eliminates inbox paralysis by answering the single most critical question in delegated email: **"Who needs to reply to this, and what is the exact decision required?"**
+> **Vision**: An intelligent email orchestration workspace built specifically for Executive Assistants (EAs/PAs) and their busy Executive Clients. Daybook Mail eliminates inbox paralysis by answering the single most critical question in delegated email: **"Who needs to reply to this, and what is the exact decision required?"**
 
 ---
 

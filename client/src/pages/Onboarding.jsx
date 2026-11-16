@@ -66,7 +66,7 @@ export function Onboarding() {
               Step {step} of 5
             </span>
             <h1 className="text-xl md:text-2xl font-serif font-bold text-ink-900 mt-0.5 tracking-tight">
-              {step === 1 && 'Welcome to ReplyRight'}
+              {step === 1 && 'Welcome to Daybook Mail'}
               {step === 2 && 'Confirm Executive Client Profile'}
               {step === 3 && 'Connect Mailbox'}
               {step === 4 && 'Configure Client Playbook'}
@@ -94,7 +94,7 @@ export function Onboarding() {
         {step === 1 && (
           <div className="space-y-6">
             <p className="text-xs text-ink-600 leading-relaxed">
-              ReplyRight is purpose-built for executive assistants managing high-volume client inboxes.
+              Daybook Mail is purpose-built for executive assistants managing high-volume client inboxes.
               Here is how it transforms your workflow in three steps:
             </p>
 

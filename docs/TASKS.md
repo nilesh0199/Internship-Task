@@ -1,6 +1,6 @@
-# IMPLEMENTATION ROADMAP & TASKS — ReplyRight
+# IMPLEMENTATION ROADMAP & TASKS — Daybook Mail
 
-> **Protocol for AI Agents**: Execute strictly phase-by-phase. Do not skip forward. After finishing each phase, tick completed tasks, note any simulated behavior in [`/docs/SIMULATED.md`](file:///d:/Nilesh/internship%20task/docs/SIMULATED.md), and commit with a clean descriptive message.
+> **Protocol for AI Agents**: Execute strictly phase-by-phase. Do not skip forward. After finishing each phase, tick completed tasks, note any simulated behavior in [`/docs/SIMULATED.md`](SIMULATED.md), and commit with a clean descriptive message.
 > 
 > Legend: `[M]` = Must-Have for Live Prototype Review | `[I]` = If-Time Enhancement
 

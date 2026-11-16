@@ -45,7 +45,7 @@ connectDB();
 app.get(['/api/health', '/healthz'], (req, res) => {
   res.status(200).json({
     ok: true,
-    service: 'ReplyRight API',
+    service: 'Daybook Mail API',
     status: 'healthy',
     timestamp: new Date().toISOString(),
     environment: env.NODE_ENV,
@@ -65,8 +65,8 @@ app.use(errorHandler);
 // Start server if not imported
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    logger.info(`[ReplyRight Server] Running on http://localhost:${PORT}`);
-    logger.info(`[ReplyRight Server] Health check available at http://localhost:${PORT}/api/health`);
+    logger.info(`[Daybook Mail Server] Running on http://localhost:${PORT}`);
+    logger.info(`[Daybook Mail Server] Health check available at http://localhost:${PORT}/api/health`);
   });
 }
 
