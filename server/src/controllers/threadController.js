@@ -1,4 +1,5 @@
 import { store } from '../services/store.js';
+import { runAgentsForThread } from '../agents/index.js';
 import { logger } from '../utils/logger.js';
 import { env } from '../config/env.js';
 
@@ -51,6 +52,19 @@ export async function getThreads(req, res, next) {
 
     if (segment === 'meetings') {
       threads = threads.filter((t) => t.meetings?.length > 0);
+    }
+
+    if (segment === 'proposals') {
+      const proposals = await store.getAgentProposals(req.user?.orgId);
+      const proposalThreadIds = proposals.map((p) => String(p.threadId));
+      threads = threads.filter(
+        (t) =>
+          proposalThreadIds.includes(String(t._id || t.id)) ||
+          t.agentSummary?.toLowerCase().includes('proposed') ||
+          t.agentSummary?.toLowerCase().includes('drafted') ||
+          t.agentSummary?.toLowerCase().includes('conflict') ||
+          t.meetings?.some((m) => m.isConflict)
+      );
     }
 
     if (search && search.trim()) {
@@ -287,6 +301,14 @@ export async function clientDecision(req, res, next) {
     }
 
     const updated = await store.updateThread(thread._id, updates);
+
+    // Trigger agents on client decision
+    try {
+      await runAgentsForThread(updated, 'client_action');
+    } catch (agentErr) {
+      logger.warn({ err: agentErr.message }, '[ClientDecision] Agent run warning on client action');
+    }
+
     return res.status(200).json({ ok: true, data: updated });
   } catch (err) {
     next(err);

@@ -10,6 +10,8 @@ import authRoutes from './routes/authRoutes.js';
 import providerRoutes from './routes/providerRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import threadRoutes from './routes/threadRoutes.js';
+import agentRoutes from './routes/agentRoutes.js';
+import { startAgentScheduler } from './agents/index.js';
 
 const app = express();
 const PORT = env.PORT;
@@ -83,6 +85,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api', providerRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api', threadRoutes);
+app.use('/api/agents', agentRoutes);
+
+// Start autonomous background scheduler if configured
+startAgentScheduler();
 
 // Centralized error handler
 app.use(errorHandler);

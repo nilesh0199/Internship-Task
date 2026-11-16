@@ -543,6 +543,22 @@ export const store = {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   },
 
+  async getAgentProposals(orgId) {
+    if (isRealDBConnected()) {
+      return await Draft.find({
+        ...(orgId ? { orgId } : {}),
+        status: { $in: ['agent_proposal', 'draft'] },
+        authorId: { $regex: /^agent_/ },
+      }).lean();
+    }
+    return memoryDrafts.filter(
+      (d) =>
+        (!orgId || d.orgId === orgId) &&
+        (d.status === 'agent_proposal' || d.status === 'draft') &&
+        (d.authorId || '').startsWith('agent_')
+    );
+  },
+
   async saveDraft(draftData) {
     if (draftData._id) {
       if (isRealDBConnected()) {

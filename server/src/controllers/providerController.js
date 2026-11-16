@@ -5,6 +5,7 @@ import { GmailProvider } from '../providers/gmail/GmailProvider.js';
 import { OutlookProvider } from '../providers/outlook/OutlookProvider.js';
 import { DemoProvider } from '../providers/demo/DemoProvider.js';
 import { ingestProviderThreads } from '../services/ingest.js';
+import { runAgentsForThread } from '../agents/index.js';
 import { encryptToken } from '../utils/crypto.js';
 import { logger } from '../utils/logger.js';
 
@@ -361,6 +362,15 @@ export async function simulateInboundMessage(req, res, next) {
     const { threadId = 'th_38' } = req.body;
     const demo = new DemoProvider();
     const result = await demo.simulateMessage({ threadId });
+
+    // Trigger autonomous agents on newly injected inbound message
+    if (result.thread) {
+      try {
+        await runAgentsForThread(result.thread, 'new_message');
+      } catch (agentErr) {
+        logger.warn({ err: agentErr.message }, '[SimulateMessage] Agent run warning on simulated message');
+      }
+    }
 
     return res.status(200).json({
       ok: true,

@@ -1,5 +1,6 @@
 import { store } from './store.js';
 import { runClassificationPipeline } from '../ai/pipeline.js';
+import { runAgentsForThread } from '../agents/index.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -175,6 +176,16 @@ export async function ingestProviderThreads({ account, rawThreads = [], orgId, c
             '[Ingest] AI classification warning, kept existing label'
           );
         }
+      }
+
+      // 6. Run Autonomous Agent Collective on ingested thread
+      try {
+        await runAgentsForThread(thread, 'ingest', { orgId: targetOrgId, client });
+      } catch (agentErr) {
+        logger.warn(
+          { threadId: thread._id, err: agentErr.message },
+          '[Ingest] Autonomous agent collective warning on thread'
+        );
       }
 
       processedThreads.push(thread);
