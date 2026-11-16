@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock.js';
-import { Sparkles, Send, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { Sparkles, Send, CheckCircle2, AlertCircle, Clock, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
@@ -39,14 +39,13 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
     try {
       const res = await api.post(`/ai/generate-draft/${thread._id}`, {});
       if (res.ok && res.data) {
-        setSubject(res.data.subject);
         setBodyText(res.data.bodyText);
-        setStatus(res.data.status);
+        setSubject(res.data.subject || `RE: ${thread.subject}`);
+        toast.success('Generated AI executive response draft');
         onDraftUpdated?.(res.data);
-        toast.success('AI draft generated referencing client tone profile');
       }
     } catch (err) {
-      toast.error('Failed to generate draft: ' + err.message);
+      toast.error('Draft generation failed: ' + err.message);
     } finally {
       setLoadingAI(false);
     }
@@ -55,17 +54,13 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
   async function handleSaveDraft() {
     setSaving(true);
     try {
-      const res = await api.post('/drafts', {
-        _id: existingDraft?._id,
-        threadId: thread._id,
+      const res = await api.post(`/threads/${thread._id}/draft`, {
         subject,
         bodyText,
-        bodyHtml: `<p>${bodyText.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`,
-        to: thread.participants?.[0]?.email ? [thread.participants[0].email] : ['recipient@example.com'],
-        status,
+        status: 'draft',
       });
       if (res.ok) {
-        toast.success('Draft saved');
+        toast.success('Draft saved successfully');
         onDraftUpdated?.(res.data);
       }
     } catch (err) {
@@ -78,24 +73,18 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
   async function handleRequestApproval() {
     setSaving(true);
     try {
-      // First save content
-      const draftRes = await api.post('/drafts', {
-        _id: existingDraft?._id,
-        threadId: thread._id,
+      const res = await api.post(`/threads/${thread._id}/draft`, {
         subject,
         bodyText,
-        bodyHtml: `<p>${bodyText.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`,
-        to: thread.participants?.[0]?.email ? [thread.participants[0].email] : ['recipient@example.com'],
         status: 'pending_client',
       });
-
-      if (draftRes.ok) {
+      if (res.ok) {
+        toast.success("Draft submitted! Priya will see this in her Decision Queue.");
         setStatus('pending_client');
-        onDraftUpdated?.(draftRes.data);
-        toast.success("Draft submitted to Priya's Decision Queue for 1-tap signoff!");
+        onDraftUpdated?.(res.data);
       }
     } catch (err) {
-      toast.error('Failed to submit for approval: ' + err.message);
+      toast.error('Submission failed: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -105,19 +94,17 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
     setShowConfirmSend(false);
     setSaving(true);
     try {
-      const res = await api.post(`/drafts/${existingDraft?._id || 'new'}/send`, {
-        threadId: thread._id,
-        to: thread.participants?.[0]?.email ? [thread.participants[0].email] : ['recipient@example.com'],
+      const res = await api.post(`/threads/${thread._id}/send`, {
         subject,
-        bodyHtml: `<p>${bodyText}</p>`,
+        bodyText,
       });
       if (res.ok) {
-        setStatus('sent');
         toast.success(
-          res.isSimulated
-            ? 'Email transmission simulated (SEND_ENABLED=false)'
-            : 'Email dispatched successfully!'
+          res.data.simulated
+            ? 'Simulated dispatch recorded in audit log (SEND_ENABLED=false)'
+            : 'Email sent successfully via Gmail API!'
         );
+        onDraftUpdated?.(res.data.draft);
       }
     } catch (err) {
       toast.error('Send failed: ' + err.message);
@@ -127,28 +114,22 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
   }
 
   return (
-    <div className="p-4 rounded-xl border border-borderMuted bg-white space-y-4">
-      {/* Draft Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-borderMuted">
+    <div className="bg-white border border-black/[0.05] rounded-2xl p-5 shadow-card space-y-4">
+      {/* Draft Header Strip */}
+      <div className="flex items-center justify-between pb-3 border-b border-borderMuted/60">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-ink-900">
-            Assistant Reply Composer
+          <span className="text-xs font-semibold text-ink-900 tracking-tight">
+            Reply Composer
           </span>
           {status === 'pending_client' && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-              <Clock className="h-2.5 w-2.5" />
-              <span>Awaiting Priya's Approval</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60 font-medium">
+              Awaiting Priya's Signoff
             </span>
           )}
           {status === 'approved' && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-              <CheckCircle2 className="h-2.5 w-2.5 text-emerald-600" />
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-medium flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3 text-emerald-600" />
               <span>Approved by Priya</span>
-            </span>
-          )}
-          {status === 'sent' && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-              <span>Dispatched</span>
             </span>
           )}
         </div>
@@ -156,43 +137,47 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
         <button
           onClick={handleGenerateAIDraft}
           disabled={loadingAI}
-          className="text-xs font-medium text-accent hover:opacity-80 flex items-center gap-1 cursor-pointer transition"
+          className="px-3 py-1.5 rounded-full bg-[#F0FDFA] hover:bg-[#CCFBF1] text-label-assistant border border-label-assistant/20 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
         >
-          <Sparkles className="h-3.5 w-3.5" />
-          <span>{loadingAI ? 'Drafting...' : 'Generate AI Draft'}</span>
+          <Sparkles className={`h-3.5 w-3.5 ${loadingAI ? 'animate-spin' : ''}`} />
+          <span>{loadingAI ? 'Drafting...' : 'Generate with AI'}</span>
         </button>
       </div>
 
       {/* Editor Inputs */}
       <div className="space-y-3">
         <div>
-          <label className="block text-[11px] font-medium text-ink-500 mb-1">Subject</label>
+          <label className="block text-[11px] font-semibold text-ink-500 mb-1 tracking-tight">
+            Subject
+          </label>
           <input
             type="text"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full px-3 py-1.5 text-xs bg-white border border-borderMuted rounded-lg"
+            className="w-full px-3.5 py-2 text-xs bg-ink-50/60 border border-borderMuted rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 font-medium text-ink-900"
           />
         </div>
 
         <div>
-          <label className="block text-[11px] font-medium text-ink-500 mb-1">Message Body</label>
+          <label className="block text-[11px] font-semibold text-ink-500 mb-1 tracking-tight">
+            Message Body
+          </label>
           <textarea
             rows={5}
             value={bodyText}
             onChange={(e) => setBodyText(e.target.value)}
-            placeholder="Draft your reply here or click 'Generate AI Draft'..."
-            className="w-full p-3 text-xs bg-white border border-borderMuted rounded-lg focus:outline-none focus:ring-1 focus:ring-accent leading-relaxed"
+            placeholder="Compose your reply or generate a context-aware draft using AI..."
+            className="w-full p-3.5 text-xs bg-ink-50/60 border border-borderMuted rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 leading-relaxed font-sans text-ink-900 placeholder:text-ink-400"
           />
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-2">
+      <div className="flex items-center justify-between pt-1">
         <button
           onClick={handleSaveDraft}
           disabled={saving}
-          className="px-3 py-1.5 rounded-lg border border-borderMuted text-xs font-medium text-ink-700 hover:bg-ink-100 transition cursor-pointer"
+          className="px-4 py-2 rounded-full border border-black/[0.08] hover:bg-ink-100 text-xs font-medium text-ink-700 transition cursor-pointer active:scale-95"
         >
           {saving ? 'Saving...' : 'Save Draft'}
         </button>
@@ -202,7 +187,7 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
             <button
               onClick={handleRequestApproval}
               disabled={saving}
-              className="px-4 py-1.5 rounded-lg bg-label-client text-white text-xs font-semibold hover:opacity-95 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-5 py-2 rounded-full bg-label-client text-white text-xs font-semibold hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-soft active:scale-95"
             >
               <span>Submit for Priya's Approval</span>
             </button>
@@ -210,7 +195,7 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
             <button
               onClick={() => setShowConfirmSend(true)}
               disabled={saving}
-              className="px-4 py-1.5 rounded-lg bg-ink-900 text-white text-xs font-semibold hover:bg-ink-800 transition flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2 rounded-full bg-ink-900 text-white text-xs font-semibold hover:bg-ink-800 transition-all flex items-center gap-1.5 cursor-pointer shadow-soft active:scale-95"
             >
               <Send className="h-3 w-3" />
               <span>Approve & Send</span>
@@ -232,28 +217,33 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-borderMuted space-y-4 overscroll-contain select-text"
+            className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-float border border-black/[0.06] space-y-4 overscroll-contain select-text"
           >
-            <h3 className="text-sm font-serif font-bold text-ink-900">
-              Confirm Email Dispatch
-            </h3>
-            <p className="text-xs text-ink-600 leading-normal">
-              You are authorizing dispatch to <strong>{thread.participants?.[0]?.email || 'recipient'}</strong>.
+            <div className="flex items-center gap-2 text-ink-900">
+              <ShieldCheck className="h-5 w-5 text-accent" />
+              <h3 className="text-base font-serif font-bold">
+                Confirm Email Dispatch
+              </h3>
+            </div>
+
+            <p className="text-xs text-ink-600 leading-relaxed">
+              You are authorizing transmission to <strong>{thread.participants?.[0]?.email || 'recipient'}</strong>.
               <br />
-              <span className="text-[11px] text-amber-700 block mt-2 p-2 rounded bg-amber-50 border border-amber-200">
-                Safety gate active: Prototype simulates transmission and writes to Activity Log.
+              <span className="text-[11px] text-amber-800 block mt-3 p-3 rounded-xl bg-amber-50/80 border border-amber-200/70">
+                Safety gate active: Prototype simulates transmission and records audit in Activity Log.
               </span>
             </p>
+
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowConfirmSend(false)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-ink-700 hover:bg-ink-100"
+                className="px-4 py-2 rounded-full text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-100 transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSendNow}
-                className="px-4 py-1.5 rounded-lg bg-ink-900 text-white text-xs font-semibold hover:bg-ink-800"
+                className="px-5 py-2 rounded-full bg-ink-900 text-white text-xs font-semibold hover:bg-ink-800 transition cursor-pointer shadow-soft active:scale-95"
               >
                 Confirm Dispatch
               </button>

@@ -10,6 +10,8 @@ import {
   Sparkles,
   Send,
   UserCheck,
+  Quote,
+  ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -36,73 +38,87 @@ export function DecisionCard({ thread, draft, onAction }) {
   });
 
   return (
-    <div className="bg-white border border-borderMuted rounded-2xl p-6 md:p-8 shadow-sm space-y-6 relative overflow-hidden transition-all">
-      {/* Top Metadata: Sender, Date, Deadline Chip */}
-      <div className="flex items-center justify-between text-xs text-ink-500 border-b border-borderMuted/60 pb-3">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-ink-900">{sender}</span>
+    <div className="bg-white border border-black/[0.06] rounded-3xl p-7 md:p-9 shadow-card hover:shadow-card-hover transition-all duration-300 space-y-6 relative overflow-hidden">
+      {/* Top Metadata Strip: Sender, Date, Urgency Chip */}
+      <div className="flex items-center justify-between text-xs text-ink-500 border-b border-borderMuted/60 pb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-full bg-ink-100 text-ink-800 font-bold text-xs flex items-center justify-center">
+            {sender[0].toUpperCase()}
+          </div>
+          <span className="font-bold text-ink-900 tracking-tight">{sender}</span>
           <span>•</span>
-          <span>{receivedDate}</span>
+          <span className="text-ink-400 font-mono text-[11px]">{receivedDate}</span>
         </div>
 
         {decision.deadline && (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-700 font-semibold text-[11px] border border-red-200/60">
-            <Clock className="h-3 w-3" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-700 font-semibold text-xs border border-red-200/70 shadow-2xs">
+            <Clock className="h-3.5 w-3.5" />
             <span>Due: {decision.deadline}</span>
           </span>
         )}
       </div>
 
       {/* Decision Question Headline (Fraunces Serif) */}
-      <div className="space-y-1">
-        <h2 className="text-xl md:text-2xl font-serif font-bold text-ink-900 leading-snug">
+      <div className="space-y-1.5">
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-ink-900 leading-snug tracking-tight">
           {decision.question}
         </h2>
         {decision.consequence && (
-          <p className="text-xs text-ink-500 font-medium">
-            Consequence of delay: <span className="text-ink-700">{decision.consequence}</span>
+          <p className="text-xs text-ink-500 font-medium tracking-tight">
+            Consequence of delay: <span className="text-ink-700 font-semibold">{decision.consequence}</span>
           </p>
         )}
       </div>
 
-      {/* 2-3 Bullet Points Context */}
-      <div className="p-4 rounded-xl bg-ink-100/40 border border-borderMuted/80 space-y-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-ink-500 block">
-          Key Context & Evidence
+      {/* Key Context & Evidence Card */}
+      <div className="p-5 rounded-2xl bg-[#FAF8F5]/80 border border-black/[0.04] space-y-2.5">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-ink-400 block">
+          Key Context & Reasoning
         </span>
-        <ul className="text-xs text-ink-800 space-y-1.5 list-disc list-inside leading-relaxed">
-          <li>{thread.aiReason?.summary || thread.snippet}</li>
+        <ul className="text-xs text-ink-800 space-y-2 leading-relaxed">
+          <li className="flex items-start gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-ink-400 mt-1.5 flex-shrink-0" />
+            <span>{thread.aiReason?.summary || thread.snippet}</span>
+          </li>
           {thread.aiReason?.evidence && (
-            <li className="italic text-ink-700">"{thread.aiReason.evidence}"</li>
+            <li className="flex items-start gap-2 italic text-amber-950 font-serif bg-[#FFFBF0] p-3 rounded-xl border border-amber-200/60">
+              <Quote className="h-3.5 w-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <span>"{thread.aiReason.evidence}"</span>
+            </li>
           )}
-          <li>
-            <strong>Why escalated to you:</strong> {thread.aiReason?.reason || 'Requires CEO authority.'}
+          <li className="flex items-start gap-2 text-ink-600">
+            <span className="h-1.5 w-1.5 rounded-full bg-ink-400 mt-1.5 flex-shrink-0" />
+            <span>
+              <strong className="text-ink-900 font-semibold">Why this requires you:</strong> {thread.aiReason?.reason || 'Requires personal CEO decision.'}
+            </span>
           </li>
         </ul>
       </div>
 
-      {/* Prepared Assistant Draft Preview (if Maya drafted a response) */}
+      {/* Prepared Assistant Draft Preview (if Maya prepared a draft) */}
       {draft && (
-        <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-2">
+        <div className="p-5 rounded-2xl bg-[#F0FDFA] border border-teal-200/70 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-emerald-900 flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-              <span>Maya Prepared This Draft For You:</span>
+            <span className="text-xs font-semibold text-teal-950 flex items-center gap-1.5">
+              <Sparkles className="h-4 w-4 text-teal-600" />
+              <span>Maya Prepared This Response For You</span>
             </span>
-            <span className="text-[10px] font-mono text-emerald-700">1-Tap Approval Ready</span>
+            <span className="text-[11px] font-mono font-bold text-teal-800 bg-white/80 px-2.5 py-0.5 rounded-full border border-teal-200/60">
+              1-Tap Approval Ready
+            </span>
           </div>
-          <div className="text-xs text-emerald-950 font-serif whitespace-pre-wrap bg-white/80 p-3 rounded-lg border border-emerald-200/60 leading-relaxed">
+          <div className="text-xs text-teal-950 font-serif whitespace-pre-wrap bg-white/90 p-4 rounded-xl border border-teal-100 leading-relaxed shadow-2xs">
             {draft.bodyText}
           </div>
         </div>
       )}
 
-      {/* Action Buttons */}
+      {/* Action Button Strip */}
       <div className="pt-2 flex flex-wrap items-center gap-3">
         {draft ? (
           <button
             onClick={() => onAction('approve', { draftId: draft._id })}
-            className="px-5 py-2.5 rounded-xl bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-sm transition"
+            className="px-6 py-3 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-soft transition-all active:scale-95"
           >
             <Check className="h-4 w-4" />
             <span>Approve Maya's Draft</span>
@@ -110,7 +126,7 @@ export function DecisionCard({ thread, draft, onAction }) {
         ) : (
           <button
             onClick={() => setIsReplying(!isReplying)}
-            className="px-5 py-2.5 rounded-xl bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-sm transition"
+            className="px-6 py-3 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-soft transition-all active:scale-95"
           >
             <Send className="h-3.5 w-3.5" />
             <span>Reply Myself</span>
@@ -119,22 +135,22 @@ export function DecisionCard({ thread, draft, onAction }) {
 
         <button
           onClick={() => setIsHandingOver(!isHandingOver)}
-          className="px-4 py-2.5 rounded-xl border border-borderMuted text-ink-700 hover:bg-ink-100 text-xs font-medium transition cursor-pointer flex items-center gap-1.5"
+          className="px-5 py-3 rounded-full border border-black/[0.08] bg-white hover:bg-ink-50 text-ink-700 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-soft active:scale-95"
         >
-          <UserCheck className="h-3.5 w-3.5" />
+          <UserCheck className="h-3.5 w-3.5 text-accent" />
           <span>Hand to Maya</span>
         </button>
 
         <button
           onClick={() => onAction('snooze')}
-          className="px-3 py-2 text-xs font-medium text-ink-500 hover:text-ink-900 transition"
+          className="px-4 py-3 rounded-full text-xs font-medium text-ink-500 hover:text-ink-900 hover:bg-ink-100 transition cursor-pointer"
         >
           Snooze 24h
         </button>
 
         <button
           onClick={() => onAction('handled')}
-          className="px-3 py-2 text-xs font-medium text-ink-500 hover:text-ink-900 transition ml-auto"
+          className="px-4 py-3 rounded-full text-xs font-medium text-ink-500 hover:text-ink-900 hover:bg-ink-100 transition ml-auto cursor-pointer"
         >
           Mark Handled
         </button>
@@ -142,21 +158,21 @@ export function DecisionCard({ thread, draft, onAction }) {
 
       {/* Handover to Assistant Note Input */}
       {isHandingOver && (
-        <div className="p-3.5 rounded-xl bg-ink-100/60 border border-borderMuted space-y-2 animate-in fade-in">
-          <label className="block text-xs font-medium text-ink-700">
-            Note for Maya (e.g. "Decline politely and offer to reschedule in November")
+        <div className="p-4 rounded-2xl bg-ink-50/80 border border-borderMuted space-y-2.5 animate-in fade-in">
+          <label className="block text-xs font-semibold text-ink-800 tracking-tight">
+            Instructions for Maya (e.g. "Decline politely and propose early November instead")
           </label>
           <input
             type="text"
             value={handoverNote}
             onChange={(e) => setHandoverNote(e.target.value)}
-            placeholder="Instructions for assistant..."
-            className="w-full px-3 py-1.5 text-xs bg-white border border-borderMuted rounded-lg"
+            placeholder="Type your direction..."
+            className="w-full px-3.5 py-2 text-xs bg-white border border-borderMuted rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 font-medium"
           />
-          <div className="flex items-center gap-2 justify-end">
+          <div className="flex items-center gap-2 justify-end pt-1">
             <button
               onClick={() => setIsHandingOver(false)}
-              className="px-3 py-1 text-xs text-ink-500 hover:text-ink-800"
+              className="px-3.5 py-1.5 text-xs text-ink-500 hover:text-ink-900 cursor-pointer"
             >
               Cancel
             </button>
@@ -165,7 +181,7 @@ export function DecisionCard({ thread, draft, onAction }) {
                 onAction('hand_to_assistant', { note: handoverNote });
                 setIsHandingOver(false);
               }}
-              className="px-3 py-1 rounded-md bg-ink-900 text-white text-xs font-medium"
+              className="px-4 py-1.5 rounded-full bg-ink-900 text-white text-xs font-semibold shadow-xs cursor-pointer hover:bg-ink-800 transition"
             >
               Delegate to Maya
             </button>
@@ -175,19 +191,21 @@ export function DecisionCard({ thread, draft, onAction }) {
 
       {/* Reply Myself Composer */}
       {isReplying && (
-        <div className="p-4 rounded-xl bg-ink-100/60 border border-borderMuted space-y-3 animate-in fade-in">
-          <label className="block text-xs font-medium text-ink-700">Your Direct Reply</label>
+        <div className="p-5 rounded-2xl bg-ink-50/80 border border-borderMuted space-y-3 animate-in fade-in">
+          <label className="block text-xs font-semibold text-ink-800 tracking-tight">
+            Your Direct Executive Reply
+          </label>
           <textarea
             rows={3}
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             placeholder="Type your response..."
-            className="w-full p-3 text-xs bg-white border border-borderMuted rounded-lg"
+            className="w-full p-3.5 text-xs bg-white border border-borderMuted rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 leading-relaxed font-sans"
           />
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-2 pt-1">
             <button
               onClick={() => setIsReplying(false)}
-              className="px-3 py-1.5 text-xs text-ink-500 hover:text-ink-800"
+              className="px-3.5 py-1.5 text-xs text-ink-500 hover:text-ink-900 cursor-pointer"
             >
               Cancel
             </button>
@@ -196,7 +214,7 @@ export function DecisionCard({ thread, draft, onAction }) {
                 onAction('approve', { note: replyText });
                 setIsReplying(false);
               }}
-              className="px-4 py-1.5 rounded-lg bg-ink-900 text-white text-xs font-medium"
+              className="px-5 py-2 rounded-full bg-ink-900 text-white text-xs font-semibold shadow-xs cursor-pointer hover:bg-ink-800 transition"
             >
               Send Response
             </button>
@@ -208,17 +226,15 @@ export function DecisionCard({ thread, draft, onAction }) {
       <div className="pt-2 border-t border-borderMuted/60">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-xs text-ink-500 hover:text-ink-900 flex items-center gap-1 cursor-pointer transition select-none"
+          className="text-xs font-medium text-ink-400 hover:text-ink-900 flex items-center gap-1.5 cursor-pointer transition select-none"
         >
-          <span>{isExpanded ? 'Hide conversation history' : 'Read full conversation history'}</span>
+          <span>{isExpanded ? 'Hide conversation history' : 'Read original email context'}</span>
           {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
         </button>
 
         {isExpanded && (
-          <div className="mt-4 space-y-3 pl-2 border-l-2 border-borderMuted text-xs text-ink-800 leading-relaxed font-sans">
-            <div className="p-3 rounded-lg bg-ink-100/30 whitespace-pre-wrap">
-              {thread.snippet || 'No earlier history available.'}
-            </div>
+          <div className="mt-4 p-4 rounded-2xl bg-ink-50/50 border border-borderMuted/60 text-xs text-ink-800 leading-relaxed font-sans whitespace-pre-wrap">
+            {thread.snippet || 'No earlier history available.'}
           </div>
         )}
       </div>

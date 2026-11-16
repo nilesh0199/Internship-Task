@@ -72,7 +72,7 @@ export function RoleSwitcher() {
   // Logged-out state: One-click instant login buttons with direct navigation
   if (!user) {
     return (
-      <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 bg-white/95 backdrop-blur border border-borderMuted shadow-lg rounded-full px-4 py-2 text-xs font-medium text-ink-700">
+      <div className="fixed bottom-5 right-5 z-40 flex items-center gap-2 bg-white/90 backdrop-blur-md border border-black/[0.08] shadow-float rounded-full px-4 py-2 text-xs font-medium text-ink-700 select-none">
         <div className="flex items-center gap-1.5 text-ink-500 font-semibold">
           <Sparkles className="h-3.5 w-3.5 text-accent" />
           <span>Quick Test:</span>
@@ -80,14 +80,14 @@ export function RoleSwitcher() {
         <button
           disabled={switching}
           onClick={() => handleQuickDemo('assistant')}
-          className="px-2.5 py-1 rounded-full bg-label-assistantBg text-label-assistant font-semibold hover:opacity-85 transition cursor-pointer disabled:opacity-50"
+          className="px-3 py-1.5 rounded-full bg-label-assistantBg text-label-assistant font-semibold hover:opacity-85 transition cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs"
         >
           Maya (Assistant)
         </button>
         <button
           disabled={switching}
           onClick={() => handleQuickDemo('client')}
-          className="px-2.5 py-1 rounded-full bg-label-clientBg text-label-client font-semibold hover:opacity-85 transition cursor-pointer disabled:opacity-50"
+          className="px-3 py-1.5 rounded-full bg-label-clientBg text-label-client font-semibold hover:opacity-85 transition cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs"
         >
           Priya (Client)
         </button>
@@ -98,8 +98,8 @@ export function RoleSwitcher() {
   const isAssistant = user.role === 'assistant';
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 bg-white/95 backdrop-blur border border-borderMuted shadow-lg rounded-full p-1.5 text-xs text-ink-700 select-none">
-      <span className="text-[11px] font-semibold text-ink-400 pl-2 pr-1 uppercase tracking-wider hidden sm:inline">
+    <div className="fixed bottom-5 right-5 z-40 flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-black/[0.08] shadow-float rounded-full p-1.5 text-xs text-ink-700 select-none">
+      <span className="text-[11px] font-semibold text-ink-400 pl-2.5 pr-1 uppercase tracking-wider hidden sm:inline">
         Persona:
       </span>
 
@@ -110,16 +110,16 @@ export function RoleSwitcher() {
         onClick={() => {
           if (!isAssistant) handleSwitch('assistant');
         }}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer ${
+        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
           isAssistant
-            ? 'bg-label-assistant text-white shadow-xs'
-            : 'text-ink-600 hover:text-ink-900 hover:bg-ink-100'
+            ? 'bg-label-assistant text-white shadow-soft'
+            : 'text-ink-600 hover:text-ink-900 hover:bg-ink-100/70'
         } ${switching ? 'opacity-60 cursor-not-allowed' : ''}`}
         title="Maya Lin — Executive Assistant Workspace"
       >
         <span
           className={`h-2 w-2 rounded-full ${
-            isAssistant ? 'bg-white' : 'bg-label-assistant'
+            isAssistant ? 'bg-white ring-2 ring-white/30' : 'bg-label-assistant'
           }`}
         />
         <span>Maya (Assistant)</span>
@@ -132,16 +132,16 @@ export function RoleSwitcher() {
         onClick={() => {
           if (isAssistant) handleSwitch('client');
         }}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer ${
+        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
           !isAssistant
-            ? 'bg-label-client text-white shadow-xs'
-            : 'text-ink-600 hover:text-ink-900 hover:bg-ink-100'
+            ? 'bg-label-client text-white shadow-soft'
+            : 'text-ink-600 hover:text-ink-900 hover:bg-ink-100/70'
         } ${switching ? 'opacity-60 cursor-not-allowed' : ''}`}
         title="Priya Sharma — Executive Client Decision Queue"
       >
         <span
           className={`h-2 w-2 rounded-full ${
-            !isAssistant ? 'bg-white' : 'bg-label-client'
+            !isAssistant ? 'bg-white ring-2 ring-white/30' : 'bg-label-client'
           }`}
         />
         <span>Priya (Client)</span>
@@ -152,7 +152,7 @@ export function RoleSwitcher() {
         type="button"
         disabled={switching}
         onClick={() => handleSwitch(isAssistant ? 'client' : 'assistant')}
-        className="p-1.5 text-ink-400 hover:text-ink-900 hover:bg-ink-100 rounded-full transition cursor-pointer disabled:opacity-50"
+        className="p-1.5 text-ink-400 hover:text-ink-900 hover:bg-ink-100 rounded-full transition cursor-pointer disabled:opacity-50 active:scale-95"
         title={isAssistant ? 'Switch to Priya Sharma' : 'Switch to Maya Lin'}
       >
         {switching ? (
@@ -166,7 +166,7 @@ export function RoleSwitcher() {
       <button
         type="button"
         onClick={handleLogout}
-        className="p-1.5 text-ink-400 hover:text-red-600 hover:bg-red-50 rounded-full transition cursor-pointer border-l border-borderMuted pl-2"
+        className="p-1.5 text-ink-400 hover:text-red-600 hover:bg-red-50 rounded-full transition cursor-pointer border-l border-borderMuted/80 pl-2 active:scale-95"
         title="Sign out of prototype session"
       >
         <LogOut className="h-3.5 w-3.5" />

@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Plus,
+  BookOpen,
 } from 'lucide-react';
 import { api } from '../lib/api.js';
 import { toast } from 'sonner';
@@ -30,7 +31,7 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
     try {
       const res = await api.post(`/ai/rerun/${thread._id}`, {});
       if (res.ok) {
-        toast.success('Live AI pipeline completed');
+        toast.success('Live AI pipeline re-evaluated thread');
         onThreadUpdated?.(res.data.thread);
       }
     } catch (err) {
@@ -73,7 +74,7 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
         description: `Rule learned from override: ${overrideNote || thread.subject}`,
       });
       if (res.ok) {
-        toast.success('Rule appended to Client Playbook!');
+        toast.success('Rule appended to Priya\'s Playbook!');
         setShowRulePrompt(false);
       }
     } catch (err) {
@@ -82,79 +83,83 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
   }
 
   return (
-    <div className="bg-white border-l border-borderMuted h-full overflow-y-auto app-pane-scroll p-4 space-y-5 text-ink-900">
+    <div className="bg-[#FAF8F5]/60 border-l border-borderMuted/70 h-full overflow-y-auto app-pane-scroll p-4 space-y-4 text-ink-900 select-none">
       {/* Panel Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-borderMuted">
-        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink-700">
-          <Sparkles className="h-4 w-4 text-accent" />
-          <span>AI Decision Inspector</span>
+      <div className="flex items-center justify-between pb-3 border-b border-borderMuted/60">
+        <div className="flex items-center gap-2">
+          <div className="h-6 w-6 rounded-full bg-accent/10 text-accent flex items-center justify-center">
+            <Sparkles className="h-3.5 w-3.5" />
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-wider text-ink-700">
+            Decision Model
+          </span>
         </div>
 
         <button
           onClick={handleRerun}
           disabled={rerunning}
-          className="text-xs text-ink-500 hover:text-ink-900 flex items-center gap-1 cursor-pointer transition"
-          title="Re-run live AI pipeline"
+          className="text-xs font-medium text-ink-600 hover:text-ink-900 bg-white hover:bg-ink-100 border border-black/[0.05] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+          title="Re-run live AI pipeline on this thread"
         >
-          <RefreshCw className={`h-3 w-3 ${rerunning ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-3 w-3 ${rerunning ? 'animate-spin text-accent' : ''}`} />
           <span>{rerunning ? 'Analyzing...' : 'Re-run AI'}</span>
         </button>
       </div>
 
       {/* Primary Classification Card */}
-      <div className="p-4 rounded-xl bg-ink-100/50 border border-borderMuted space-y-3">
+      <div className="p-4 rounded-2xl bg-white border border-black/[0.05] shadow-card space-y-3">
         <div className="flex items-center justify-between">
           <LabelBadge label={thread.currentLabel} size="lg" />
           <ConfidenceDots confidence={thread.confidence} showText />
         </div>
 
-        {/* Model & Latency badge */}
-        <div className="flex items-center gap-2 text-[10px] text-ink-500 font-mono">
+        {/* Engine Metadata Chip */}
+        <div className="flex items-center gap-2 text-[10px] text-ink-400 font-mono">
           <span>Engine: {aiReason.model || 'Gemini 2.0 Flash'}</span>
           {aiReason.latencyMs > 0 && <span>• {aiReason.latencyMs}ms</span>}
         </div>
 
-        {/* Crisp Summary */}
-        <p className="text-xs text-ink-700 font-medium leading-relaxed">
+        {/* Crisp Executive Takeaway */}
+        <p className="text-xs text-ink-800 font-medium leading-relaxed bg-ink-50/60 p-3 rounded-xl border border-black/[0.03]">
           {aiReason.summary || thread.snippet}
         </p>
       </div>
 
       {/* Quoted Evidence Highlight */}
       {aiReason.evidence && (
-        <div className="space-y-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 flex items-center gap-1">
-            <Quote className="h-3 w-3 text-amber-600" />
-            <span>Quoted Evidence Quote</span>
-          </span>
-          <div className="p-3 rounded-lg bg-amber-50/70 border border-amber-200/80 text-xs italic text-amber-900 leading-normal">
-            "{aiReason.evidence}"
+        <div className="p-4 rounded-2xl bg-[#FFFBF0] border border-amber-200/60 shadow-xs space-y-2">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-amber-800">
+            <Quote className="h-3.5 w-3.5 text-amber-600" />
+            <span>Quoted Evidence</span>
           </div>
+          <p className="text-xs italic text-amber-950 font-serif leading-relaxed">
+            "{aiReason.evidence}"
+          </p>
         </div>
       )}
 
       {/* Decision Reasoning */}
-      <div className="space-y-1.5">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">
+      <div className="p-4 rounded-2xl bg-white border border-black/[0.05] shadow-card space-y-2">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-ink-400 block">
           Why this was assigned
         </span>
-        <p className="text-xs text-ink-700 leading-relaxed bg-white p-3 rounded-lg border border-borderMuted">
-          {aiReason.reason || 'Assigned based on sender metadata and client delegation profile.'}
+        <p className="text-xs text-ink-700 leading-relaxed">
+          {aiReason.reason || 'Assigned based on sender authority and client delegation profile.'}
         </p>
       </div>
 
       {/* Structured Decision Preview (if Client to Reply) */}
       {aiReason.decision && (
-        <div className="space-y-2 p-3.5 rounded-xl bg-label-clientBg/60 border border-label-client/20">
+        <div className="p-4 rounded-2xl bg-[#FDF7F3] border border-label-client/20 shadow-xs space-y-2">
           <span className="text-[10px] font-bold uppercase tracking-wider text-label-client block">
             Executive Decision Question
           </span>
-          <div className="text-xs font-serif font-bold text-ink-900">
+          <div className="text-xs font-serif font-bold text-ink-900 leading-snug">
             {aiReason.decision.question}
           </div>
           {aiReason.decision.deadline && (
-            <div className="text-[11px] text-label-client font-medium">
-              Deadline: {aiReason.decision.deadline}
+            <div className="text-[11px] text-label-client font-semibold">
+              Due: {aiReason.decision.deadline}
             </div>
           )}
           {aiReason.decision.consequence && (
@@ -165,26 +170,26 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
         </div>
       )}
 
-      {/* Rule Synthesis Offer Prompt */}
+      {/* Rule Synthesis Offer Prompt (Active upon override) */}
       {showRulePrompt && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-2 animate-in fade-in">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-900">
+        <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200/80 shadow-xs space-y-2.5 animate-in fade-in">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-950">
             <CheckCircle2 className="h-4 w-4 text-emerald-600" />
             <span>Learned from your correction</span>
           </div>
-          <p className="text-[11px] text-emerald-800">
-            Would you like to make this a permanent rule in Priya's Playbook so AI remembers next time?
+          <p className="text-[11px] text-emerald-900 leading-relaxed">
+            Would you like to append this rule to Priya's Playbook so AI remembers for future threads?
           </p>
           <div className="flex items-center gap-2 pt-1">
             <button
               onClick={handleMakeRule}
-              className="px-3 py-1 rounded-md bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-medium cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-medium cursor-pointer shadow-xs transition"
             >
               Make this a rule
             </button>
             <button
               onClick={() => setShowRulePrompt(false)}
-              className="px-2 py-1 text-xs text-ink-500 hover:text-ink-900"
+              className="px-2.5 py-1 text-xs text-ink-500 hover:text-ink-900 cursor-pointer"
             >
               Dismiss
             </button>
@@ -193,23 +198,25 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
       )}
 
       {/* Manual Override Accordion */}
-      <div className="pt-2 border-t border-borderMuted space-y-3">
+      <div className="pt-2">
         {!isOverriding ? (
           <button
             onClick={() => setIsOverriding(true)}
-            className="w-full py-2 px-3 rounded-lg border border-borderMuted text-xs font-medium text-ink-700 hover:bg-ink-100 flex items-center justify-center gap-1.5 transition cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-full bg-white hover:bg-ink-100/70 border border-black/[0.06] shadow-soft text-xs font-semibold text-ink-700 hover:text-ink-900 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
           >
-            <Sliders className="h-3.5 w-3.5" />
+            <Sliders className="h-3.5 w-3.5 text-ink-500" />
             <span>Manual Label Override</span>
           </button>
         ) : (
-          <div className="p-3.5 rounded-xl border border-borderMuted bg-ink-100/40 space-y-3">
-            <span className="text-xs font-semibold text-ink-900 block">Override Label Assignment</span>
+          <div className="p-4 rounded-2xl bg-white border border-black/[0.06] shadow-card space-y-3">
+            <span className="text-xs font-semibold text-ink-900 block">
+              Override Label Assignment
+            </span>
 
             <select
               value={selectedLabel}
               onChange={(e) => setSelectedLabel(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs bg-white border border-borderMuted rounded-lg"
+              className="w-full px-3 py-2 text-xs bg-ink-50/70 border border-borderMuted rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20"
             >
               <option value="ASSISTANT_TO_REPLY">Assistant to Reply</option>
               <option value="CLIENT_TO_REPLY">Client to Reply</option>
@@ -222,20 +229,20 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
               value={overrideNote}
               onChange={(e) => setOverrideNote(e.target.value)}
               placeholder="Reason / assistant note (optional)"
-              className="w-full px-2.5 py-1.5 text-xs bg-white border border-borderMuted rounded-lg"
+              className="w-full px-3 py-2 text-xs bg-ink-50/70 border border-borderMuted rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20"
             />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pt-1">
               <button
                 onClick={handleApplyOverride}
                 disabled={submitting}
-                className="px-3 py-1.5 rounded-md bg-ink-900 text-white text-xs font-medium hover:bg-ink-900/90 cursor-pointer"
+                className="px-4 py-1.5 rounded-full bg-ink-900 text-white text-xs font-semibold hover:bg-ink-800 cursor-pointer shadow-xs transition"
               >
                 {submitting ? 'Saving...' : 'Apply Override'}
               </button>
               <button
                 onClick={() => setIsOverriding(false)}
-                className="px-2.5 py-1.5 text-xs text-ink-500 hover:text-ink-900 cursor-pointer"
+                className="px-3 py-1.5 text-xs text-ink-500 hover:text-ink-900 cursor-pointer"
               >
                 Cancel
               </button>
@@ -245,23 +252,23 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
       </div>
 
       {/* Reclassification Timeline */}
-      <div className="pt-3 border-t border-borderMuted space-y-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 flex items-center gap-1.5">
+      <div className="pt-3 border-t border-borderMuted/60 space-y-3">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-400 flex items-center gap-1.5">
           <History className="h-3.5 w-3.5" />
-          <span>Reclassification Timeline ({timeline.length})</span>
+          <span>Audit Timeline ({timeline.length})</span>
         </span>
 
-        <div className="space-y-3 pl-2 border-l border-borderMuted">
+        <div className="space-y-3 pl-2.5 border-l-2 border-borderMuted/80">
           {timeline.map((evt) => (
             <div key={evt._id} className="relative pl-3 text-xs space-y-0.5">
-              <div className="absolute -left-[17px] top-1.5 h-2 w-2 rounded-full bg-ink-400 ring-2 ring-white" />
+              <div className="absolute -left-[17px] top-1.5 h-2 w-2 rounded-full bg-ink-400 ring-4 ring-[#FAF8F5]" />
               <div className="flex items-center gap-1 font-semibold text-ink-900">
                 <span className="capitalize">{evt.actorName || 'ReplyRight AI'}</span>
                 <span className="text-ink-400 font-normal">changed to</span>
                 <LabelBadge label={evt.newLabel} size="xs" />
               </div>
               <p className="text-[11px] text-ink-500 leading-normal">{evt.reason}</p>
-              <span className="text-[10px] text-ink-400 block">
+              <span className="text-[10px] text-ink-400 block font-mono">
                 {new Date(evt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>

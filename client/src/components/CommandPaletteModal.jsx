@@ -10,6 +10,8 @@ import {
   ArrowRight,
   ExternalLink,
   X,
+  Send,
+  Loader2,
 } from 'lucide-react';
 
 export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelectThread }) {
@@ -26,9 +28,6 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         if (isOpen) onClose();
-        else {
-          // open
-        }
       }
       if (e.key === 'Escape' && isOpen) {
         onClose();
@@ -64,7 +63,10 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', text: 'Error contacting AI assistant: ' + err.message },
+        {
+          role: 'assistant',
+          text: 'AI reasoning temporarily unavailable: ' + (err.message || 'Error occurred'),
+        },
       ]);
     } finally {
       setLoading(false);
@@ -83,15 +85,17 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
       onWheel={(e) => {
         if (e.target === e.currentTarget) e.preventDefault();
       }}
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-20 px-4 overscroll-contain select-none"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-16 md:pt-20 px-4 overscroll-contain select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-borderMuted overflow-hidden flex flex-col max-h-[80vh] overscroll-contain select-text"
+        className="bg-white rounded-3xl max-w-2xl w-full shadow-float border border-black/[0.06] overflow-hidden flex flex-col max-h-[82vh] overscroll-contain select-text"
       >
         {/* Top Search Bar */}
-        <div className="p-4 border-b border-borderMuted flex items-center gap-3">
-          <Sparkles className="h-5 w-5 text-accent flex-shrink-0" />
+        <div className="p-4 md:p-5 border-b border-borderMuted/60 flex items-center gap-3 bg-white">
+          <div className="h-8 w-8 rounded-full bg-accent/10 text-accent flex items-center justify-center flex-shrink-0">
+            <Sparkles className="h-4 w-4" />
+          </div>
           <input
             autoFocus
             type="text"
@@ -101,14 +105,20 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
             placeholder="Ask about your email or search... (e.g. 'What needs Priya's attention?')"
             className="w-full text-sm font-medium text-ink-900 placeholder:text-ink-400 focus:outline-none bg-transparent"
           />
-          <button onClick={onClose} className="text-ink-400 hover:text-ink-900 p-1">
+          <button
+            onClick={onClose}
+            className="text-ink-400 hover:text-ink-900 p-1.5 rounded-full hover:bg-ink-100 transition cursor-pointer"
+            title="Close (Esc)"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Suggested Queries Chips */}
-        <div className="px-4 py-2.5 bg-ink-100/40 border-b border-borderMuted flex items-center gap-2 overflow-x-auto text-[11px]">
-          <span className="text-ink-500 font-semibold flex-shrink-0">Suggestions:</span>
+        <div className="px-5 py-3 bg-ink-50/60 border-b border-borderMuted/60 flex items-center gap-2 overflow-x-auto text-[11px] no-scrollbar">
+          <span className="text-ink-400 font-semibold flex-shrink-0 uppercase tracking-wider text-[10px]">
+            Suggestions:
+          </span>
           {[
             "Show emails needing client's attention",
             "What am I waiting on?",
@@ -119,7 +129,7 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
             <button
               key={i}
               onClick={() => handleSuggestedClick(prompt)}
-              className="px-2.5 py-1 rounded-full bg-white hover:bg-ink-100 text-ink-700 border border-borderMuted flex-shrink-0 transition cursor-pointer"
+              className="px-3 py-1 rounded-full bg-white hover:bg-ink-100 text-ink-700 border border-black/[0.05] shadow-2xs flex-shrink-0 transition-all cursor-pointer font-medium active:scale-95"
             >
               {prompt}
             </button>
@@ -127,62 +137,103 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
         </div>
 
         {/* Conversation Stream */}
-        <div className="p-4 overflow-y-auto flex-1 space-y-4 min-h-[220px]">
+        <div className="p-5 overflow-y-auto flex-1 space-y-4 min-h-[240px]">
           {messages.length === 0 ? (
-            <div className="py-8 text-center space-y-2">
-              <Command className="h-8 w-8 text-ink-300 mx-auto" />
-              <p className="text-xs text-ink-500 font-medium">
-                Type any natural-language question or click a suggested prompt above.
+            <div className="py-12 text-center space-y-2.5">
+              <div className="h-12 w-12 rounded-full bg-ink-100 text-ink-400 flex items-center justify-center mx-auto">
+                <Command className="h-6 w-6" />
+              </div>
+              <p className="text-xs font-semibold text-ink-700">
+                Type any natural-language inquiry or click a suggested prompt above
               </p>
-              <p className="text-[11px] text-ink-400">
-                Powered by structured LLM tool calling over MongoDB threads.
+              <p className="text-[11px] text-ink-400 max-w-sm mx-auto leading-relaxed">
+                Powered by structured LLM tool calling over your live inbox threads, sender history, and delegation rules.
               </p>
             </div>
           ) : (
             messages.map((m, idx) => (
               <div
                 key={idx}
-                className={`flex gap-3 text-xs leading-relaxed ${
-                  m.role === 'user' ? 'justify-end' : 'justify-start'
+                className={`flex flex-col ${
+                  m.role === 'user' ? 'items-end' : 'items-start'
                 }`}
               >
-                {m.role === 'assistant' && (
-                  <div className="h-6 w-6 rounded-full bg-accent text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">
-                    AI
+                {m.role === 'user' ? (
+                  <div className="rounded-2xl bg-ink-900 text-white px-4 py-2.5 max-w-[85%] text-xs font-medium leading-relaxed shadow-soft">
+                    {m.text}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl bg-[#F0FDFA] border border-teal-200/60 p-4 max-w-[92%] text-xs text-ink-900 space-y-3 shadow-2xs">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-label-assistant">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      <span>ReplyRight AI Assistant</span>
+                    </div>
+                    <div className="leading-relaxed whitespace-pre-wrap">{m.text}</div>
+
+                    {/* Tool Result Structured Summary */}
+                    {m.toolResult && m.toolResult.count > 0 && (
+                      <div className="p-3 bg-white/95 rounded-xl border border-teal-200/60 space-y-2 mt-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800">
+                          Matched Conversations ({m.toolResult.count})
+                        </span>
+                        <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                          {m.toolResult.threads?.slice(0, 4).map((t) => (
+                            <div
+                              key={t._id}
+                              onClick={() => {
+                                onSelectThread?.(t._id);
+                                onClose();
+                              }}
+                              className="p-2 rounded-lg bg-ink-50 hover:bg-teal-50 cursor-pointer flex items-center justify-between transition"
+                            >
+                              <div className="truncate mr-2">
+                                <span className="font-semibold text-ink-900 block truncate">
+                                  {t.subject}
+                                </span>
+                                <span className="text-[10px] text-ink-500">
+                                  {t.participants?.[0]?.name}
+                                </span>
+                              </div>
+                              <ArrowRight className="h-3 w-3 text-ink-400 flex-shrink-0" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
-                <div
-                  className={`p-3 rounded-xl max-w-[85%] whitespace-pre-wrap ${
-                    m.role === 'user'
-                      ? 'bg-ink-900 text-white rounded-tr-none'
-                      : 'bg-ink-100/60 text-ink-900 border border-borderMuted rounded-tl-none'
-                  }`}
-                >
-                  {m.text}
-                </div>
               </div>
             ))
           )}
 
           {loading && (
-            <div className="flex items-center gap-2 text-xs text-ink-500 italic p-2">
-              <div className="h-3.5 w-3.5 rounded-full border-2 border-accent border-t-transparent animate-spin" />
-              <span>Querying thread repository & synthesizing tools...</span>
+            <div className="flex items-center gap-2 text-xs text-ink-500 py-2">
+              <Loader2 className="h-4 w-4 animate-spin text-accent" />
+              <span>Analyzing mailbox context...</span>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="px-4 py-2.5 bg-ink-100/30 border-t border-borderMuted flex items-center justify-between text-[11px] text-ink-500">
-          <span>Press Enter to ask • Esc to close</span>
+        {/* Footer Input */}
+        <form
+          onSubmit={handleAsk}
+          className="p-3 border-t border-borderMuted/60 bg-ink-50/50 flex items-center gap-2"
+        >
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Ask a follow-up or search..."
+            className="flex-1 px-4 py-2 text-xs bg-white border border-borderMuted rounded-full focus:outline-none focus:ring-2 focus:ring-accent/20"
+          />
           <button
-            onClick={handleAsk}
+            type="submit"
             disabled={!query.trim() || loading}
-            className="px-3 py-1 rounded bg-ink-900 text-white font-medium hover:bg-ink-800 disabled:opacity-40 cursor-pointer"
+            className="p-2 rounded-full bg-ink-900 text-white disabled:opacity-40 hover:bg-ink-800 transition cursor-pointer shadow-soft active:scale-95"
           >
-            Ask AI
+            <Send className="h-3.5 w-3.5" />
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );

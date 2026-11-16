@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   Calendar,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 
 export function AtAGlanceStrip({ counts = {}, activeSegment, onSelectSegment, conflicts = [] }) {
@@ -20,9 +21,9 @@ export function AtAGlanceStrip({ counts = {}, activeSegment, onSelectSegment, co
   ];
 
   return (
-    <div className="bg-white border-b border-borderMuted px-4 py-2.5">
-      {/* Metric Chips Row */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+    <div className="bg-[#FAF8F5]/80 border-b border-borderMuted/60 px-3 py-2.5 select-none">
+      {/* Metric Filter Pills Row */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = activeSegment === item.id;
@@ -30,17 +31,17 @@ export function AtAGlanceStrip({ counts = {}, activeSegment, onSelectSegment, co
             <button
               key={item.id}
               onClick={() => onSelectSegment(item.id)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition flex-shrink-0 cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all duration-150 flex-shrink-0 cursor-pointer active:scale-95 ${
                 isActive
-                  ? 'bg-ink-900 text-white font-semibold'
-                  : 'bg-ink-100/60 hover:bg-ink-100 text-ink-700'
+                  ? 'bg-ink-900 text-white font-semibold shadow-soft'
+                  : 'bg-white hover:bg-white/90 text-ink-700 border border-black/[0.05] shadow-xs'
               }`}
             >
               <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-white' : item.color || 'text-ink-500'}`} />
-              <span>{item.label}</span>
+              <span className="tracking-tight">{item.label}</span>
               <span
-                className={`text-[11px] px-1.5 py-0.2 rounded-full ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-white text-ink-900 font-semibold shadow-xs'
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-ink-100 text-ink-700'
                 }`}
               >
                 {item.count}
@@ -50,12 +51,12 @@ export function AtAGlanceStrip({ counts = {}, activeSegment, onSelectSegment, co
         })}
       </div>
 
-      {/* Calendar Conflict Alert (if any) */}
+      {/* Calendar Conflict Alert */}
       {conflicts.length > 0 && (
-        <div className="mt-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2 animate-pulse">
-          <AlertCircle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
-          <span>
-            <strong>Schedule Conflict:</strong> {conflicts[0]?.title || 'Board Dry-Run'} overlaps on Thursday 3:00 PM with Investor Sync.
+        <div className="mt-2 p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/70 text-xs text-amber-900 flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+          <span className="leading-snug">
+            <strong>Schedule Conflict:</strong> {conflicts[0]?.title || 'Executive Session'} overlaps with another calendar event.
           </span>
         </div>
       )}

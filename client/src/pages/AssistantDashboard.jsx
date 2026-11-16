@@ -32,6 +32,7 @@ import {
   CheckCheck,
   Sparkles,
   Info,
+  ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -110,7 +111,7 @@ export function AssistantDashboard() {
         }
       })
       .catch((err) => {
-        if (isMounted) toast.error('Failed to load thread details: ' + err.message);
+        if (isMounted) toast.error('Failed to load thread detail: ' + err.message);
       })
       .finally(() => {
         if (isMounted) setLoadingDetail(false);
@@ -121,50 +122,45 @@ export function AssistantDashboard() {
     };
   }, [selectedThreadId]);
 
-  // Handle segment change
-  function handleSelectSegment(segmentKey) {
-    const next = new URLSearchParams(searchParams);
-    next.set('segment', segmentKey);
-    setSearchParams(next);
+  function handleSelectSegment(segmentId) {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('segment', segmentId);
+    nextParams.delete('threadId');
+    setSearchParams(nextParams);
   }
 
-  // Handle selecting a thread
-  function handleSelectThread(id) {
-    const next = new URLSearchParams(searchParams);
-    next.set('threadId', id);
-    setSearchParams(next);
+  function handleSelectThread(threadId) {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('threadId', threadId);
+    setSearchParams(nextParams);
   }
 
-  // Handle quick actions on thread
   async function handleToggleRead(thread) {
-    const newRead = !thread.isRead;
     try {
-      await api.patch(`/threads/${thread._id}`, { isRead: newRead });
-      setThreads((prev) => prev.map((t) => (t._id === thread._id ? { ...t, isRead: newRead } : t)));
+      await api.patch(`/threads/${thread._id}`, { isRead: !thread.isRead });
+      loadThreads();
       if (selectedThreadData?.thread?._id === thread._id) {
         setSelectedThreadData((prev) => ({
           ...prev,
-          thread: { ...prev.thread, isRead: newRead },
+          thread: { ...prev.thread, isRead: !thread.isRead },
         }));
       }
     } catch (err) {
-      toast.error('Action failed: ' + err.message);
+      toast.error('Failed to update read state: ' + err.message);
     }
   }
 
   async function handleToggleArchive(thread) {
-    const newArchive = !thread.isArchived;
     try {
-      await api.patch(`/threads/${thread._id}`, { isArchived: newArchive });
-      toast.success(newArchive ? 'Archived' : 'Unarchived', {
-        action: {
-          label: 'Undo',
-          onClick: () => handleToggleArchive(thread),
-        },
-      });
+      const nextArchived = !thread.isArchived;
+      await api.patch(`/threads/${thread._id}`, { isArchived: nextArchived });
+      toast.success(nextArchived ? 'Thread moved to archive' : 'Thread unarchived');
       loadThreads();
+      if (selectedThreadData?.thread?._id === thread._id) {
+        setSelectedThreadData(null);
+      }
     } catch (err) {
-      toast.error('Action failed: ' + err.message);
+      toast.error('Failed to archive thread: ' + err.message);
     }
   }
 
@@ -227,43 +223,45 @@ export function AssistantDashboard() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-[#FAF8F5] text-ink-900 font-sans overflow-hidden">
-      {/* Top Universal App Bar */}
-      <header className="h-14 bg-white border-b border-borderMuted px-4 flex items-center justify-between flex-shrink-0 z-10">
+      {/* Top Floating App Bar */}
+      <header className="h-16 bg-white/85 backdrop-blur-md border-b border-borderMuted/70 px-5 flex items-center justify-between flex-shrink-0 z-10 select-none">
         <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-lg bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-sm">
+          <div className="h-8 w-8 rounded-xl bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-sm shadow-soft">
             R
           </div>
           <div>
-            <span className="font-serif font-bold text-base text-ink-900 tracking-tight">
-              ReplyRight
-            </span>
-            <span className="text-[10px] uppercase font-semibold tracking-wider text-ink-500 ml-2 hidden sm:inline">
-              Assistant Workspace
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-serif font-bold text-base text-ink-900 tracking-tight">
+                ReplyRight
+              </span>
+              <span className="text-[10px] font-semibold tracking-wide text-label-assistant bg-label-assistantBg px-2 py-0.5 rounded-full border border-label-assistant/20 hidden sm:inline">
+                Assistant Workspace
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Global Search & Command Palette trigger */}
-        <div className="flex-1 max-w-md mx-4">
+        <div className="flex-1 max-w-md mx-6">
           <button
             onClick={() => setIsCommandPaletteOpen(true)}
-            className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg bg-ink-100/70 border border-borderMuted text-xs text-ink-500 hover:bg-ink-100 transition cursor-pointer"
+            className="w-full flex items-center justify-between px-4 py-2 rounded-full bg-ink-100/70 hover:bg-ink-100 border border-borderMuted/80 text-xs text-ink-500 hover:text-ink-700 transition-all cursor-pointer shadow-xs hover:border-black/[0.1] active:scale-[0.99]"
           >
             <div className="flex items-center gap-2">
-              <Search className="h-3.5 w-3.5" />
-              <span>Search threads or ask AI...</span>
+              <Search className="h-3.5 w-3.5 text-ink-400" />
+              <span className="tracking-tight">Ask AI or search conversations...</span>
             </div>
-            <kbd className="px-1.5 py-0.5 rounded bg-white border border-borderMuted text-[10px] font-mono text-ink-600 shadow-2xs">
-              Cmd+K
+            <kbd className="px-2 py-0.5 rounded-full bg-white border border-borderMuted text-[10px] font-mono text-ink-600 shadow-2xs font-semibold">
+              ⌘K
             </kbd>
           </button>
         </div>
 
-        {/* Right actions: Playbook, Activity, Accounts */}
+        {/* Right tools: Playbook, Activity, Accounts */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsPlaybookOpen(true)}
-            className="px-2.5 py-1.5 rounded-lg border border-borderMuted text-xs font-medium text-ink-700 hover:bg-ink-100 flex items-center gap-1.5 transition cursor-pointer"
+            className="px-3.5 py-1.5 rounded-full border border-black/[0.06] bg-white hover:bg-ink-50 text-xs font-semibold text-ink-700 hover:text-ink-900 flex items-center gap-1.5 transition-all shadow-soft cursor-pointer active:scale-95"
             title="Edit Priya's Delegation Playbook"
           >
             <Sliders className="h-3.5 w-3.5 text-accent" />
@@ -272,7 +270,7 @@ export function AssistantDashboard() {
 
           <button
             onClick={() => setIsActivityOpen(true)}
-            className="p-1.5 rounded-lg border border-borderMuted text-ink-700 hover:bg-ink-100 transition cursor-pointer"
+            className="h-8 w-8 rounded-full border border-black/[0.06] bg-white hover:bg-ink-50 text-ink-600 hover:text-ink-900 transition-all shadow-soft cursor-pointer flex items-center justify-center active:scale-95"
             title="View Activity Audit Log"
           >
             <History className="h-3.5 w-3.5" />
@@ -280,7 +278,7 @@ export function AssistantDashboard() {
 
           <Link
             to="/settings/accounts"
-            className="p-1.5 rounded-lg border border-borderMuted text-ink-700 hover:bg-ink-100 transition"
+            className="h-8 w-8 rounded-full border border-black/[0.06] bg-white hover:bg-ink-50 text-ink-600 hover:text-ink-900 transition-all shadow-soft flex items-center justify-center active:scale-95"
             title="Manage Connected Mailboxes"
           >
             <Mail className="h-3.5 w-3.5" />
@@ -293,18 +291,18 @@ export function AssistantDashboard() {
         {/* ================================================================= */}
         {/* PANE 1: Navigation & Segments Sidebar (240px)                      */}
         {/* ================================================================= */}
-        <aside className="w-56 bg-white border-r border-borderMuted flex flex-col flex-shrink-0 select-none">
-          {/* Client Boss Card */}
-          <div className="p-3.5 border-b border-borderMuted bg-ink-100/30">
+        <aside className="w-60 bg-[#FAF8F5] border-r border-borderMuted/70 flex flex-col flex-shrink-0 select-none">
+          {/* Client Boss Profile Card */}
+          <div className="m-3 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-full bg-label-clientBg text-label-client font-serif font-bold text-xs flex items-center justify-center">
+              <div className="h-9 w-9 rounded-full bg-label-clientBg text-label-client font-serif font-bold text-xs flex items-center justify-center ring-2 ring-white shadow-xs flex-shrink-0">
                 PS
               </div>
               <div className="truncate">
-                <div className="text-xs font-semibold text-ink-900 truncate">
+                <div className="text-xs font-bold text-ink-900 truncate tracking-tight">
                   {client?.name || 'Priya Sharma'}
                 </div>
-                <div className="text-[10px] text-ink-500 truncate">
+                <div className="text-[11px] text-ink-500 truncate">
                   {client?.title || 'Founder & CEO'}
                 </div>
               </div>
@@ -312,7 +310,7 @@ export function AssistantDashboard() {
           </div>
 
           {/* Segments Navigation List */}
-          <nav className="flex-1 overflow-y-auto app-pane-scroll p-2 space-y-0.5 text-xs">
+          <nav className="flex-1 overflow-y-auto app-pane-scroll px-2.5 py-1 space-y-1 text-xs">
             {[
               { id: 'all', label: 'All Inbox', icon: Inbox, count: counts.TOTAL },
               { id: 'client', label: 'Client to Reply', icon: UserCheck, count: counts.CLIENT_TO_REPLY, color: 'text-label-client' },
@@ -331,20 +329,20 @@ export function AssistantDashboard() {
                 <button
                   key={seg.id}
                   onClick={() => handleSelectSegment(seg.id)}
-                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg transition cursor-pointer text-left ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all duration-150 cursor-pointer text-left active:scale-[0.99] ${
                     isActive
-                      ? 'bg-ink-100 font-semibold text-ink-900'
-                      : 'text-ink-700 hover:bg-ink-100/50'
+                      ? 'bg-ink-900 font-semibold text-white shadow-soft'
+                      : 'text-ink-700 hover:bg-white hover:text-ink-900 hover:shadow-xs'
                   }`}
                 >
-                  <div className="flex items-center gap-2 truncate">
-                    <Icon className={`h-4 w-4 flex-shrink-0 ${seg.color || 'text-ink-500'}`} />
-                    <span className="truncate">{seg.label}</span>
+                  <div className="flex items-center gap-2.5 truncate">
+                    <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white' : seg.color || 'text-ink-500'}`} />
+                    <span className="truncate tracking-tight">{seg.label}</span>
                   </div>
                   {typeof seg.count === 'number' && (
                     <span
-                      className={`text-[11px] px-1.5 py-0.2 rounded-full font-mono ${
-                        isActive ? 'bg-white font-bold text-ink-900' : 'text-ink-400'
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-ink-100 text-ink-600'
                       }`}
                     >
                       {seg.count}
@@ -356,13 +354,13 @@ export function AssistantDashboard() {
           </nav>
 
           {/* Sync Status Footer */}
-          <div className="p-3 border-t border-borderMuted text-xs flex items-center justify-between bg-ink-100/20">
-            <div className="flex items-center gap-1.5 text-[11px] text-ink-600">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          <div className="p-3.5 m-2.5 rounded-2xl bg-white border border-black/[0.05] shadow-xs text-xs flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[11px] text-ink-600 font-medium">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-100" />
               <span>Demo Mailbox synced</span>
             </div>
-            <button onClick={loadThreads} title="Sync now">
-              <RefreshCw className="h-3 w-3 text-ink-400 hover:text-ink-900 cursor-pointer" />
+            <button onClick={loadThreads} title="Sync now" className="p-1 hover:bg-ink-100 rounded-full transition cursor-pointer">
+              <RefreshCw className="h-3 w-3 text-ink-400 hover:text-ink-900" />
             </button>
           </div>
         </aside>
@@ -370,7 +368,7 @@ export function AssistantDashboard() {
         {/* ================================================================= */}
         {/* PANE 2: Center Thread List (380px – 440px)                         */}
         {/* ================================================================= */}
-        <section className="w-88 md:w-96 lg:w-[420px] bg-white border-r border-borderMuted flex flex-col flex-shrink-0 overflow-hidden">
+        <section className="w-88 md:w-96 lg:w-[420px] bg-[#FAF8F5]/50 border-r border-borderMuted/70 flex flex-col flex-shrink-0 overflow-hidden">
           {/* At A Glance Metric Chips Strip */}
           <AtAGlanceStrip
             counts={counts}
@@ -379,62 +377,66 @@ export function AssistantDashboard() {
             conflicts={conflicts}
           />
 
-          {/* Quiet Folder Daily Assurance Banner (When in Quiet Folder) */}
+          {/* Quiet Folder Assurance Banner */}
           {activeSegment === 'no_reply' && (
-            <div className="p-3 bg-ink-100/70 border-b border-borderMuted text-xs text-ink-700 flex items-start gap-2">
+            <div className="p-3 mx-2 my-2 bg-white rounded-2xl border border-black/[0.05] shadow-xs text-xs text-ink-700 flex items-start gap-2">
               <Info className="h-4 w-4 text-ink-500 flex-shrink-0 mt-0.5" />
               <div>
-                <strong>Quiet Folder Audited:</strong> 8 automated newsletters and receipts muted with transparent reasons. Nothing critical slipped through today.
+                <strong>Quiet Folder Audited:</strong> Automated newsletters and receipts filtered with transparent reasons.
               </div>
             </div>
           )}
 
           {/* Review Queue Fast Triage Banner */}
           {activeSegment === 'needs_review' && (
-            <div className="p-2.5 bg-violet-50 border-b border-violet-200 text-xs text-violet-900 flex items-center justify-between">
+            <div className="p-3 mx-2 my-2 bg-violet-50/90 rounded-2xl border border-violet-200 text-xs text-violet-900 flex items-center justify-between shadow-xs">
               <span>
-                <strong>Fast Keyboard Triage:</strong> Press <kbd className="font-mono font-bold">c</kbd> (Client), <kbd className="font-mono font-bold">a</kbd> (Assistant), <kbd className="font-mono font-bold">n</kbd> (No Reply).
+                <strong>Fast Keyboard Triage:</strong> Press <kbd className="font-mono font-bold bg-white px-1.5 py-0.5 rounded shadow-2xs">c</kbd> (Client), <kbd className="font-mono font-bold bg-white px-1.5 py-0.5 rounded shadow-2xs">a</kbd> (Assistant), <kbd className="font-mono font-bold bg-white px-1.5 py-0.5 rounded shadow-2xs">n</kbd> (Quiet).
               </span>
-              <span className="font-bold text-[11px]">{threads.length} left</span>
+              <span className="font-bold text-[11px] bg-white px-2 py-0.5 rounded-full text-violet-700 shadow-xs">
+                {threads.length} left
+              </span>
             </div>
           )}
 
-          {/* Thread List Filter Bar */}
-          <div className="p-2.5 border-b border-borderMuted flex items-center gap-2 bg-ink-100/20">
-            <Search className="h-3.5 w-3.5 text-ink-400 ml-1" />
+          {/* Thread List Filter Input */}
+          <div className="px-3 py-2 border-b border-borderMuted/60 flex items-center gap-2 bg-white/60">
+            <Search className="h-3.5 w-3.5 text-ink-400 ml-1 flex-shrink-0" />
             <input
               id="thread-search-input"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by sender, keyword..."
-              className="w-full text-xs bg-transparent focus:outline-none placeholder:text-ink-400 text-ink-900"
+              className="w-full text-xs bg-transparent focus:outline-none placeholder:text-ink-400 text-ink-900 font-medium tracking-tight"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="text-xs text-ink-400 hover:text-ink-700">
+              <button onClick={() => setSearchQuery('')} className="text-xs text-ink-400 hover:text-ink-700 px-1 font-medium">
                 Clear
               </button>
             )}
           </div>
 
-          {/* Thread Scroll Area */}
-          <div className="flex-1 overflow-y-auto app-pane-scroll divide-y divide-borderMuted/60">
+          {/* Thread Card Scroll Area */}
+          <div className="flex-1 overflow-y-auto app-pane-scroll py-1.5">
             {loadingList ? (
-              <div className="p-4 space-y-3">
+              <div className="p-3 space-y-2.5">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="animate-pulse space-y-2 p-3 bg-ink-100/40 rounded-xl">
-                    <div className="h-3 bg-ink-200 rounded w-1/3" />
-                    <div className="h-4 bg-ink-200 rounded w-3/4" />
-                    <div className="h-3 bg-ink-200 rounded w-1/2" />
+                  <div key={i} className="animate-pulse space-y-2 p-3.5 bg-white rounded-2xl border border-black/[0.04]">
+                    <div className="h-3 bg-ink-200 rounded-full w-1/3" />
+                    <div className="h-4 bg-ink-200 rounded-full w-3/4" />
+                    <div className="h-3 bg-ink-100 rounded-full w-1/2" />
                   </div>
                 ))}
               </div>
             ) : threads.length === 0 ? (
-              <div className="py-16 text-center space-y-2 px-4">
-                <CheckCheck className="h-8 w-8 text-emerald-500 mx-auto" />
-                <h3 className="text-sm font-semibold text-ink-900">Inbox Zero</h3>
-                <p className="text-xs text-ink-500">
-                  No conversations match the current segment filter.
+              <div className="py-20 text-center space-y-2 px-6">
+                <div className="h-12 w-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
+                  <CheckCheck className="h-6 w-6" />
+                </div>
+                <h3 className="text-sm font-serif font-bold text-ink-900">Inbox Zero</h3>
+                <p className="text-xs text-ink-500 leading-relaxed max-w-xs mx-auto">
+                  No conversations match the current segment filter. Everything is triaged and in place.
                 </p>
               </div>
             ) : (
@@ -455,30 +457,32 @@ export function AssistantDashboard() {
         {/* ================================================================= */}
         <main className="flex-1 flex overflow-hidden bg-white">
           {!selectedThreadId ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-ink-500 space-y-3">
-              <Mail className="h-10 w-10 text-ink-300" />
-              <h2 className="text-base font-serif font-bold text-ink-900">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-ink-500 space-y-3 bg-[#FAF8F5]/30">
+              <div className="h-16 w-16 rounded-3xl bg-white border border-black/[0.05] shadow-card flex items-center justify-center text-ink-300">
+                <Mail className="h-8 w-8" />
+              </div>
+              <h2 className="text-lg font-serif font-bold text-ink-900">
                 Select a conversation to inspect
               </h2>
-              <p className="text-xs text-ink-500 max-w-sm">
-                Use <kbd className="font-mono">j</kbd> and <kbd className="font-mono">k</kbd> to move, <kbd className="font-mono">Enter</kbd> to open, or click any conversation in the list.
+              <p className="text-xs text-ink-500 max-w-sm leading-relaxed">
+                Use <kbd className="px-1.5 py-0.5 rounded bg-ink-100 text-[11px] font-mono">j</kbd> and <kbd className="px-1.5 py-0.5 rounded bg-ink-100 text-[11px] font-mono">k</kbd> to move, <kbd className="px-1.5 py-0.5 rounded bg-ink-100 text-[11px] font-mono">Enter</kbd> to open, or tap any card in the list.
               </p>
             </div>
           ) : loadingDetail || !selectedThreadData ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="flex items-center gap-2 text-xs text-ink-500">
+            <div className="flex-1 flex items-center justify-center bg-[#FAF8F5]/30">
+              <div className="flex items-center gap-2.5 text-xs text-ink-500 p-4 rounded-2xl bg-white border border-black/[0.05] shadow-card">
                 <div className="h-4 w-4 rounded-full border-2 border-accent border-t-transparent animate-spin" />
-                <span>Loading conversation and AI decision model...</span>
+                <span>Loading conversation and decision model...</span>
               </div>
             </div>
           ) : (
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
               {/* Conversation Reader Column */}
-              <div className="flex-1 flex flex-col overflow-y-auto app-pane-scroll p-6 space-y-6">
+              <div className="flex-1 flex flex-col overflow-y-auto app-pane-scroll p-6 md:p-8 space-y-6">
                 {/* Thread Subject Header */}
-                <div className="border-b border-borderMuted pb-4 space-y-3">
+                <div className="border-b border-borderMuted/70 pb-5 space-y-3">
                   <div className="flex items-start justify-between gap-4">
-                    <h1 className="text-lg font-serif font-bold text-ink-900 leading-snug">
+                    <h1 className="text-xl md:text-2xl font-serif font-bold text-ink-900 leading-snug tracking-tight">
                       {selectedThreadData.thread.subject}
                     </h1>
 
@@ -497,7 +501,7 @@ export function AssistantDashboard() {
                             toast.error('Summarize failed: ' + err.message);
                           }
                         }}
-                        className="px-2.5 py-1 rounded-lg border border-borderMuted text-xs font-medium text-ink-700 hover:bg-ink-100 transition flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-full border border-black/[0.06] bg-white hover:bg-ink-50 text-xs font-semibold text-ink-700 hover:text-ink-900 transition flex items-center gap-1.5 shadow-soft cursor-pointer active:scale-95"
                         title="Summarize conversation"
                       >
                         <Sparkles className="h-3.5 w-3.5 text-accent" />
@@ -505,26 +509,26 @@ export function AssistantDashboard() {
                       </button>
                       <button
                         onClick={() => handleToggleArchive(selectedThreadData.thread)}
-                        className="p-1.5 rounded-lg border border-borderMuted text-ink-600 hover:bg-ink-100 transition"
+                        className="h-8 w-8 rounded-full border border-black/[0.06] bg-white hover:bg-ink-50 text-ink-600 hover:text-ink-900 transition shadow-soft flex items-center justify-center cursor-pointer active:scale-95"
                         title="Archive thread"
                       >
-                        <Archive className="h-4 w-4" />
+                        <Archive className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => handleToggleRead(selectedThreadData.thread)}
-                        className="p-1.5 rounded-lg border border-borderMuted text-ink-600 hover:bg-ink-100 transition"
+                        className="h-8 w-8 rounded-full border border-black/[0.06] bg-white hover:bg-ink-50 text-ink-600 hover:text-ink-900 transition shadow-soft flex items-center justify-center cursor-pointer active:scale-95"
                         title="Mark as unread"
                       >
-                        <Mail className="h-4 w-4" />
+                        <Mail className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
 
-                  {/* Participants Row & Aging Warning */}
+                  {/* Participants Row & Aging Nudge */}
                   <div className="flex items-center justify-between text-xs text-ink-500 flex-wrap gap-2">
-                    <div>
-                      Participants:{' '}
-                      <span className="text-ink-900 font-medium">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-ink-400">Participants:</span>
+                      <span className="text-ink-900 font-semibold">
                         {(selectedThreadData.thread.participants || [])
                           .map((p) => p.name || p.email)
                           .join(', ')}
@@ -535,9 +539,9 @@ export function AssistantDashboard() {
                     {selectedThreadData.thread.currentLabel === 'CLIENT_TO_REPLY' && (
                       <button
                         onClick={() => handleSendNudge(selectedThreadData.thread)}
-                        className="text-xs px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 font-semibold hover:bg-amber-100 transition flex items-center gap-1 cursor-pointer"
+                        className="text-xs px-3 py-1 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 font-semibold hover:bg-amber-100 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                       >
-                        <Bell className="h-3 w-3" />
+                        <Bell className="h-3 w-3 text-amber-700" />
                         <span>Send Gentle Nudge to Priya</span>
                       </button>
                     )}
@@ -552,10 +556,10 @@ export function AssistantDashboard() {
                     return (
                       <div
                         key={msg._id}
-                        className={`rounded-xl border transition ${
+                        className={`rounded-2xl border transition-all ${
                           isLast
-                            ? 'border-borderMuted bg-white shadow-xs'
-                            : 'border-borderMuted/60 bg-ink-100/30'
+                            ? 'border-black/[0.06] bg-white shadow-card'
+                            : 'border-borderMuted/60 bg-ink-50/50'
                         }`}
                       >
                         {/* Message Header */}
@@ -566,14 +570,14 @@ export function AssistantDashboard() {
                               [msg._id]: !isCollapsed,
                             }))
                           }
-                          className="p-3.5 flex items-center justify-between cursor-pointer select-none"
+                          className="p-4 flex items-center justify-between cursor-pointer select-none"
                         >
-                          <div className="flex items-center gap-2.5">
-                            <div className="h-7 w-7 rounded-full bg-ink-200 text-ink-800 font-bold text-xs flex items-center justify-center">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-ink-100 text-ink-800 font-bold text-xs flex items-center justify-center flex-shrink-0 ring-2 ring-white">
                               {(msg.from?.name || msg.from?.email || 'U')[0].toUpperCase()}
                             </div>
                             <div>
-                              <span className="text-xs font-semibold text-ink-900">
+                              <span className="text-xs font-bold text-ink-900 tracking-tight">
                                 {msg.from?.name || msg.from?.email}
                               </span>
                               <span className="text-[11px] text-ink-400 ml-2">
@@ -583,18 +587,18 @@ export function AssistantDashboard() {
                           </div>
 
                           <div className="flex items-center gap-2 text-xs text-ink-400">
-                            <span>{new Date(msg.date).toLocaleString()}</span>
+                            <span className="text-[11px] font-mono">{new Date(msg.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
                             {isCollapsed ? (
-                              <ChevronDown className="h-4 w-4" />
+                              <ChevronDown className="h-4 w-4 text-ink-400" />
                             ) : (
-                              <ChevronUp className="h-4 w-4" />
+                              <ChevronUp className="h-4 w-4 text-ink-400" />
                             )}
                           </div>
                         </div>
 
                         {/* Message Content */}
                         {!isCollapsed && (
-                          <div className="px-4 pb-4 pt-1 text-xs text-ink-800 leading-relaxed border-t border-borderMuted/40 whitespace-pre-wrap font-sans">
+                          <div className="px-5 pb-5 pt-1 text-xs text-ink-800 leading-relaxed border-t border-borderMuted/30 whitespace-pre-wrap font-sans">
                             {msg.bodyText || msg.snippet}
                           </div>
                         )}
@@ -604,7 +608,7 @@ export function AssistantDashboard() {
                 </div>
 
                 {/* Assistant Draft Composer Area */}
-                <div className="pt-4">
+                <div className="pt-2">
                   <DraftEditor
                     thread={selectedThreadData.thread}
                     existingDraft={selectedThreadData.drafts?.[0]}
@@ -619,7 +623,7 @@ export function AssistantDashboard() {
               </div>
 
               {/* AI Reasoning Inspector Column (320px) */}
-              <div className="w-80 border-l border-borderMuted flex-shrink-0">
+              <div className="w-80 border-l border-borderMuted/70 flex-shrink-0">
                 <AIReasonPanel
                   thread={selectedThreadData.thread}
                   timeline={selectedThreadData.timeline || []}
