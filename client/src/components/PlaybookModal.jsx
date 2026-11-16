@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock.js';
 import { X, Plus, Trash2, ShieldCheck, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -13,6 +14,20 @@ export function PlaybookModal({ isOpen, onClose, onPlaybookUpdated }) {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Lock body/background scroll while playbook modal is open
+  useBodyScrollLock(isOpen);
+
+  // Close on Escape key
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -80,8 +95,19 @@ export function PlaybookModal({ isOpen, onClose, onPlaybookUpdated }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-borderMuted max-h-[85vh] flex flex-col">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overscroll-contain select-none"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-borderMuted max-h-[85vh] flex flex-col overscroll-contain select-text"
+      >
         {/* Header */}
         <div className="p-5 border-b border-borderMuted flex items-center justify-between">
           <div className="flex items-center gap-2">

@@ -1,8 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HelpCircle, X, ShieldCheck, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock.js';
 
 export function PrototypeHelpPopover() {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Lock body/background scroll while the prototype guide is open
+  useBodyScrollLock(isOpen);
+
+  // Close on Escape key
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   return (
     <>
@@ -16,8 +31,19 @@ export function PrototypeHelpPopover() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-borderMuted p-6 space-y-4">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsOpen(false);
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overscroll-contain select-none"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-borderMuted p-6 space-y-4 max-h-[90vh] overflow-y-auto overscroll-contain select-text"
+          >
             <div className="flex items-center justify-between pb-2 border-b border-borderMuted">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-accent" />
@@ -27,7 +53,8 @@ export function PrototypeHelpPopover() {
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 text-ink-400 hover:text-ink-900"
+                className="p-1 text-ink-400 hover:text-ink-900 transition cursor-pointer"
+                title="Close (Esc)"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -77,7 +104,7 @@ export function PrototypeHelpPopover() {
               </a>
               <button
                 onClick={() => setIsOpen(false)}
-                className="px-4 py-1.5 rounded-lg bg-ink-900 text-white font-medium hover:bg-ink-800 cursor-pointer"
+                className="px-4 py-1.5 rounded-lg bg-ink-900 text-white font-medium hover:bg-ink-800 transition cursor-pointer"
               >
                 Got it
               </button>

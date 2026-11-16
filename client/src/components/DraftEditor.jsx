@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock.js';
 import { Sparkles, Send, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -10,6 +11,20 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
   const [loadingAI, setLoadingAI] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showConfirmSend, setShowConfirmSend] = useState(false);
+
+  // Lock body/background scroll while confirm send modal is open
+  useBodyScrollLock(showConfirmSend);
+
+  // Close on Escape key
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && showConfirmSend) {
+        setShowConfirmSend(false);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showConfirmSend]);
 
   useEffect(() => {
     if (existingDraft) {
@@ -206,8 +221,19 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
 
       {/* Confirmation Modal */}
       {showConfirmSend && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-borderMuted space-y-4">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowConfirmSend(false);
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overscroll-contain select-none"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-borderMuted space-y-4 overscroll-contain select-text"
+          >
             <h3 className="text-sm font-serif font-bold text-ink-900">
               Confirm Email Dispatch
             </h3>

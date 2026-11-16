@@ -1,2 +1,1 @@
-// Custom React hooks placeholder (useThreads, useKeyboardShortcuts, useAuth)
-export {};
+export { useBodyScrollLock } from './useBodyScrollLock.js';

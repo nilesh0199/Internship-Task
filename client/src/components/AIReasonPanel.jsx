@@ -82,7 +82,7 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
   }
 
   return (
-    <div className="bg-white border-l border-borderMuted h-full overflow-y-auto p-4 space-y-5 text-ink-900">
+    <div className="bg-white border-l border-borderMuted h-full overflow-y-auto app-pane-scroll p-4 space-y-5 text-ink-900">
       {/* Panel Header */}
       <div className="flex items-center justify-between pb-3 border-b border-borderMuted">
         <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink-700">

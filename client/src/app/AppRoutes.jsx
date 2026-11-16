@@ -69,7 +69,7 @@ export function AppRoutes() {
           <Route
             path="/client/*"
             element={
-              <ProtectedRoute allowedRoles={['client', 'assistant']}>
+              <ProtectedRoute allowedRoles={['client']}>
                 <ClientQueue />
               </ProtectedRoute>
             }

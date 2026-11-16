@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock.js';
 import {
   Search,
   MessageSquare,
@@ -16,6 +17,9 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Lock body/background scroll while command palette is open
+  useBodyScrollLock(isOpen);
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -72,8 +76,19 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-20 px-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-borderMuted overflow-hidden flex flex-col max-h-[80vh]">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-20 px-4 overscroll-contain select-none"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-borderMuted overflow-hidden flex flex-col max-h-[80vh] overscroll-contain select-text"
+      >
         {/* Top Search Bar */}
         <div className="p-4 border-b border-borderMuted flex items-center gap-3">
           <Sparkles className="h-5 w-5 text-accent flex-shrink-0" />

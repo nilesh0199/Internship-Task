@@ -312,7 +312,7 @@ export function AssistantDashboard() {
           </div>
 
           {/* Segments Navigation List */}
-          <nav className="flex-1 overflow-y-auto p-2 space-y-0.5 text-xs">
+          <nav className="flex-1 overflow-y-auto app-pane-scroll p-2 space-y-0.5 text-xs">
             {[
               { id: 'all', label: 'All Inbox', icon: Inbox, count: counts.TOTAL },
               { id: 'client', label: 'Client to Reply', icon: UserCheck, count: counts.CLIENT_TO_REPLY, color: 'text-label-client' },
@@ -418,7 +418,7 @@ export function AssistantDashboard() {
           </div>
 
           {/* Thread Scroll Area */}
-          <div className="flex-1 overflow-y-auto divide-y divide-borderMuted/60">
+          <div className="flex-1 overflow-y-auto app-pane-scroll divide-y divide-borderMuted/60">
             {loadingList ? (
               <div className="p-4 space-y-3">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -474,7 +474,7 @@ export function AssistantDashboard() {
           ) : (
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
               {/* Conversation Reader Column */}
-              <div className="flex-1 flex flex-col overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 flex flex-col overflow-y-auto app-pane-scroll p-6 space-y-6">
                 {/* Thread Subject Header */}
                 <div className="border-b border-borderMuted pb-4 space-y-3">
                   <div className="flex items-start justify-between gap-4">

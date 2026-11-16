@@ -599,4 +599,6 @@ export const store = {
       ) || null
     );
   },
+
+  initSeedData,
 };

@@ -42,24 +42,46 @@ export function AuthProvider({ children }) {
 
   async function demoLogin(role = 'assistant') {
     setLoading(true);
-    const res = await api.post('/auth/demo-login', { role });
-    if (res.ok && res.data?.user) {
-      setUser(res.data.user);
-      await refreshSession();
+    try {
+      const res = await api.post('/auth/demo-login', { role });
+      if (res.ok && res.data?.user) {
+        setUser(res.data.user);
+        try {
+          const meRes = await api.get('/auth/me');
+          if (meRes.ok && meRes.data?.user) {
+            setUser(meRes.data.user);
+            setClient(meRes.data.client || null);
+          }
+        } catch {
+          // Keep user from demo login
+        }
+      }
+      return res;
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    return res;
   }
 
-  async function switchRole() {
+  async function switchRole(targetRole) {
     setLoading(true);
-    const res = await api.post('/auth/switch-role', {});
-    if (res.ok && res.data?.user) {
-      setUser(res.data.user);
-      await refreshSession();
+    try {
+      const res = await api.post('/auth/switch-role', targetRole ? { targetRole } : {});
+      if (res.ok && res.data?.user) {
+        setUser(res.data.user);
+        try {
+          const meRes = await api.get('/auth/me');
+          if (meRes.ok && meRes.data?.user) {
+            setUser(meRes.data.user);
+            setClient(meRes.data.client || null);
+          }
+        } catch {
+          // Keep user from switch role
+        }
+      }
+      return res;
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    return res;
   }
 
   async function signup(payload) {

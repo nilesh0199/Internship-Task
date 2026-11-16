@@ -33,6 +33,7 @@ function setAuthCookie(res, token) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: '/',
   });
 }
 
@@ -184,10 +185,15 @@ export async function demoLogin(req, res, next) {
 export async function switchRole(req, res, next) {
   try {
     const currentRole = req.user.role;
-    const targetRole = currentRole === 'assistant' ? 'client' : 'assistant';
+    const targetRole = req.body?.targetRole || (currentRole === 'assistant' ? 'client' : 'assistant');
     const targetEmail = targetRole === 'client' ? 'priya@vortexdynamics.com' : 'maya@vortexdynamics.com';
 
     let targetUser = await store.findUserByEmail(targetEmail);
+    if (!targetUser) {
+      await store.initSeedData?.();
+      targetUser = await store.findUserByEmail(targetEmail);
+    }
+
     if (!targetUser) {
       return res.status(404).json({
         ok: false,
@@ -240,7 +246,7 @@ export async function getMe(req, res, next) {
  * Clear session cookie and logout
  */
 export function logout(req, res) {
-  res.clearCookie('token');
+  res.clearCookie('token', { path: '/' });
   return res.status(200).json({ ok: true, message: 'Logged out successfully' });
 }
 

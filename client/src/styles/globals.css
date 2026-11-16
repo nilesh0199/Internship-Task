@@ -13,4 +13,17 @@
     color: var(--text-ink);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
+
+  /* Universal scroll lock when any modal, drawer, or dialog is open */
+  body.modal-open,
+  html.modal-open {
+    overflow: hidden !important;
+    touch-action: none;
+  }
+
+  /* Prevent background panes from wheel or touch scrolling while a modal is open */
+  body.modal-open .app-pane-scroll {
+    overflow-y: hidden !important;
+    overscroll-behavior: none !important;
+  }
 }
