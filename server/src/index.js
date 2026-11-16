@@ -90,8 +90,24 @@ app.use(errorHandler);
 // Start server if not imported
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    logger.info(`[Daybook Mail Server] Running on http://localhost:${PORT}`);
-    logger.info(`[Daybook Mail Server] Health check available at http://localhost:${PORT}/api/health`);
+    const isMongo = isRealDBConnected();
+    const banner = [
+      '==================================================================',
+      '               DAYBOOK MAIL — EXECUTIVE INBOX API                 ',
+      '==================================================================',
+      ` Port:               http://localhost:${PORT}`,
+      ` Environment:        ${env.NODE_ENV}`,
+      ` Storage Engine:     ${isMongo ? 'MongoDB Atlas (Persistent)' : 'In-Memory Store (Volatile Fallback)'}`,
+      ` Primary AI:         Gemini (${env.GEMINI_MODEL}) [${env.GEMINI_API_KEY ? 'Active' : 'Unconfigured - Fallback'}]`,
+      ` Fallback AI:        Groq (${env.GROQ_MODEL}) [${env.GROQ_API_KEY ? 'Active' : 'Unconfigured - Rules'}]`,
+      ` Google OAuth:       ${env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? 'Configured & Enabled' : 'Disabled (Missing Credentials)'}`,
+      ` Microsoft OAuth:    ${env.MICROSOFT_CLIENT_ID && env.MICROSOFT_CLIENT_SECRET ? 'Configured & Enabled' : 'Disabled (Missing Credentials)'}`,
+      ` Email Dispatch:     ${env.SEND_ENABLED ? 'LIVE DISPATCH ENABLED' : 'SAFETY GATE ACTIVE (Simulated Send)'}`,
+      ` Health Check:       http://localhost:${PORT}/api/health`,
+      '==================================================================',
+    ].join('\n');
+
+    logger.info(`\n${banner}\n`);
   });
 }
 

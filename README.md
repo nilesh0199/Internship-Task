@@ -56,6 +56,7 @@ Daybook Mail bridges the gap between high-volume administrative triage and execu
 
 ## 2. Key Features
 
+- **Editorial Landing Page (`/`)**: High-polish Pinterest-inspired visual presentation with drifting email cards, interactive triage reasoning playground, value propositions, and role-based redirecting for authenticated users.
 - **Two Connected Experiences**:
   - **Assistant Workspace**: High-throughput 3-pane desktop dashboard featuring full keyboard navigation (`j`/`k`, shortcuts), deep AI reasoning inspection, draft-for-approval composer, and timeline audit logs.
   - **Client Decision Queue**: Ultra-distilled, mobile-friendly single column presenting email as **Decision Cards** in elegant serif typography with one-tap choices (*Approve Maya's Draft*, *Reply Myself*, *Hand to Maya*).
@@ -184,7 +185,7 @@ npm run seed
 To guarantee flawless live demonstrations without third-party rate limits:
 - **Simulated by Default**:
   - Demo Mailbox (40 realistic pre-seeded threads).
-  - Live Inbound Message Injector (`POST /api/demo/inject-message`).
+  - Live Inbound Message Injector (`POST /api/demo/simulate-message`).
   - Email Sending (`SEND_ENABLED=false` simulates email dispatch and updates audit log).
 - **Live**:
   - Live Google OAuth and Microsoft Graph OAuth flows.

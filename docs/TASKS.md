@@ -110,6 +110,16 @@
 
 ---
 
+## Phase 9: Daybook Mail Upgrade, Connectors, Security & Landing Page `[M]`
+- [x] **9.1**: Rebrand entire repo from ReplyRight to Daybook Mail ("A daybook for your inbox"), add SVG book favicon, replace hotlinked images with local initials Avatar component, and convert absolute file links to relative. `[M]`
+- [x] **9.2**: Fix deployment architecture: configure client API base with Vercel edge proxy rewrite (`/api/:path*`), implement `COOKIE_SAMESITE` (lax/none), implement storage-aware `/api/health` and lightweight `/healthz`, and enforce production secret check. `[M]`
+- [x] **9.3**: Security & Multi-tenant isolation: enforce `roleRequired` guards across all routes (assistant vs client vs shared), scope all queries/mutations by `req.user.orgId`, block registration with demo emails, implement `purgeAccountData`, and audit zero email body/token logging. `[M]`
+- [x] **9.4**: Provider connectors & Shared ingestion: build `server/src/services/ingest.js` with batch concurrency, simplify token encryption to refresh tokens, implement robust Gmail (base64/multipart, auto-client) and Outlook (Graph `/me/messages`) normalization, add account source chips & filters, and handle missing credentials gracefully in UI. `[M]`
+- [x] **9.5**: Pinterest-inspired editorial landing page: build warm, minimal landing page with floating drifting email cards, interactive triage reasoning playground, feature showcase, and suppress floating role controls on `/`. `[M]`
+- [x] **9.6**: Reliability, polish & verification: add startup active-features banner, rehearse demo flows, update documentation, and verify local execution. `[M]`
+
+---
+
 ## Known Issues & Prototype Reviewer Guidance
 
 1. **Email Sending Safety Flag**:

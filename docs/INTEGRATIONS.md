@@ -69,7 +69,7 @@ export class EmailProviderAdapter {
 - Primary vehicle for live demoing and automated evaluation.
 - Serves 40 realistic pre-seeded threads from `/server/src/seed/threads.json`.
 - **Simulated Message Injector**:
-  - Exposes an API endpoint `POST /api/demo/inject-message` allowing the reviewer to trigger follow-up inbound messages.
+  - Exposes an API endpoint `POST /api/demo/simulate-message` allowing the reviewer to trigger follow-up inbound messages.
   - Demonstrates real-time thread reclassification (e.g. moving a thread from `ASSISTANT_TO_REPLY` to `CLIENT_TO_REPLY`).
 - Guaranteed zero quota exhaustion and 100% offline capability.
 
