@@ -9,3 +9,4 @@ export { Correction } from './Correction.js';
 export { Draft } from './Draft.js';
 export { ActivityLog } from './ActivityLog.js';
 export { Invite } from './Invite.js';
+export { AgentRun } from './AgentRun.js';

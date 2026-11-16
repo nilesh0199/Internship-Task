@@ -22,6 +22,31 @@ const PlaybookSchema = new mongoose.Schema(
       maxAssistantApprovalUsd: { type: Number, default: 1000 },
     },
     customInstructions: { type: String, default: '' },
+    agentAutonomy: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({
+        triage: 'auto',
+        scheduling: 'propose',
+        followup: 'propose',
+        drafting: 'propose',
+        digest: 'auto',
+        guardian: 'auto',
+      }),
+    },
+    agentSettings: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({
+        followupDays: 3,
+        enabledAgents: {
+          triage: true,
+          scheduling: true,
+          followup: true,
+          drafting: true,
+          digest: true,
+          guardian: true,
+        },
+      }),
+    },
     updatedAt: { type: Date, default: Date.now },
   },
   { _id: false }

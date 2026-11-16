@@ -15,6 +15,7 @@ import {
   Draft,
   ActivityLog,
   Invite,
+  AgentRun,
 } from '../models/index.js';
 import { logger } from '../utils/logger.js';
 
@@ -33,6 +34,7 @@ let memoryCorrections = [];
 let memoryDrafts = [];
 let memoryActivityLogs = [];
 let memoryInvites = [];
+let memoryAgentRuns = [];
 
 /**
  * Initializes in-memory seed dataset for demo/offline execution
@@ -674,6 +676,160 @@ export const store = {
         (i) => (i.token === tokenOrCode || i.code === tokenOrCode) && i.status === 'pending'
       ) || null
     );
+  },
+
+  // Agent Runs & Autonomous Audit Logs
+  async addAgentRun(runData) {
+    const id = 'run_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+    const doc = {
+      _id: id,
+      ...runData,
+      createdAt: new Date(),
+    };
+    if (isRealDBConnected()) {
+      return await AgentRun.create(doc);
+    }
+    memoryAgentRuns.unshift(doc);
+    // Keep max 500 recent runs in memory
+    if (memoryAgentRuns.length > 500) memoryAgentRuns.length = 500;
+    return doc;
+  },
+
+  async getAgentRuns({ orgId, threadId, agentId, outcome, limit = 50 }) {
+    if (isRealDBConnected()) {
+      const q = {};
+      if (orgId) q.orgId = orgId;
+      if (threadId) q.threadId = threadId;
+      if (agentId) q.agentId = agentId;
+      if (outcome) q.outcome = outcome;
+      return await AgentRun.find(q).sort({ createdAt: -1 }).limit(parseInt(limit, 10));
+    }
+    let list = memoryAgentRuns;
+    if (orgId) list = list.filter((r) => r.orgId === orgId);
+    if (threadId) list = list.filter((r) => r.threadId === threadId);
+    if (agentId) list = list.filter((r) => r.agentId === agentId);
+    if (outcome) list = list.filter((r) => r.outcome === outcome);
+    return list.slice(0, parseInt(limit, 10));
+  },
+
+  async getAgentRunById(id) {
+    if (isRealDBConnected()) {
+      return await AgentRun.findById(id);
+    }
+    return memoryAgentRuns.find((r) => r._id === id || String(r._id) === String(id)) || null;
+  },
+
+  async updateAgentRun(id, updates) {
+    if (isRealDBConnected()) {
+      return await AgentRun.findByIdAndUpdate(id, { $set: updates }, { new: true });
+    }
+    const idx = memoryAgentRuns.findIndex((r) => r._id === id || String(r._id) === String(id));
+    if (idx !== -1) {
+      memoryAgentRuns[idx] = { ...memoryAgentRuns[idx], ...updates, updatedAt: new Date() };
+      return memoryAgentRuns[idx];
+    }
+    return null;
+  },
+
+  async getAgentStats(orgId, hours = 24) {
+    const cutoff = new Date(Date.now() - hours * 3600 * 1000);
+    let runs = [];
+    if (isRealDBConnected()) {
+      runs = await AgentRun.find({ orgId, createdAt: { $gte: cutoff } });
+    } else {
+      runs = memoryAgentRuns.filter(
+        (r) => (!orgId || r.orgId === orgId) && new Date(r.createdAt) >= cutoff
+      );
+    }
+
+    const stats = {
+      total: runs.length,
+      autoHandled: 0,
+      proposed: 0,
+      escalated: 0,
+      reversed: 0,
+      skipped: 0,
+      byAgent: {
+        triage: { total: 0, handled: 0, proposed: 0, escalated: 0, reversed: 0 },
+        scheduling: { total: 0, handled: 0, proposed: 0, escalated: 0, reversed: 0 },
+        followup: { total: 0, handled: 0, proposed: 0, escalated: 0, reversed: 0 },
+        drafting: { total: 0, handled: 0, proposed: 0, escalated: 0, reversed: 0 },
+        digest: { total: 0, handled: 0, proposed: 0, escalated: 0, reversed: 0 },
+        guardian: { total: 0, handled: 0, proposed: 0, escalated: 0, reversed: 0 },
+      },
+      hoursSavedEstimateHours: '0.0',
+    };
+
+    for (const r of runs) {
+      if (r.outcome === 'auto_handled') stats.autoHandled++;
+      else if (r.outcome === 'proposed') stats.proposed++;
+      else if (r.outcome === 'escalated') stats.escalated++;
+      else if (r.outcome === 'reversed') stats.reversed++;
+      else if (r.outcome === 'skipped') stats.skipped++;
+
+      if (stats.byAgent[r.agentId]) {
+        stats.byAgent[r.agentId].total++;
+        if (r.outcome === 'auto_handled') stats.byAgent[r.agentId].handled++;
+        else if (r.outcome === 'proposed') stats.byAgent[r.agentId].proposed++;
+        else if (r.outcome === 'escalated') stats.byAgent[r.agentId].escalated++;
+        else if (r.outcome === 'reversed') stats.byAgent[r.agentId].reversed++;
+      }
+    }
+
+    // Formula: 40 seconds estimated saved per auto-handled routine email
+    const secondsSaved = stats.autoHandled * 40;
+    stats.hoursSavedEstimateHours = (secondsSaved / 3600).toFixed(1);
+
+    return stats;
+  },
+
+  async undoAgentRun(id, userId, actorName = 'User') {
+    const run = await this.getAgentRunById(id);
+    if (!run) {
+      throw new Error('Agent run not found');
+    }
+    if (run.undoneAt) {
+      return { run, alreadyUndone: true };
+    }
+
+    // Execute undo payload
+    if (run.undo && run.undo.type) {
+      if (run.undo.type === 'unarchive_thread' || run.undo.type === 'restore_label') {
+        const { previousLabel, isArchived } = run.undo.payload || {};
+        if (run.threadId) {
+          await this.updateThread(run.threadId, {
+            currentLabel: previousLabel || 'ASSISTANT_TO_REPLY',
+            isArchived: typeof isArchived === 'boolean' ? isArchived : false,
+          });
+        }
+      } else if (run.undo.type === 'discard_draft') {
+        const { draftId } = run.undo.payload || {};
+        if (draftId) {
+          await this.saveDraft({ _id: draftId, status: 'discarded' });
+        }
+      }
+    }
+
+    const updatedRun = await this.updateAgentRun(id, {
+      undoneAt: new Date(),
+    });
+
+    await this.addActivityLog({
+      orgId: run.orgId,
+      actorId: userId,
+      actorName: actorName || 'Assistant',
+      actorRole: 'agent',
+      action: 'AGENT_UNDO',
+      threadId: run.threadId,
+      details: {
+        runId: id,
+        agentId: run.agentId,
+        action: run.action,
+        undoType: run.undo?.type,
+      },
+    });
+
+    return { run: updatedRun, undone: true };
   },
 
   initSeedData,

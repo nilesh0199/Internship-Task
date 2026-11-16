@@ -5,7 +5,7 @@ const ActivityLogSchema = new mongoose.Schema(
     orgId: { type: String, required: true, index: true },
     actorId: { type: String, default: null },
     actorName: { type: String, default: 'System' },
-    actorRole: { type: String, enum: ['assistant', 'client', 'system'], required: true },
+    actorRole: { type: String, enum: ['assistant', 'client', 'system', 'agent'], required: true },
     action: {
       type: String,
       enum: [
@@ -19,7 +19,12 @@ const ActivityLogSchema = new mongoose.Schema(
         'THREAD_SNOOZED',
         'PLAYBOOK_UPDATED',
         'ACCOUNT_SYNCED',
+        'ACCOUNT_DISCONNECTED',
+        'ACCOUNT_PURGED',
         'DEMO_MESSAGE_INJECTED',
+        'AGENT_RUN',
+        'AGENT_ACTION',
+        'AGENT_UNDO',
       ],
       required: true,
       index: true,

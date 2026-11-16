@@ -13,9 +13,14 @@ const DraftSchema = new mongoose.Schema(
     bodyText: { type: String, required: true },
     status: {
       type: String,
-      enum: ['draft', 'pending_client', 'approved', 'sent', 'discarded'],
+      enum: ['draft', 'agent_proposal', 'pending_client', 'approved', 'sent', 'discarded'],
       default: 'draft',
       index: true,
+    },
+    agentProposalType: {
+      type: String,
+      enum: ['draft_reply', 'reschedule_meeting', 'confirm_meeting', 'stale_followup', null],
+      default: null,
     },
     clientApproval: {
       approvedAt: { type: Date, default: null },
