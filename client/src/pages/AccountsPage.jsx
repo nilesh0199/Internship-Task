@@ -66,11 +66,19 @@ export function AccountsPage() {
   }
 
   async function handleDisconnect(account, purge = false) {
-    if (!confirm(`Are you sure you want to disconnect ${account.emailAddress}?`)) return;
+    const confirmMsg = purge
+      ? `Are you sure you want to disconnect ${account.emailAddress} AND permanently purge all of its threads, messages, and classifications?`
+      : `Are you sure you want to disconnect ${account.emailAddress}?`;
+    if (!confirm(confirmMsg)) return;
+
     try {
       const res = await api.post(`/accounts/${account._id}/disconnect`, { purge });
       if (res.ok) {
-        toast.success(`Disconnected ${account.emailAddress}`);
+        toast.success(
+          purge
+            ? `Disconnected ${account.emailAddress} and purged all associated data`
+            : `Disconnected ${account.emailAddress}`
+        );
         await loadAccounts();
       }
     } catch (err) {
@@ -232,13 +240,23 @@ export function AccountsPage() {
                       </button>
 
                       {acc.provider !== 'demo' && (
-                        <button
-                          onClick={() => handleDisconnect(acc)}
-                          className="px-4 py-2 rounded-full border border-red-200 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-1 transition cursor-pointer active:scale-95"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                          <span>Disconnect</span>
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleDisconnect(acc, false)}
+                            className="px-3.5 py-2 rounded-full border border-black/[0.08] hover:bg-ink-50 text-xs font-semibold text-ink-600 hover:text-ink-900 transition cursor-pointer active:scale-95"
+                            title="Disconnect without deleting data"
+                          >
+                            Disconnect
+                          </button>
+                          <button
+                            onClick={() => handleDisconnect(acc, true)}
+                            className="px-3.5 py-2 rounded-full border border-red-200 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+                            title="Revoke and permanently delete all threads and messages for this account"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            <span>Disconnect & delete data</span>
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>

@@ -1,4 +1,5 @@
 import express from 'express';
+import { z } from 'zod';
 import {
   connectGoogle,
   googleCallback,
@@ -9,23 +10,58 @@ import {
   disconnectAccount,
   simulateInboundMessage,
 } from '../controllers/providerController.js';
-import { authRequired } from '../middleware/index.js';
+import { authRequired, roleRequired, validate } from '../middleware/index.js';
 
 const router = express.Router();
 
-// OAuth Handshakes
-router.get('/connect/google', authRequired, connectGoogle);
+const AccountIdParamSchema = z.object({
+  id: z.string().min(1),
+});
+
+const DisconnectBodySchema = z
+  .object({
+    purge: z.boolean().optional(),
+  })
+  .optional();
+
+const SimulateMessageSchema = z
+  .object({
+    threadId: z.string().min(1).optional(),
+  })
+  .optional();
+
+// OAuth Handshakes (Assistant Only)
+router.get('/connect/google', authRequired, roleRequired(['assistant']), connectGoogle);
 router.get('/auth/google/callback', googleCallback);
 
-router.get('/connect/microsoft', authRequired, connectMicrosoft);
+router.get('/connect/microsoft', authRequired, roleRequired(['assistant']), connectMicrosoft);
 router.get('/auth/microsoft/callback', microsoftCallback);
 
 // Account Management
 router.get('/accounts', authRequired, listAccounts);
-router.post('/accounts/:id/sync', authRequired, syncAccount);
-router.post('/accounts/:id/disconnect', authRequired, disconnectAccount);
+router.post(
+  '/accounts/:id/sync',
+  authRequired,
+  roleRequired(['assistant']),
+  validate(AccountIdParamSchema, 'params'),
+  syncAccount
+);
+router.post(
+  '/accounts/:id/disconnect',
+  authRequired,
+  roleRequired(['assistant']),
+  validate(AccountIdParamSchema, 'params'),
+  validate(DisconnectBodySchema),
+  disconnectAccount
+);
 
-// Demo Simulated Follow-Up Message Injector
-router.post('/demo/simulate-message', authRequired, simulateInboundMessage);
+// Demo Simulated Follow-Up Message Injector (Assistant Only)
+router.post(
+  '/demo/simulate-message',
+  authRequired,
+  roleRequired(['assistant']),
+  validate(SimulateMessageSchema),
+  simulateInboundMessage
+);
 
 export default router;

@@ -7,11 +7,19 @@ import { env } from '../config/env.js';
  */
 export async function getThreads(req, res, next) {
   try {
-    const { segment = 'all', search, limit = 50 } = req.query;
+    const { segment = 'all', search, limit = 50, accountId } = req.query;
 
     const filters = {
       isArchived: segment === 'archived',
     };
+
+    if (req.user?.orgId) {
+      filters.orgId = req.user.orgId;
+    }
+
+    if (accountId) {
+      filters.accountId = accountId;
+    }
 
     if (segment === 'assistant') {
       filters.currentLabel = 'ASSISTANT_TO_REPLY';
@@ -31,6 +39,15 @@ export async function getThreads(req, res, next) {
     }
 
     let threads = await store.getThreads(filters);
+
+    // Client role filtering: clientVisible ONLY, hiding internal notes, in-progress drafts, and quiet folder
+    if (req.user?.role === 'client') {
+      threads = threads.filter(
+        (t) =>
+          (t.clientVisible === true || t.currentLabel === 'CLIENT_TO_REPLY') &&
+          t.currentLabel !== 'NO_REPLY_NEEDED'
+      );
+    }
 
     if (segment === 'meetings') {
       threads = threads.filter((t) => t.meetings?.length > 0);
@@ -67,9 +84,36 @@ export async function getThreadById(req, res, next) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 
+    // Strict org scoping: return 404 to avoid leaking existence
+    if (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId) {
+      return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
+    }
+
+    // Client role access gate: must be clientVisible and not in quiet folder
+    if (req.user?.role === 'client') {
+      if (thread.clientVisible === false && thread.currentLabel !== 'CLIENT_TO_REPLY') {
+        return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
+      }
+      if (thread.currentLabel === 'NO_REPLY_NEEDED') {
+        return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
+      }
+    }
+
     const messages = await store.getMessagesByThreadId(thread._id);
-    const events = await store.getClassificationEvents(thread._id);
-    const drafts = await store.getDraftsByThreadId(thread._id);
+    let events = await store.getClassificationEvents(thread._id);
+    let drafts = await store.getDraftsByThreadId(thread._id);
+
+    if (req.user?.role === 'client') {
+      // Hide internal in-progress assistant drafts from executive view
+      drafts = drafts.filter(
+        (d) => d.status === 'pending_client' || d.status === 'approved' || d.status === 'sent'
+      );
+      // Strip assistant internal notes from timeline events
+      events = events.map((e) => ({
+        ...e,
+        assistantNote: undefined,
+      }));
+    }
 
     return res.status(200).json({
       ok: true,
@@ -91,12 +135,13 @@ export async function getThreadById(req, res, next) {
 export async function updateThread(req, res, next) {
   try {
     const { id } = req.params;
-    const updates = req.body;
-
-    const thread = await store.updateThread(id, updates);
-    if (!thread) {
+    const existing = await store.getThreadById(id);
+    if (!existing || (existing.orgId && req.user?.orgId && existing.orgId !== req.user.orgId)) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
+
+    const updates = req.body;
+    const thread = await store.updateThread(id, updates);
 
     return res.status(200).json({ ok: true, data: thread });
   } catch (err) {
@@ -113,7 +158,7 @@ export async function overrideLabel(req, res, next) {
     const { newLabel, note = '' } = req.body;
 
     const thread = await store.getThreadById(id);
-    if (!thread) {
+    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 
@@ -185,7 +230,7 @@ export async function clientDecision(req, res, next) {
     const { action, note = '', draftId } = req.body; // 'approve', 'hand_to_assistant', 'snooze', 'handled'
 
     const thread = await store.getThreadById(id);
-    if (!thread) {
+    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 

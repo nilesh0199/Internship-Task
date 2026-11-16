@@ -269,7 +269,44 @@ export async function syncAccount(req, res, next) {
 export async function disconnectAccount(req, res, next) {
   try {
     const { id } = req.params;
+    const purge = req.query.purge === 'true' || req.body?.purge === true;
+
+    // Verify account exists and belongs to user's organization
+    const accounts = await store.getConnectedAccounts(req.user.orgId);
+    const account = accounts.find((a) => a._id === id || String(a._id) === String(id));
+    if (!account) {
+      return res.status(404).json({
+        ok: false,
+        error: { message: 'Account not found', code: 'ACCOUNT_NOT_FOUND' },
+      });
+    }
+
+    if (purge) {
+      const purgeResult = await store.purgeAccountData(id, req.user.orgId);
+      await store.addActivityLog({
+        orgId: req.user.orgId,
+        actorId: req.user._id,
+        actorName: req.user.name,
+        actorRole: 'assistant',
+        action: 'ACCOUNT_PURGED',
+        details: { provider: account.provider, email: account.emailAddress, purgedThreads: purgeResult.purgedThreadsCount },
+      });
+      return res.status(200).json({
+        ok: true,
+        message: 'Account disconnected and all associated data purged successfully',
+        data: purgeResult,
+      });
+    }
+
     await store.removeConnectedAccount(id);
+    await store.addActivityLog({
+      orgId: req.user.orgId,
+      actorId: req.user._id,
+      actorName: req.user.name,
+      actorRole: 'assistant',
+      action: 'ACCOUNT_DISCONNECTED',
+      details: { provider: account.provider, email: account.emailAddress },
+    });
     return res.status(200).json({ ok: true, message: 'Account disconnected successfully' });
   } catch (err) {
     next(err);

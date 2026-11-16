@@ -46,6 +46,22 @@ function setAuthCookie(res, token) {
 export async function signup(req, res, next) {
   try {
     const { email, password, name, role, clientName, clientEmail, company } = req.body;
+
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    if (
+      normalizedEmail === 'maya@vortexdynamics.com' ||
+      normalizedEmail === 'priya@vortexdynamics.com'
+    ) {
+      return res.status(400).json({
+        ok: false,
+        error: {
+          message:
+            "This is a reserved demo account. Use the 'Try Demo' buttons on the login page to access it.",
+          code: 'RESERVED_DEMO_ACCOUNT',
+        },
+      });
+    }
+
     const existing = await store.findUserByEmail(email);
     if (existing) {
       return res.status(400).json({

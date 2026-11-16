@@ -13,7 +13,7 @@ export async function classifyThread(req, res, next) {
     const { forceRerun = false } = req.body || {};
 
     const thread = await store.getThreadById(threadId);
-    if (!thread) {
+    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 
@@ -33,7 +33,7 @@ export async function rerunAI(req, res, next) {
   try {
     const { threadId } = req.params;
     const thread = await store.getThreadById(threadId);
-    if (!thread) {
+    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 
@@ -57,7 +57,7 @@ export async function summarizeThread(req, res, next) {
   try {
     const { threadId } = req.params;
     const thread = await store.getThreadById(threadId);
-    if (!thread) {
+    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 
@@ -91,7 +91,7 @@ export async function generateDraft(req, res, next) {
   try {
     const { threadId } = req.params;
     const thread = await store.getThreadById(threadId);
-    if (!thread) {
+    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 

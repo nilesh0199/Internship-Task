@@ -571,8 +571,39 @@ export const store = {
     if (isRealDBConnected()) {
       return await ConnectedAccount.findByIdAndDelete(id);
     }
-    memoryConnectedAccounts = memoryConnectedAccounts.filter((a) => a._id !== id);
+    memoryConnectedAccounts = memoryConnectedAccounts.filter((a) => a._id !== id && String(a._id) !== String(id));
     return true;
+  },
+
+  async purgeAccountData(accountId, orgId) {
+    if (isRealDBConnected()) {
+      const threads = await Thread.find({ accountId, orgId });
+      const threadIds = threads.map((t) => t._id);
+
+      await Message.deleteMany({ threadId: { $in: threadIds } });
+      await ClassificationEvent.deleteMany({ threadId: { $in: threadIds } });
+      await Classification.deleteMany({ threadId: { $in: threadIds } });
+      await Draft.deleteMany({ threadId: { $in: threadIds } });
+      await Thread.deleteMany({ _id: { $in: threadIds } });
+      await ConnectedAccount.findByIdAndDelete(accountId);
+      return { purgedThreadsCount: threadIds.length };
+    }
+
+    const threadsToRemove = memoryThreads.filter(
+      (t) => (t.accountId === accountId || String(t.accountId) === String(accountId)) && (!orgId || t.orgId === orgId)
+    );
+    const threadIds = threadsToRemove.map((t) => t._id || t.id);
+
+    memoryThreads = memoryThreads.filter((t) => !threadIds.includes(t._id || t.id));
+    memoryMessages = memoryMessages.filter((m) => !threadIds.includes(m.threadId));
+    memoryClassificationEvents = memoryClassificationEvents.filter((e) => !threadIds.includes(e.threadId));
+    memoryClassifications = memoryClassifications.filter((c) => !threadIds.includes(c.threadId));
+    memoryDrafts = memoryDrafts.filter((d) => !threadIds.includes(d.threadId));
+    memoryConnectedAccounts = memoryConnectedAccounts.filter(
+      (a) => a._id !== accountId && String(a._id) !== String(accountId)
+    );
+
+    return { purgedThreadsCount: threadIds.length };
   },
 
   // Invites
