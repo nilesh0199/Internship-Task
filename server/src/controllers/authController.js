@@ -164,7 +164,7 @@ export async function login(req, res, next) {
  */
 export async function demoLogin(req, res, next) {
   try {
-    const { role } = req.body; // 'assistant' or 'client'
+    const role = req.body?.role || req.query?.role || 'assistant'; // 'assistant' or 'client'
     const targetEmail = role === 'client' ? 'priya@vortexdynamics.com' : 'maya@vortexdynamics.com';
     let user = await store.findUserByEmail(targetEmail);
 
