@@ -1,0 +1,2865 @@
+[
+  {
+    "id": "th_01",
+    "providerThreadId": "gm_th_001",
+    "subject": "Series A Expansion Term Sheet - Final Execution Deadline",
+    "snippet": "Mark Suster: Attached is the revised term sheet with the $18M valuation cap. We need Priya's countersignature by 5 PM today.",
+    "participants": [
+      {
+        "name": "Mark Suster",
+        "email": "mark.suster@upfront.com",
+        "isVip": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      },
+      {
+        "name": "Sarah Jenkins",
+        "email": "s.jenkins@fenwick.com"
+      }
+    ],
+    "lastMessageAt": "2026-11-16T01:10:01.824Z",
+    "lastMessageId": "msg_001_3",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.98,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-16T09:10:01.824Z",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Lead investor and board member Mark Suster requires Priya's explicit electronic signature on the final Series A expansion term sheet before 5 PM today.",
+      "evidence": "We need Priya's countersignature by 5 PM today to lock in the syndicate allocation.",
+      "summary": "Series A term sheet ready for Priya's signature before 5 PM close of business.",
+      "decision": {
+        "question": "Do you approve and countersign the $18M Series A expansion term sheet?",
+        "options": [
+          "Sign DocuSign Link Now",
+          "Request Valuation Revision",
+          "Ask Maya to Schedule Call"
+        ],
+        "deadline": "Today by 5:00 PM EST",
+        "consequence": "Syndicate co-investor allocation will expire and re-open to external parties."
+      },
+      "signalsUsed": [
+        "VIP_MATCH",
+        "PLAYBOOK_LEGAL_RULE",
+        "FINANCIAL_THRESHOLD"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_001_1",
+        "from": {
+          "name": "Mark Suster",
+          "email": "mark.suster@upfront.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T03:10:01.824Z",
+        "snippet": "Priya, draft terms are circulating with legal.",
+        "bodyText": "Priya, draft terms are circulating with legal. Our partners agreed to the valuation compromise. Sarah is reviewing the indemnification clause."
+      },
+      {
+        "id": "msg_001_2",
+        "from": {
+          "name": "Sarah Jenkins",
+          "email": "s.jenkins@fenwick.com"
+        },
+        "to": [
+          {
+            "name": "Mark Suster",
+            "email": "mark.suster@upfront.com"
+          },
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T22:10:01.824Z",
+        "snippet": "Fenwick has approved the final language.",
+        "bodyText": "Fenwick has reviewed and approved the revised protective provisions and clean liquidation preference. Clean execution copy attached."
+      },
+      {
+        "id": "msg_001_3",
+        "from": {
+          "name": "Mark Suster",
+          "email": "mark.suster@upfront.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          },
+          {
+            "name": "Sarah Jenkins",
+            "email": "s.jenkins@fenwick.com"
+          }
+        ],
+        "date": "2026-11-16T01:10:01.824Z",
+        "snippet": "Attached is the revised term sheet with the $18M valuation cap. We need Priya's countersignature by 5 PM today.",
+        "bodyText": "Priya, everything is set. Attached is the revised term sheet with the $18M valuation cap. We need your countersignature on the DocuSign envelope by 5 PM today to lock in the syndicate allocation."
+      }
+    ]
+  },
+  {
+    "id": "th_02",
+    "providerThreadId": "gm_th_002",
+    "subject": "VP of Engineering Offer Package - Approval for Dan Miller",
+    "snippet": "Elena Rostova: Dan accepted verbal numbers, but requires 1.2% equity and $320k base. Need Priya's signoff.",
+    "participants": [
+      {
+        "name": "Elena Rostova",
+        "email": "elena@vortexdynamics.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T23:10:01.824Z",
+    "lastMessageId": "msg_002_2",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.95,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Executive hiring approval exceeds assistant delegated threshold ($320k base + 1.2% equity) and requires Priya's founder signoff.",
+      "evidence": "Need Priya's signoff before we issue the formal Carta grant and offer letter.",
+      "summary": "VP Eng final compensation package awaiting Priya's executive approval.",
+      "decision": {
+        "question": "Approve Dan Miller's VP of Engineering offer ($320k base + 1.2% equity)?",
+        "options": [
+          "Approve Offer Package",
+          "Counter with 1.0% Equity",
+          "Decline and Re-open"
+        ],
+        "deadline": "Tomorrow morning (candidate considering competing Stripe offer)",
+        "consequence": "Candidate will accept competing offer if written agreement is delayed past tomorrow."
+      },
+      "signalsUsed": [
+        "PLAYBOOK_EXECUTIVE_HIRING",
+        "COMPENSATION_THRESHOLD"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_002_1",
+        "from": {
+          "name": "Elena Rostova",
+          "email": "elena@vortexdynamics.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T03:10:01.824Z",
+        "snippet": "Dan's final interview loop was unanimous strong hire.",
+        "bodyText": "Priya, Dan Miller completed the team deep dive. Unanimous positive feedback from all engineering leads."
+      },
+      {
+        "id": "msg_002_2",
+        "from": {
+          "name": "Elena Rostova",
+          "email": "elena@vortexdynamics.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T23:10:01.824Z",
+        "snippet": "Dan accepted verbal numbers, but requires 1.2% equity and $320k base.",
+        "bodyText": "Priya, Dan accepted our verbal parameters, but his agent requested 1.2% equity (we budgeted 1.0%) with $320k base. Need your formal signoff before sending the Carta package."
+      }
+    ]
+  },
+  {
+    "id": "th_03",
+    "providerThreadId": "gm_th_003",
+    "subject": "Updated Commercial Lease Agreement - Signature Requested for HQ Expansion",
+    "snippet": "Sarah Jenkins: Landlord agreed to the sublease clause. Please sign page 24 on behalf of Vortex Dynamics Inc.",
+    "participants": [
+      {
+        "name": "Sarah Jenkins",
+        "email": "s.jenkins@fenwick.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T21:10:01.824Z",
+    "lastMessageId": "msg_003_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.94,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Corporate officer signature legally required on the commercial real estate lease for HQ expansion.",
+      "evidence": "Please sign page 24 on behalf of Vortex Dynamics Inc.",
+      "summary": "Commercial HQ lease execution copy ready for Priya's signature.",
+      "decision": {
+        "question": "Sign the 3-year commercial HQ lease expansion agreement?",
+        "options": [
+          "Sign via DocuSign",
+          "Review Landlord Changes",
+          "Delegate Questions to Maya"
+        ],
+        "deadline": "Friday 5:00 PM",
+        "consequence": "Loss of reserved 4th-floor space to backup commercial tenant."
+      },
+      "signalsUsed": [
+        "LEGAL_CONTRACT_RULE",
+        "VIP_DOMAIN_MATCH"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_003_1",
+        "from": {
+          "name": "Sarah Jenkins",
+          "email": "s.jenkins@fenwick.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T21:10:01.824Z",
+        "snippet": "Landlord agreed to the sublease clause. Please sign page 24.",
+        "bodyText": "Priya, Fenwick finalized negotiations with landlord counsel. They conceded the right to sublease up to 40% of square footage. Please execute on page 24 via the attached portal."
+      }
+    ]
+  },
+  {
+    "id": "th_04",
+    "providerThreadId": "gm_th_004",
+    "subject": "Confidential Partnership / Acquisition Inquiry",
+    "snippet": "David Cole (Databricks Corp Dev): Would love to connect 1:1 with Priya next week regarding strategic technology integration.",
+    "participants": [
+      {
+        "name": "David Cole",
+        "email": "david.cole@databricks.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T19:10:01.824Z",
+    "lastMessageId": "msg_004_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.96,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "High-level strategic inquiry from VP Corp Dev at Databricks marked confidential; requires Priya's direct evaluation.",
+      "evidence": "Would love to connect 1:1 with Priya next week regarding strategic technology integration.",
+      "summary": "Databricks Corp Dev exploring confidential strategic technology integration.",
+      "decision": {
+        "question": "Take private exploratory meeting with Databricks Corp Dev?",
+        "options": [
+          "Instruct Maya to Schedule 30m",
+          "Send Polite Decline",
+          "Request Agenda First"
+        ],
+        "deadline": "This week",
+        "consequence": "Missed potential strategic acquisition or OEM licensing channel."
+      },
+      "signalsUsed": [
+        "PLAYBOOK_STRATEGIC_RULE",
+        "CORP_DEV_FLAG"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_004_1",
+        "from": {
+          "name": "David Cole",
+          "email": "david.cole@databricks.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T19:10:01.824Z",
+        "snippet": "Would love to connect 1:1 with Priya next week.",
+        "bodyText": "Hi Priya, our executive team has been following Vortex Dynamics' robotics perception breakthroughs. I lead strategic investments at Databricks and would value a confidential 1:1 conversation on potential platform collaboration."
+      }
+    ]
+  },
+  {
+    "id": "th_05",
+    "providerThreadId": "gm_th_005",
+    "subject": "Q3 Board Deck Review - Slide 14 ARR Revisions",
+    "snippet": "Mark Suster: Looks solid, but Slide 14 ARR ramp feels conservative. Priya, what is your take on projecting $4.2M instead of $3.6M?",
+    "participants": [
+      {
+        "name": "Mark Suster",
+        "email": "mark.suster@upfront.com",
+        "isVip": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T17:10:01.824Z",
+    "lastMessageId": "msg_005_2",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.93,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "meetings": [
+      {
+        "title": "Q3 Formal Board of Directors Meeting",
+        "startTime": "2026-11-19T03:10:01.824Z",
+        "endTime": "2026-11-19T05:10:01.824Z",
+        "locationOrLink": "Vortex Boardroom & Zoom",
+        "attendees": [
+          "priya@vortexdynamics.com",
+          "mark.suster@upfront.com"
+        ],
+        "isConflict": false
+      }
+    ],
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Direct strategic question from Board Member Mark Suster concerning board presentation financial forecasts.",
+      "evidence": "Priya, what is your take on projecting $4.2M instead of $3.6M?",
+      "summary": "Board member asking Priya's stance on Slide 14 revenue projections.",
+      "decision": {
+        "question": "Revise Slide 14 ARR projection up to $4.2M or keep conservative $3.6M?",
+        "options": [
+          "Keep Conservative $3.6M (Recommend)",
+          "Adopt Bull Case $4.2M",
+          "Discuss on Call"
+        ],
+        "deadline": "Thursday Board Meeting",
+        "consequence": "Board expectations will be locked to whatever number is presented."
+      },
+      "signalsUsed": [
+        "VIP_MATCH",
+        "DIRECT_QUESTION_TO_CLIENT"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_005_1",
+        "from": {
+          "name": "Maya Lin",
+          "email": "maya@vortexdynamics.com"
+        },
+        "to": [
+          {
+            "name": "Mark Suster",
+            "email": "mark.suster@upfront.com"
+          }
+        ],
+        "date": "2026-11-15T03:10:01.824Z",
+        "snippet": "Attached is the draft deck for Thursday's board meeting.",
+        "bodyText": "Hi Mark, on behalf of Priya, attached is the preliminary Q3 Board Deck for review ahead of Thursday."
+      },
+      {
+        "id": "msg_005_2",
+        "from": {
+          "name": "Mark Suster",
+          "email": "mark.suster@upfront.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          },
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T17:10:01.824Z",
+        "snippet": "Slide 14 ARR ramp feels conservative. Priya, what is your take?",
+        "bodyText": "Overall narrative is strong. However, Slide 14 ARR projections feel overly conservative given the pipeline. Priya, what is your take on projecting $4.2M instead of $3.6M? Let me know before tomorrow's dry run."
+      }
+    ]
+  },
+  {
+    "id": "th_06",
+    "providerThreadId": "gm_th_006",
+    "subject": "Dinner with Mom next Sunday?",
+    "snippet": "Anjali Sharma: Hey Priya! Mom is in town next weekend. Can you make Sunday dinner at 7 PM in Palo Alto?",
+    "participants": [
+      {
+        "name": "Anjali Sharma",
+        "email": "anjali.sharma@gmail.com",
+        "isVip": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T15:10:01.824Z",
+    "lastMessageId": "msg_006_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.97,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Immediate family member (Priya's sister) sent personal invitation. Playbook explicitly reserves family inquiries for Priya.",
+      "evidence": "Can you make Sunday dinner at 7 PM in Palo Alto?",
+      "summary": "Family dinner invitation with Mom from sister Anjali.",
+      "decision": {
+        "question": "Confirm Sunday 7 PM dinner with Mom and Anjali?",
+        "options": [
+          "Yes, I will be there",
+          "Suggest 6 PM Instead",
+          "Have Maya check calendar"
+        ],
+        "deadline": "End of week",
+        "consequence": "Family scheduling conflict."
+      },
+      "signalsUsed": [
+        "PLAYBOOK_FAMILY_RULE",
+        "VIP_SENDER"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_006_1",
+        "from": {
+          "name": "Anjali Sharma",
+          "email": "anjali.sharma@gmail.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T15:10:01.824Z",
+        "snippet": "Mom is in town next weekend. Can you make Sunday dinner?",
+        "bodyText": "Hey Priya! Mom is landing on Friday and staying through Tuesday. We want to do a family dinner on Sunday at 7 PM at Evvia in Palo Alto. Let me know if you can break away from founder duties!"
+      }
+    ]
+  },
+  {
+    "id": "th_07",
+    "providerThreadId": "gm_th_007",
+    "subject": "TechCrunch Disrupt Keynote - Confirmation of Fireside Topic",
+    "snippet": "Alex Wilhelm: Priya, we need your selection between the Robotics Foundation Models or Autonomous Supply Chain topic by Friday.",
+    "participants": [
+      {
+        "name": "Alex Wilhelm",
+        "email": "alex.wilhelm@techcrunch.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T13:10:01.824Z",
+    "lastMessageId": "msg_007_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.91,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "High-visibility public keynote topic choice requiring founder editorial decision.",
+      "evidence": "we need your selection between the Robotics Foundation Models or Autonomous Supply Chain topic by Friday.",
+      "summary": "TechCrunch Disrupt fireside topic selection needed from Priya.",
+      "decision": {
+        "question": "Select keynote topic for TechCrunch Disrupt mainstage fireside?",
+        "options": [
+          "Robotics Foundation Models",
+          "Autonomous Supply Chain",
+          "Custom Blended Topic"
+        ],
+        "deadline": "Friday 5 PM",
+        "consequence": "Conference program printing deadline; default topic will be chosen by producers."
+      },
+      "signalsUsed": [
+        "EXECUTIVE_SPEAKING_RULE",
+        "DIRECT_CLIENT_DECISION"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_007_1",
+        "from": {
+          "name": "Alex Wilhelm",
+          "email": "alex.wilhelm@techcrunch.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T13:10:01.824Z",
+        "snippet": "We need your selection between the Robotics Foundation Models or Autonomous Supply Chain topic.",
+        "bodyText": "Hi Priya, excited to host your fireside chat on the Main Stage. Editorial team needs the confirmed title and abstract for the brochure by Friday. Do you prefer 'Robotics Foundation Models' or 'The Autonomous Supply Chain'?"
+      }
+    ]
+  },
+  {
+    "id": "th_08",
+    "providerThreadId": "gm_th_008",
+    "subject": "Emergency Outage SLA Credit Request - $45,000 Authorization",
+    "snippet": "Marcus Vance: As discussed, the 40-minute telemetry outage breached our Tier 1 SLA. We are requesting a $45,000 credit against Q4.",
+    "participants": [
+      {
+        "name": "Marcus Vance",
+        "email": "marcus@acmecorp.com",
+        "isVip": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T11:10:01.824Z",
+    "lastMessageId": "msg_008_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.95,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Enterprise customer requesting $45,000 SLA penalty credit. Value dramatically exceeds assistant authorization limit ($1,000).",
+      "evidence": "We are requesting a $45,000 credit against Q4 billing.",
+      "summary": "Acme Corp demanding $45k outage SLA credit.",
+      "decision": {
+        "question": "Authorize $45,000 SLA billing credit for Acme Corp?",
+        "options": [
+          "Authorize Full $45k Credit",
+          "Offer $20k + Free Enterprise Tier",
+          "Schedule Executive Call"
+        ],
+        "deadline": "Thursday",
+        "consequence": "Risk of contract termination on $600k ARR account."
+      },
+      "signalsUsed": [
+        "FINANCIAL_THRESHOLD_GUARDRAIL",
+        "ENTERPRISE_RISK"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_008_1",
+        "from": {
+          "name": "Marcus Vance",
+          "email": "marcus@acmecorp.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T11:10:01.824Z",
+        "snippet": "We are requesting a $45,000 credit against Q4.",
+        "bodyText": "Priya, our production line halted for 40 minutes during your Tuesday telemetry outage. Per section 8.2 of our Master Services Agreement, we are entitled to a $45,000 credit against our Q4 invoice. Please confirm authorization so accounting can adjust."
+      }
+    ]
+  },
+  {
+    "id": "th_09",
+    "providerThreadId": "gm_th_009",
+    "subject": "Founders Fund Annual CEO Summit - Private Invitation",
+    "snippet": "Brian Singerman: Priya, invitation for you to attend our closed-door CEO summit in Jackson Hole this September.",
+    "participants": [
+      {
+        "name": "Brian Singerman",
+        "email": "bsingerman@foundersfund.com",
+        "isVip": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T09:10:01.824Z",
+    "lastMessageId": "msg_009_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.92,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "VIP Tier-1 investor invitation strictly non-transferable and addressed personally to Priya.",
+      "evidence": "invitation for you to attend our closed-door CEO summit in Jackson Hole",
+      "summary": "Private Founders Fund CEO Summit invitation in Jackson Hole.",
+      "decision": {
+        "question": "Attend Founders Fund Jackson Hole CEO Summit (Sept 18-20)?",
+        "options": [
+          "Accept & Have Maya Book Flights",
+          "Decline with Regrets",
+          "Check Conflicting Board Dates"
+        ],
+        "deadline": "Next Monday",
+        "consequence": "Invitation will be forfeited to waitlisted founder."
+      },
+      "signalsUsed": [
+        "VIP_MATCH",
+        "EXECUTIVE_EVENT_RULE"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_009_1",
+        "from": {
+          "name": "Brian Singerman",
+          "email": "bsingerman@foundersfund.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T09:10:01.824Z",
+        "snippet": "Invitation for you to attend our closed-door CEO summit in Jackson Hole.",
+        "bodyText": "Priya, we are gathering 35 portfolio CEOs for three days in Jackson Hole focusing on AI infrastructure scaling. Strictly non-transferable. Would love to have you participate."
+      }
+    ]
+  },
+  {
+    "id": "th_10",
+    "providerThreadId": "gm_th_010",
+    "subject": "Trap 4: Speaker Agreement - TechCrunch Disrupt Mainstage Execution Copy",
+    "snippet": "Maya Lin prepared draft reply. TechCrunch approved terms, Priya signature link ready.",
+    "participants": [
+      {
+        "name": "Alex Wilhelm",
+        "email": "alex.wilhelm@techcrunch.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T07:10:01.824Z",
+    "lastMessageId": "msg_010_3",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.96,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Maya already handled speaker rider logistics. All terms are approved; final signature link requires Priya's one-click approval.",
+      "evidence": "Maya already confirmed the audio recording clause. Just waiting on Priya's formal click-through.",
+      "summary": "Speaker agreement finalized by Maya; awaiting Priya's 1-tap signoff.",
+      "decision": {
+        "question": "Approve and authorize Maya to execute the TechCrunch Speaker Agreement?",
+        "options": [
+          "Approve Maya's Draft & Send",
+          "Edit Draft",
+          "Review Rider Changes"
+        ],
+        "deadline": "Today",
+        "consequence": "Stage slot reassignment."
+      },
+      "signalsUsed": [
+        "DRAFT_FOR_APPROVAL_LANE",
+        "LEGAL_SIGNATURE"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_010_1",
+        "from": {
+          "name": "Alex Wilhelm",
+          "email": "alex.wilhelm@techcrunch.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-14T03:10:01.824Z",
+        "snippet": "Please find the speaker agreement attached.",
+        "bodyText": "Attached is the speaker agreement with our standard IP clauses."
+      },
+      {
+        "id": "msg_010_2",
+        "from": {
+          "name": "Maya Lin",
+          "email": "maya@vortexdynamics.com"
+        },
+        "to": [
+          {
+            "name": "Alex Wilhelm",
+            "email": "alex.wilhelm@techcrunch.com"
+          }
+        ],
+        "date": "2026-11-15T03:10:01.824Z",
+        "snippet": "We need the video broadcast restriction added to Section 4.",
+        "bodyText": "Hi Alex, Priya's legal team requires adding the non-exclusive clause to section 4. Otherwise approved."
+      },
+      {
+        "id": "msg_010_3",
+        "from": {
+          "name": "Alex Wilhelm",
+          "email": "alex.wilhelm@techcrunch.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          },
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T07:10:01.824Z",
+        "snippet": "Clause accepted. Just waiting on Priya's formal click-through.",
+        "bodyText": "Done! Amendment accepted. Here is the DocuSign execution link awaiting Priya's click."
+      }
+    ]
+  },
+  {
+    "id": "th_11",
+    "providerThreadId": "gm_th_011",
+    "subject": "Catering Menu Selection for Friday All-Hands Lunch",
+    "snippet": "FreshBites Catering: Hi Maya, please confirm menu selections (Mediterranean or Taco Bar) by Wednesday 2 PM.",
+    "participants": [
+      {
+        "name": "FreshBites Catering",
+        "email": "orders@freshbitescatering.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-16T02:10:01.824Z",
+    "lastMessageId": "msg_011_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.98,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Routine team office logistics and catering coordination under assistant delegated authority.",
+      "evidence": "Hi Maya, please confirm menu selections (Mediterranean or Taco Bar) by Wednesday 2 PM.",
+      "summary": "Friday lunch catering menu confirmation needed from Maya.",
+      "signalsUsed": [
+        "ASSISTANT_ROLE_DISPATCH",
+        "OFFICE_LOGISTICS_RULE"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_011_1",
+        "from": {
+          "name": "FreshBites Catering",
+          "email": "orders@freshbitescatering.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-16T02:10:01.824Z",
+        "snippet": "Please confirm menu selections by Wednesday 2 PM.",
+        "bodyText": "Hi Maya, hope your week is off to a great start. For the 65-person all-hands lunch this Friday, do you want to proceed with the Mediterranean Bowl station or the Taco Bar? Total is $840. Please confirm by tomorrow 2 PM."
+      }
+    ]
+  },
+  {
+    "id": "th_12",
+    "providerThreadId": "gm_th_012",
+    "subject": "Flight & Hotel Options: Priya's SF to NYC Tech Week Trip",
+    "snippet": "Navan Executive Travel: Maya, here are the two nonstop United flights and rooms at The Carlyle matching Priya's preferences.",
+    "participants": [
+      {
+        "name": "Navan Executive Travel",
+        "email": "concierge@navan.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-16T00:10:01.824Z",
+    "lastMessageId": "msg_012_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.97,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Executive travel booking and itinerary coordination explicitly assigned to Assistant in Playbook.",
+      "evidence": "Maya, here are the two nonstop United flights and rooms at The Carlyle matching Priya's preferences.",
+      "summary": "Executive travel booking confirmation for NYC Tech Week.",
+      "signalsUsed": [
+        "PLAYBOOK_TRAVEL_RULE",
+        "ASSISTANT_DIRECT_DISPATCH"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_012_1",
+        "from": {
+          "name": "Navan Executive Travel",
+          "email": "concierge@navan.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-16T00:10:01.824Z",
+        "snippet": "Here are the two nonstop United flights and rooms at The Carlyle.",
+        "bodyText": "Hi Maya, per your request, here are options for Priya's Oct 12-15 trip to NYC. Flight: UA 1890 SFO->EWR (dep 8:30 AM). Hotel: Deluxe King at The Carlyle. Let us know which to ticket."
+      }
+    ]
+  },
+  {
+    "id": "th_13",
+    "providerThreadId": "gm_th_013",
+    "subject": "Trap 2: FW: Office Lease Escalation Clause - Parking Space Allocation",
+    "snippet": "Facilities forwarding email: 'Maya, please advise on which parking spots we should keep under the amendment.'",
+    "participants": [
+      {
+        "name": "David Kim (Facilities)",
+        "email": "david.kim@vortexdynamics.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T22:10:01.824Z",
+    "lastMessageId": "msg_013_2",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.94,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Despite Priya being in CC from landlord thread, forwarded action is explicitly assigned to Maya ('Maya, please advise').",
+      "evidence": "Maya, please advise on which parking spots we should keep under the amendment.",
+      "summary": "Facilities requests Maya to allocate remaining parking spaces.",
+      "signalsUsed": [
+        "TRAP_FORWARDED_ACTION_CHECK",
+        "ASSISTANT_NAME_DETECTION"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_013_1",
+        "from": {
+          "name": "Landlord Management",
+          "email": "management@missionbayoffices.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-14T03:10:01.824Z",
+        "snippet": "Under the new lease, you retain 12 reserved parking stalls.",
+        "bodyText": "Notice: Under amendment 3, Vortex Dynamics is entitled to 12 designated parking stalls in Garage B."
+      },
+      {
+        "id": "msg_013_2",
+        "from": {
+          "name": "David Kim (Facilities)",
+          "email": "david.kim@vortexdynamics.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "cc": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T22:10:01.824Z",
+        "snippet": "Maya, please advise on which parking spots we should keep.",
+        "bodyText": "Maya, forwarding the landlord update. Please advise on which parking spots we should designate for executives vs visitors."
+      }
+    ]
+  },
+  {
+    "id": "th_14",
+    "providerThreadId": "gm_th_014",
+    "subject": "Vendor Invoice #INV-2026-884 - Amazon Web Services Support",
+    "snippet": "AWS Accounts: Monthly business support invoice $750.00 ready for payment processing.",
+    "participants": [
+      {
+        "name": "AWS Accounts",
+        "email": "no-reply-aws-billing@amazon.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T20:10:01.824Z",
+    "lastMessageId": "msg_014_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.96,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Invoice amount ($750.00) is below Maya's autonomous approval threshold ($1,000.00) in the Client Playbook.",
+      "evidence": "Monthly business support invoice $750.00 ready for payment processing.",
+      "summary": "AWS Support invoice for $750 within Maya's autonomous limit.",
+      "signalsUsed": [
+        "PLAYBOOK_SPEND_THRESHOLD_ALLOWED",
+        "INVOICE_PROCESSING"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_014_1",
+        "from": {
+          "name": "AWS Accounts",
+          "email": "no-reply-aws-billing@amazon.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T20:10:01.824Z",
+        "snippet": "Monthly business support invoice $750.00 ready for payment processing.",
+        "bodyText": "Your monthly AWS Business Support fee of $750.00 has been calculated for account 9918-2231. Please upload to your Brex account for clearing."
+      }
+    ]
+  },
+  {
+    "id": "th_15",
+    "providerThreadId": "gm_th_015",
+    "subject": "Rescheduling Sync with Notion Head of Design",
+    "snippet": "Rachel Adams (EA to Notion VP): Hi Maya, can we push our Friday design sync to next Tuesday at 2 PM?",
+    "participants": [
+      {
+        "name": "Rachel Adams",
+        "email": "rachel.adams@makenotion.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T18:10:01.824Z",
+    "lastMessageId": "msg_015_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.98,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "meetings": [
+      {
+        "title": "Vortex x Notion Design System Collaboration",
+        "startTime": "2026-11-21T03:10:01.824Z",
+        "endTime": "2026-11-21T03:55:01.824Z",
+        "locationOrLink": "Google Meet",
+        "attendees": [
+          "maya@vortexdynamics.com",
+          "rachel.adams@makenotion.com"
+        ],
+        "isConflict": false
+      }
+    ],
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Assistant-to-assistant calendar rescheduling request falls squarely under Maya's calendar ownership.",
+      "evidence": "can we push our Friday design sync to next Tuesday at 2 PM?",
+      "summary": "Notion EA requesting reschedule of joint design sync to Tuesday.",
+      "signalsUsed": [
+        "PLAYBOOK_CALENDAR_RULE",
+        "PEER_ASSISTANT_COMM"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_015_1",
+        "from": {
+          "name": "Rachel Adams",
+          "email": "rachel.adams@makenotion.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T18:10:01.824Z",
+        "snippet": "Can we push our Friday design sync to next Tuesday at 2 PM?",
+        "bodyText": "Hi Maya, our VP of Design has a conflicting customer sprint on Friday. Would Priya and your team have 45 minutes on Tuesday at 2 PM PST instead? Let me know if that works for Priya's calendar."
+      }
+    ]
+  },
+  {
+    "id": "th_16",
+    "providerThreadId": "gm_th_016",
+    "subject": "Executive Leadership Retreat - Napa Valley Venue Deposit",
+    "snippet": "Meadowood Napa: Maya, attaching contract for 12 cottages. Initial deposit of $500 required to hold dates.",
+    "participants": [
+      {
+        "name": "Meadowood Events",
+        "email": "events@meadowood.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T16:10:01.824Z",
+    "lastMessageId": "msg_016_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.95,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Offsite logistics planning and hold deposit within assistant limits.",
+      "evidence": "Initial deposit of $500 required to hold dates.",
+      "summary": "Napa retreat venue contract and $500 hold deposit for Maya.",
+      "signalsUsed": [
+        "ASSISTANT_LOGISTICS",
+        "SPEND_THRESHOLD_ALLOWED"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_016_1",
+        "from": {
+          "name": "Meadowood Events",
+          "email": "events@meadowood.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T16:10:01.824Z",
+        "snippet": "Initial deposit of $500 required to hold dates.",
+        "bodyText": "Hi Maya, wonderful speaking earlier. We placed a tentative courtesy hold on 12 Estate Suites for Oct 24-26. Please return signed booking form and $500 credit card authorization by Friday."
+      }
+    ]
+  },
+  {
+    "id": "th_17",
+    "providerThreadId": "gm_th_017",
+    "subject": "DHL Customs Clearance Required: Prototype Sensors to UK Partner",
+    "snippet": "DHL Global Forwarding: Consignment #889211 held at Heathrow. Requires commercial invoice with Harmonized Tariff Code.",
+    "participants": [
+      {
+        "name": "DHL Express Support",
+        "email": "clearance-uk@dhl.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T14:10:01.824Z",
+    "lastMessageId": "msg_017_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.97,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "International shipping customs paperwork handling falls under operational assistant responsibilities.",
+      "evidence": "Requires commercial invoice with Harmonized Tariff Code.",
+      "summary": "DHL customs documentation needed for prototype shipment.",
+      "signalsUsed": [
+        "ASSISTANT_LOGISTICS"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_017_1",
+        "from": {
+          "name": "DHL Express Support",
+          "email": "clearance-uk@dhl.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T14:10:01.824Z",
+        "snippet": "Consignment held at Heathrow. Requires commercial invoice.",
+        "bodyText": "Attention Maya Lin: Shipment tracking #889211 requires an updated commercial invoice specifying the HS Code for robotics optical sensors before clearance can be granted."
+      }
+    ]
+  },
+  {
+    "id": "th_18",
+    "providerThreadId": "gm_th_018",
+    "subject": "Studio B Executive Headshots - High-Res Selects for PR",
+    "snippet": "Studio B: Maya, gallery is ready! Please select 4 images for final color grading and retouching.",
+    "participants": [
+      {
+        "name": "Studio B Photography",
+        "email": "alex@studiobphoto.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T12:10:01.824Z",
+    "lastMessageId": "msg_018_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.96,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "PR asset coordination and image selection for press kits delegated to Maya.",
+      "evidence": "Please select 4 images for final color grading and retouching.",
+      "summary": "Priya's PR photo selects ready for Maya's curation.",
+      "signalsUsed": [
+        "ASSISTANT_MEDIA_COORDINATION"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_018_1",
+        "from": {
+          "name": "Studio B Photography",
+          "email": "alex@studiobphoto.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T12:10:01.824Z",
+        "snippet": "Please select 4 images for final color grading and retouching.",
+        "bodyText": "Hi Maya, Priya was fantastic to photograph! Here is the private proofing gallery. Please flag the 4 favorites Priya approved so we can deliver the high-res press assets."
+      }
+    ]
+  },
+  {
+    "id": "th_19",
+    "providerThreadId": "gm_th_019",
+    "subject": "Figma Enterprise Plan - Annual Seat Audit & Renewal",
+    "snippet": "Figma Account Team: Hi Maya, renewal date is in 3 weeks. You currently have 42 editor seats. Please confirm target count.",
+    "participants": [
+      {
+        "name": "Figma Enterprise",
+        "email": "renewals@figma.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T10:10:01.824Z",
+    "lastMessageId": "msg_019_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.94,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Internal software tool seat count audit handled routinely by Maya.",
+      "evidence": "You currently have 42 editor seats. Please confirm target count.",
+      "summary": "Figma annual seat reconciliation for Maya.",
+      "signalsUsed": [
+        "ASSISTANT_OPERATIONS"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_019_1",
+        "from": {
+          "name": "Figma Enterprise",
+          "email": "renewals@figma.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T10:10:01.824Z",
+        "snippet": "Please confirm target seat count for renewal.",
+        "bodyText": "Hi Maya, your company's Figma annual contract renews next month. Let's make sure we true up inactive accounts so you aren't paying for unused licenses."
+      }
+    ]
+  },
+  {
+    "id": "th_20",
+    "providerThreadId": "gm_th_020",
+    "subject": "Boardroom Audio Visual Upgrades - Proposed Date for Testing",
+    "snippet": "Apex AV Solutions: Can our technicians come by Thursday at 8 AM to test the dual Zoom Rooms microphones?",
+    "participants": [
+      {
+        "name": "Apex AV Solutions",
+        "email": "dispatch@apexav.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T08:10:01.824Z",
+    "lastMessageId": "msg_020_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.98,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Office facility maintenance vendor scheduling.",
+      "evidence": "Can our technicians come by Thursday at 8 AM to test the dual Zoom Rooms microphones?",
+      "summary": "AV tech vendor requesting Thursday 8 AM building access.",
+      "signalsUsed": [
+        "ASSISTANT_FACILITIES"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_020_1",
+        "from": {
+          "name": "Apex AV Solutions",
+          "email": "dispatch@apexav.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T08:10:01.824Z",
+        "snippet": "Can technicians test Zoom Rooms microphones on Thursday 8 AM?",
+        "bodyText": "Hi Maya, following up on the microphone echo in Boardroom A. Our lead audio engineer can be on site Thursday at 8 AM before the office opens to run diagnostics. Please confirm if someone can badge us in."
+      }
+    ]
+  },
+  {
+    "id": "th_21",
+    "providerThreadId": "gm_th_021",
+    "subject": "Gift Basket Customization for Retiring Board Observer",
+    "snippet": "Teak & Twine Corporate: Maya, here are the 3 custom gift box mockups for David's retirement.",
+    "participants": [
+      {
+        "name": "Teak & Twine",
+        "email": "corporate@teakandtwine.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T06:10:01.824Z",
+    "lastMessageId": "msg_021_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.97,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "VIP corporate gifting curation explicitly owned by Assistant.",
+      "evidence": "here are the 3 custom gift box mockups for David's retirement.",
+      "summary": "Board observer custom retirement gift selection for Maya.",
+      "signalsUsed": [
+        "ASSISTANT_GIFTING"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_021_1",
+        "from": {
+          "name": "Teak & Twine",
+          "email": "corporate@teakandtwine.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T06:10:01.824Z",
+        "snippet": "Here are the 3 custom gift box mockups.",
+        "bodyText": "Hi Maya, per your brief on David's favorite single malt and artisanal coffees, here are three customized presentation boxes. Total per box is $260. Let us know which ribbons and card inscription you prefer."
+      }
+    ]
+  },
+  {
+    "id": "th_22",
+    "providerThreadId": "gm_th_022",
+    "subject": "Q4 Team Health Benefits Open Enrollment Presentation Dates",
+    "snippet": "Sequoia Benefits: Maya, please select a 30-minute webinar window for the employee open enrollment session.",
+    "participants": [
+      {
+        "name": "Sequoia Benefits",
+        "email": "broker@sequoia.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T05:10:01.824Z",
+    "lastMessageId": "msg_022_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.95,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Internal company-wide HR benefits scheduling.",
+      "evidence": "please select a 30-minute webinar window for the employee open enrollment session.",
+      "summary": "HR benefits open enrollment webinar scheduling for Maya.",
+      "signalsUsed": [
+        "ASSISTANT_HR_COORDINATION"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_022_1",
+        "from": {
+          "name": "Sequoia Benefits",
+          "email": "broker@sequoia.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T05:10:01.824Z",
+        "snippet": "Please select 30-minute webinar window.",
+        "bodyText": "Hi Maya, open enrollment for health and dental plans starts Nov 1st. Can we schedule an all-hands 30-minute overview webinar on either Wednesday Oct 25 or Thursday Oct 26?"
+      }
+    ]
+  },
+  {
+    "id": "th_23",
+    "providerThreadId": "gm_th_023",
+    "subject": "Weekend Floor Waxing & Deep Clean Schedule Confirmation",
+    "snippet": "CleanWorks Commercial: Confirming team will wax Suite 400 floors starting Saturday 6 PM.",
+    "participants": [
+      {
+        "name": "CleanWorks Facilities",
+        "email": "ops@cleanworksbayarea.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T04:10:01.824Z",
+    "lastMessageId": "msg_023_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Office vendor routine maintenance access confirmation.",
+      "evidence": "Confirming team will wax Suite 400 floors starting Saturday 6 PM.",
+      "summary": "Office weekend deep clean schedule confirmation for Maya.",
+      "signalsUsed": [
+        "ASSISTANT_FACILITIES"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_023_1",
+        "from": {
+          "name": "CleanWorks Facilities",
+          "email": "ops@cleanworksbayarea.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T04:10:01.824Z",
+        "snippet": "Confirming team will wax Suite 400 floors.",
+        "bodyText": "Hi Maya, just need your quick confirmation for Saturday 6 PM access so our cleaning team can apply the protective polymer coat to the hardwood."
+      }
+    ]
+  },
+  {
+    "id": "th_24",
+    "providerThreadId": "gm_th_024",
+    "subject": "Airport Chauffeur Dispatch Details for Priya Sharma",
+    "snippet": "Blacklane Chauffeur: Driver Carlos assigned for Thursday 6:00 AM pickup at Palo Alto residence.",
+    "participants": [
+      {
+        "name": "Blacklane Chauffeur Service",
+        "email": "dispatch@blacklane.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T03:10:01.824Z",
+    "lastMessageId": "msg_024_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.98,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Executive transportation and driver logistics management.",
+      "evidence": "Driver Carlos assigned for Thursday 6:00 AM pickup at Palo Alto residence.",
+      "summary": "Executive airport driver details confirmation for Maya.",
+      "signalsUsed": [
+        "ASSISTANT_TRAVEL"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_024_1",
+        "from": {
+          "name": "Blacklane Chauffeur Service",
+          "email": "dispatch@blacklane.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T03:10:01.824Z",
+        "snippet": "Driver Carlos assigned for Thursday 6:00 AM pickup.",
+        "bodyText": "Hello Maya, your booking #BL-9921 for Priya Sharma is confirmed. Driver Carlos (Black Cadillac Escalade, plate #7ABC99) will arrive at 6:00 AM Thursday for transit to SFO Terminal 3."
+      }
+    ]
+  },
+  {
+    "id": "th_25",
+    "providerThreadId": "gm_th_025",
+    "subject": "AWS Cloud Billing Statement: Account 9918-2231-90",
+    "snippet": "Amazon Web Services: Your invoice for September is now available in PDF format.",
+    "participants": [
+      {
+        "name": "Amazon Web Services",
+        "email": "no-reply-aws@amazon.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T03:10:01.824Z",
+    "lastMessageId": "msg_025_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "aiReason": {
+      "provider": "rules_engine",
+      "model": "deterministic_prefilter",
+      "reason": "Automated statement from system noreply sender with no conversational action required.",
+      "evidence": "Your invoice for September is now available in PDF format.",
+      "summary": "Automated AWS billing statement notification.",
+      "signalsUsed": [
+        "PREFILTER_NOREPLY_SENDER",
+        "BULK_RECEIPT"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_025_1",
+        "from": {
+          "name": "Amazon Web Services",
+          "email": "no-reply-aws@amazon.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T03:10:01.824Z",
+        "snippet": "Your invoice for September is now available in PDF format.",
+        "bodyText": "Greetings from Amazon Web Services. This is a billing notification for your account. No response is required."
+      }
+    ]
+  },
+  {
+    "id": "th_26",
+    "providerThreadId": "gm_th_026",
+    "subject": "Trap 3: The Future of Enterprise LLMs - let me know what you think!",
+    "snippet": "Substack Syndicate: Hit reply and tell me your thoughts on autonomous agents in production!",
+    "participants": [
+      {
+        "name": "Substack Syndicate",
+        "email": "newsletter@substacksyndicate.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T03:10:01.824Z",
+    "lastMessageId": "msg_026_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "aiReason": {
+      "provider": "rules_engine",
+      "model": "deterministic_prefilter",
+      "reason": "Marketing newsletter with List-Unsubscribe header. Prefilter safely ignores conversational bait ('hit reply').",
+      "evidence": "List-Unsubscribe header present; bulk automated mailing list distribution.",
+      "summary": "Bulk newsletter with simulated conversational question.",
+      "signalsUsed": [
+        "TRAP_NEWSLETTER_CONVERSATIONAL_BAIT",
+        "PREFILTER_HEADER_LIST_UNSUBSCRIBE"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_026_1",
+        "from": {
+          "name": "Substack Syndicate",
+          "email": "newsletter@substacksyndicate.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T03:10:01.824Z",
+        "headers": {
+          "listUnsubscribe": "<mailto:unsub@substacksyndicate.com>",
+          "precedence": "bulk"
+        },
+        "snippet": "Hit reply and tell me your thoughts on autonomous agents!",
+        "bodyText": "Welcome to this week's breakdown of enterprise LLMs. What are you building? Hit reply and let me know what you think!"
+      }
+    ]
+  },
+  {
+    "id": "th_27",
+    "providerThreadId": "gm_th_027",
+    "subject": "GitHub: Weekly Security & Dependabot Summary for Vortex Core",
+    "snippet": "GitHub Notifications: 0 critical vulnerabilities found across 14 repositories.",
+    "participants": [
+      {
+        "name": "GitHub Notifications",
+        "email": "notifications@github.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-14T03:10:01.824Z",
+    "lastMessageId": "msg_027_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "aiReason": {
+      "provider": "rules_engine",
+      "model": "deterministic_prefilter",
+      "reason": "Automated developer digest notification; no action items.",
+      "evidence": "0 critical vulnerabilities found across 14 repositories.",
+      "summary": "GitHub automated weekly security digest.",
+      "signalsUsed": [
+        "PREFILTER_NOREPLY_SENDER"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_027_1",
+        "from": {
+          "name": "GitHub Notifications",
+          "email": "notifications@github.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-14T03:10:01.824Z",
+        "snippet": "0 critical vulnerabilities found across 14 repositories.",
+        "bodyText": "This is your automated weekly Dependabot security audit. All dependencies in vortexdynamics/core are up to date."
+      }
+    ]
+  },
+  {
+    "id": "th_28",
+    "providerThreadId": "gm_th_028",
+    "subject": "Trap 1: RE: Firmware Update Rollout Schedule - Technical Debate",
+    "snippet": "VP Eng to Lead Architect: Let's stick with canary deployment on cluster 4. (Priya is only CC'd).",
+    "participants": [
+      {
+        "name": "Dan Miller (VP Eng)",
+        "email": "dan.miller@vortexdynamics.com"
+      },
+      {
+        "name": "Kai Chen (Lead Architect)",
+        "email": "kai.chen@vortexdynamics.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-14T03:10:01.824Z",
+    "lastMessageId": "msg_028_2",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.93,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Priya is only CC'd on internal technical debate. No question or decision requested of Priya.",
+      "evidence": "Priya in CC; Kai and Dan resolving deployment cadence between themselves.",
+      "summary": "Internal engineering canary rollout debate (Priya CC'd).",
+      "signalsUsed": [
+        "TRAP_CLIENT_ONLY_CCD",
+        "NO_EXPLICIT_QUESTION"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_028_1",
+        "from": {
+          "name": "Kai Chen",
+          "email": "kai.chen@vortexdynamics.com"
+        },
+        "to": [
+          {
+            "name": "Dan Miller",
+            "email": "dan.miller@vortexdynamics.com"
+          }
+        ],
+        "cc": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-13T03:10:01.824Z",
+        "snippet": "Should we push the firmware build across all fleets tonight?",
+        "bodyText": "Dan, the staging validation hit 99.98% reliability. Can we push firmware build 4.2 to all fleets tonight?"
+      },
+      {
+        "id": "msg_028_2",
+        "from": {
+          "name": "Dan Miller",
+          "email": "dan.miller@vortexdynamics.com"
+        },
+        "to": [
+          {
+            "name": "Kai Chen",
+            "email": "kai.chen@vortexdynamics.com"
+          }
+        ],
+        "cc": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-14T03:10:01.824Z",
+        "snippet": "Let's stick with canary deployment on cluster 4 first.",
+        "bodyText": "Kai, let's keep risk low. Canary deployment on cluster 4 only for 24 hours, then full rollout Thursday if error rates stay flat."
+      }
+    ]
+  },
+  {
+    "id": "th_29",
+    "providerThreadId": "gm_th_029",
+    "subject": "Uber Receipt: $38.42 for Trip in San Francisco",
+    "snippet": "Uber Receipts: Thanks for riding with Uber. Total $38.42 charged to Amex ending in 4102.",
+    "participants": [
+      {
+        "name": "Uber Receipts",
+        "email": "uber.us@uber.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-13T03:10:01.824Z",
+    "lastMessageId": "msg_029_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "aiReason": {
+      "provider": "rules_engine",
+      "model": "deterministic_prefilter",
+      "reason": "Automated transportation expense receipt.",
+      "evidence": "Total $38.42 charged to Amex ending in 4102.",
+      "summary": "Uber transit receipt ($38.42).",
+      "signalsUsed": [
+        "PREFILTER_RECEIPT"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_029_1",
+        "from": {
+          "name": "Uber Receipts",
+          "email": "uber.us@uber.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-13T03:10:01.824Z",
+        "snippet": "Thanks for riding with Uber. Total $38.42 charged.",
+        "bodyText": "Here is your receipt for your ride from SFO International Terminal to 500 Howard St, San Francisco."
+      }
+    ]
+  },
+  {
+    "id": "th_30",
+    "providerThreadId": "gm_th_030",
+    "subject": "United Airlines: Confirmation for SFO -> JFK Flight",
+    "snippet": "United Airlines: Confirmation Code #LK8892. Boarding begins at 7:50 AM at Gate 72.",
+    "participants": [
+      {
+        "name": "United Airlines",
+        "email": "reservations@united.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-13T03:10:01.824Z",
+    "lastMessageId": "msg_030_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "aiReason": {
+      "provider": "rules_engine",
+      "model": "deterministic_prefilter",
+      "reason": "Automated flight confirmation statement; no response expected.",
+      "evidence": "Confirmation Code #LK8892. Boarding begins at 7:50 AM.",
+      "summary": "United Airlines ticket confirmation.",
+      "signalsUsed": [
+        "PREFILTER_AIRLINE_CONFIRMATION"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_030_1",
+        "from": {
+          "name": "United Airlines",
+          "email": "reservations@united.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-13T03:10:01.824Z",
+        "snippet": "Confirmation Code #LK8892. Boarding begins at 7:50 AM.",
+        "bodyText": "Your itinerary is ticketed and confirmed. Passenger: Priya Sharma. Seat: 2B (First Class)."
+      }
+    ]
+  },
+  {
+    "id": "th_31",
+    "providerThreadId": "gm_th_031",
+    "subject": "Stripe: Daily Payout of $14,280.00 Successfully Initiated",
+    "snippet": "Stripe Transfer: Funds will arrive in Silicon Valley Bank account within 1-2 business days.",
+    "participants": [
+      {
+        "name": "Stripe",
+        "email": "notifications@stripe.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-12T03:10:01.824Z",
+    "lastMessageId": "msg_031_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "aiReason": {
+      "provider": "rules_engine",
+      "model": "deterministic_prefilter",
+      "reason": "Routine payment gateway notification.",
+      "evidence": "Funds will arrive in Silicon Valley Bank account within 1-2 business days.",
+      "summary": "Stripe daily payout notification ($14,280).",
+      "signalsUsed": [
+        "PREFILTER_SYSTEM_PAYOUT"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_031_1",
+        "from": {
+          "name": "Stripe",
+          "email": "notifications@stripe.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-12T03:10:01.824Z",
+        "snippet": "Daily Payout of $14,280.00 Successfully Initiated.",
+        "bodyText": "We have initiated a payout of $14,280.00 to your bank account. No further action is required."
+      }
+    ]
+  },
+  {
+    "id": "th_32",
+    "providerThreadId": "gm_th_032",
+    "subject": "Zoom: Cloud Recording Transcript Ready - Executive Sync",
+    "snippet": "Zoom Cloud: The audio transcript for 'Executive Staff Sync' is now processed and available online.",
+    "participants": [
+      {
+        "name": "Zoom Video Communications",
+        "email": "no-reply@zoom.us"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-12T03:10:01.824Z",
+    "lastMessageId": "msg_032_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "aiReason": {
+      "provider": "rules_engine",
+      "model": "deterministic_prefilter",
+      "reason": "Automated video conferencing transcription notice.",
+      "evidence": "audio transcript for 'Executive Staff Sync' is now processed",
+      "summary": "Zoom cloud meeting recording processed.",
+      "signalsUsed": [
+        "PREFILTER_NOREPLY_SENDER"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_032_1",
+        "from": {
+          "name": "Zoom Video Communications",
+          "email": "no-reply@zoom.us"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-12T03:10:01.824Z",
+        "snippet": "Audio transcript for 'Executive Staff Sync' is now processed.",
+        "bodyText": "Your cloud recording from Tuesday is now available for download in your Zoom dashboard."
+      }
+    ]
+  },
+  {
+    "id": "th_33",
+    "providerThreadId": "gm_th_033",
+    "subject": "Trap 5: quick coffee next week?",
+    "snippet": "Mark Suster: Hey Priya, no rush at all, let's grab coffee whenever you're free next month.",
+    "participants": [
+      {
+        "name": "Mark Suster",
+        "email": "mark.suster@upfront.com",
+        "isVip": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-16T01:10:01.824Z",
+    "lastMessageId": "msg_033_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NEEDS_REVIEW",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.62,
+    "reviewState": "FLAGGED_REVIEW",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Sender is a VIP Board Member. Hard guardrail in code blocked LLM's initial NO_REPLY_NEEDED classification and escalated to NEEDS_REVIEW.",
+      "evidence": "Hey Priya, no rush at all, let's grab coffee whenever you're free next month.",
+      "summary": "VIP casual email escalated by guardrails.",
+      "signalsUsed": [
+        "TRAP_VIP_CASUAL_TONE",
+        "GUARDRAIL_VIP_OVERRIDE"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_033_1",
+        "from": {
+          "name": "Mark Suster",
+          "email": "mark.suster@upfront.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-16T01:10:01.824Z",
+        "snippet": "No rush at all, let's grab coffee whenever you're free.",
+        "bodyText": "Hey Priya, hope you're getting some sleep between fundraising calls. No rush at all, let's grab coffee whenever you have an open slot in SF next month. No agenda!"
+      }
+    ]
+  },
+  {
+    "id": "th_34",
+    "providerThreadId": "gm_th_034",
+    "subject": "Introduction: Former Stripe VP of Product exploring advisory",
+    "snippet": "Arjun Sethi: Priya, connecting you with Liam Ross who led Stripe Terminal. Would make a stellar advisor.",
+    "participants": [
+      {
+        "name": "Arjun Sethi",
+        "email": "arjun@tribe.capital"
+      },
+      {
+        "name": "Liam Ross",
+        "email": "liam@rossadvisory.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T21:10:01.824Z",
+    "lastMessageId": "msg_034_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NEEDS_REVIEW",
+    "aiLabel": "NEEDS_REVIEW",
+    "manualOverride": false,
+    "confidence": 0.52,
+    "reviewState": "FLAGGED_REVIEW",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Warm peer introduction with ambiguous advisory intent. Confidence < 0.55 triggers manual assistant evaluation.",
+      "evidence": "Priya, connecting you with Liam Ross who led Stripe Terminal. Would make a stellar advisor.",
+      "summary": "Warm advisory introduction from Tribe Capital partner.",
+      "signalsUsed": [
+        "AMBIGUOUS_PEER_INTRO",
+        "CONFIDENCE_SUB_THRESHOLD"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_034_1",
+        "from": {
+          "name": "Arjun Sethi",
+          "email": "arjun@tribe.capital"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          },
+          {
+            "name": "Liam Ross",
+            "email": "liam@rossadvisory.com"
+          }
+        ],
+        "date": "2026-11-15T21:10:01.824Z",
+        "snippet": "Connecting you with Liam Ross who led Stripe Terminal.",
+        "bodyText": "Priya, meet Liam Ross. Liam scaled Stripe Terminal and is advising 2 hardware-software companies. I thought you two would hit it off. Leaving you to connect!"
+      }
+    ]
+  },
+  {
+    "id": "th_35",
+    "providerThreadId": "gm_th_035",
+    "subject": "Podcast Interview Request: 20-Minute Remote Recording for 'Robots in Plain English'",
+    "snippet": "Host Kevin Reed: We have 8,000 weekly listeners and want to feature Priya's story.",
+    "participants": [
+      {
+        "name": "Kevin Reed",
+        "email": "kevin@robotsinplainenglish.com"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T15:10:01.824Z",
+    "lastMessageId": "msg_035_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NEEDS_REVIEW",
+    "aiLabel": "NEEDS_REVIEW",
+    "manualOverride": false,
+    "confidence": 0.54,
+    "reviewState": "FLAGGED_REVIEW",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Mid-tier media request with ambiguous reach. Maya must decide whether to decline politely or schedule.",
+      "evidence": "We have 8,000 weekly listeners and want to feature Priya's story.",
+      "summary": "Mid-tier tech podcast invitation.",
+      "signalsUsed": [
+        "MEDIA_TIER_AMBIGUOUS",
+        "LOW_CONFIDENCE"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_035_1",
+        "from": {
+          "name": "Kevin Reed",
+          "email": "kevin@robotsinplainenglish.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T15:10:01.824Z",
+        "snippet": "We have 8,000 weekly listeners and want to feature Priya.",
+        "bodyText": "Hi Priya, love the mission of Vortex Dynamics. We produce 'Robots in Plain English' (8,000 engineering downloads/mo). Would love to record a concise 20-minute Zoom conversation."
+      }
+    ]
+  },
+  {
+    "id": "th_36",
+    "providerThreadId": "gm_th_036",
+    "subject": "Notice of Potential Trademark Inquiry: Vortex Perception",
+    "snippet": "Trademark Legal: We represent a legacy UK automation brand and wish to amicably review product category overlaps.",
+    "participants": [
+      {
+        "name": "Clive Sterling",
+        "email": "c.sterling@uk-ip-attorneys.co.uk"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T09:10:01.824Z",
+    "lastMessageId": "msg_036_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NEEDS_REVIEW",
+    "aiLabel": "NEEDS_REVIEW",
+    "manualOverride": false,
+    "confidence": 0.58,
+    "reviewState": "FLAGGED_REVIEW",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Informal foreign IP inquiry. Contains legal terms requiring Maya to route to Fenwick legal counsel before responding.",
+      "evidence": "We represent a legacy UK automation brand and wish to amicably review product category overlaps.",
+      "summary": "UK trademark inquiry requiring legal counsel review.",
+      "signalsUsed": [
+        "LEGAL_SCRUTINY_GUARDRAIL",
+        "RISK_FLAG"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_036_1",
+        "from": {
+          "name": "Clive Sterling",
+          "email": "c.sterling@uk-ip-attorneys.co.uk"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T09:10:01.824Z",
+        "snippet": "We represent a legacy UK automation brand.",
+        "bodyText": "Dear Ms. Sharma, our client owns European registrations for 'VORTEX SENSORS' registered in 2012. We note your recent international filings. We wish to open an informal dialogue to avoid confusion."
+      }
+    ]
+  },
+  {
+    "id": "th_37",
+    "providerThreadId": "gm_th_037",
+    "subject": "Silicon Valley Tech Gives Gala - Host Committee Table Invitation",
+    "snippet": "Gala Co-Chairs: Priya, would Vortex Dynamics be open to sponsoring a $10,000 corporate table?",
+    "participants": [
+      {
+        "name": "Jessica Alba (Gala Co-Chair)",
+        "email": "chairs@svtechgives.org"
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T03:10:01.824Z",
+    "lastMessageId": "msg_037_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NEEDS_REVIEW",
+    "aiLabel": "NEEDS_REVIEW",
+    "manualOverride": false,
+    "confidence": 0.6,
+    "reviewState": "FLAGGED_REVIEW",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Charity gala sponsorship ($10,000) exceeds Maya's budget limit, but Priya has not indicated annual philanthropy budget.",
+      "evidence": "would Vortex Dynamics be open to sponsoring a $10,000 corporate table?",
+      "summary": "Charity gala $10k host committee sponsorship request.",
+      "signalsUsed": [
+        "FINANCIAL_THRESHOLD",
+        "SPONSORSHIP_AMBIGUITY"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_037_1",
+        "from": {
+          "name": "Jessica Alba (Gala Co-Chair)",
+          "email": "chairs@svtechgives.org"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T03:10:01.824Z",
+        "snippet": "Would Vortex Dynamics sponsor a $10,000 table?",
+        "bodyText": "Priya, our annual gala supporting local STEM education takes place at SFMOMA on Nov 14. We would be honored to list Vortex Dynamics on the Host Committee at the $10,000 table tier."
+      }
+    ]
+  },
+  {
+    "id": "th_38",
+    "providerThreadId": "gm_th_038",
+    "subject": "Acme Corp Enterprise License Renewal & Pilot Expansion",
+    "snippet": "Marcus Vance: Maya, we received the draft schedule. Reviewing pilot parameters.",
+    "participants": [
+      {
+        "name": "Marcus Vance",
+        "email": "marcus@acmecorp.com",
+        "isVip": true
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T21:10:01.824Z",
+    "lastMessageId": "msg_038_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.94,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Maya is currently negotiating routine pilot scheduling with customer procurement.",
+      "evidence": "Maya, we received the draft schedule. Reviewing pilot parameters.",
+      "summary": "Acme Corp reviewing pilot deployment schedule with Maya.",
+      "signalsUsed": [
+        "ASSISTANT_ACTIVE_NEGOTIATION"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_038_1",
+        "from": {
+          "name": "Marcus Vance",
+          "email": "marcus@acmecorp.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T21:10:01.824Z",
+        "snippet": "Maya, we received the draft schedule.",
+        "bodyText": "Hi Maya, thanks for sending the updated hardware timeline. Our procurement team is doing their final pass this afternoon."
+      }
+    ],
+    "followUpScenario": {
+      "triggerLabel": "Escalate to Client Signoff",
+      "injectedMessage": {
+        "id": "msg_038_followup",
+        "from": {
+          "name": "Marcus Vance",
+          "email": "marcus@acmecorp.com"
+        },
+        "to": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          },
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-16T03:10:01.827Z",
+        "snippet": "Marcus Vance: Procurement has added a hard condition. We need Priya's personal signoff on the 20% discount amendment before 4 PM today.",
+        "bodyText": "Priya & Maya — Our CFO just intervened. To approve the $600k contract today, we need Priya's explicit signoff on a 20% volume discount amendment before 4 PM EST, or the budget slips to 2027."
+      },
+      "newLabel": "CLIENT_TO_REPLY",
+      "newReason": "Enterprise client injected non-negotiable discount condition requiring Priya's personal CEO authority before 4 PM.",
+      "decision": {
+        "question": "Approve 20% enterprise discount amendment for Acme Corp ($600k contract)?",
+        "options": [
+          "Approve 20% Discount",
+          "Counter with 10% + 2-Year Term",
+          "Decline Discount"
+        ],
+        "deadline": "Today by 4:00 PM EST",
+        "consequence": "Loss of $600k deal to competing robotics vendor."
+      }
+    }
+  },
+  {
+    "id": "th_39",
+    "providerThreadId": "gm_th_039",
+    "subject": "Hotel Room Block for Engineering Offsite in Tahoe",
+    "snippet": "Tahoe Mountain Lodge: Maya, following up on the credit card pre-authorization form for the 18 rooms.",
+    "participants": [
+      {
+        "name": "Tahoe Mountain Lodge",
+        "email": "reservations@tahoemtnlodge.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T19:10:01.824Z",
+    "lastMessageId": "msg_039_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.96,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Maya is resolving credit card authorization for offsite rooms.",
+      "evidence": "following up on the credit card pre-authorization form for the 18 rooms.",
+      "summary": "Tahoe offsite hotel billing pending Maya's action.",
+      "signalsUsed": [
+        "ASSISTANT_OPERATIONS"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_039_1",
+        "from": {
+          "name": "Tahoe Mountain Lodge",
+          "email": "reservations@tahoemtnlodge.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T19:10:01.824Z",
+        "snippet": "Following up on credit card pre-authorization form.",
+        "bodyText": "Hi Maya, please send back the signed authorization page so we can finalize the booking for your engineering offsite."
+      }
+    ],
+    "followUpScenario": {
+      "triggerLabel": "Resolve Thread to No Reply",
+      "injectedMessage": {
+        "id": "msg_039_followup",
+        "from": {
+          "name": "Tahoe Mountain Lodge",
+          "email": "reservations@tahoemtnlodge.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-16T03:10:01.827Z",
+        "snippet": "Tahoe Mountain Lodge: All set! We received payment and confirmed reservation #884920.",
+        "bodyText": "Maya, we received the Brex corporate authorization! Reservation #884920 is fully confirmed and receipt is attached. Nothing more needed from your side. See you next month!"
+      },
+      "newLabel": "NO_REPLY_NEEDED",
+      "newReason": "Vendor confirmed transaction complete and booking fully locked. Thread is resolved."
+    }
+  },
+  {
+    "id": "th_40",
+    "providerThreadId": "gm_th_040",
+    "subject": "Board Prep Session with CFO & Strategic Advisors",
+    "snippet": "CFO Tom Miller: Tentative hold for prep session. Proposing times.",
+    "participants": [
+      {
+        "name": "Tom Miller (CFO)",
+        "email": "tom.miller@vortexdynamics.com"
+      },
+      {
+        "name": "Maya Lin",
+        "email": "maya@vortexdynamics.com",
+        "isAssistant": true
+      },
+      {
+        "name": "Priya Sharma",
+        "email": "priya@vortexdynamics.com",
+        "isClient": true
+      }
+    ],
+    "lastMessageAt": "2026-11-15T17:10:01.824Z",
+    "lastMessageId": "msg_040_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.9,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "delegated",
+    "aiReason": {
+      "provider": "gemini",
+      "model": "gemini-2.0-flash",
+      "reason": "Internal CFO calendar coordination for upcoming board dry-run.",
+      "evidence": "Tentative hold for prep session. Proposing times.",
+      "summary": "CFO proposing board rehearsal meeting windows.",
+      "signalsUsed": [
+        "CALENDAR_COORDINATION"
+      ]
+    },
+    "messages": [
+      {
+        "id": "msg_040_1",
+        "from": {
+          "name": "Tom Miller (CFO)",
+          "email": "tom.miller@vortexdynamics.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "cc": [
+          {
+            "name": "Priya Sharma",
+            "email": "priya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-15T17:10:01.824Z",
+        "snippet": "Need 60 minutes with Priya for board prep.",
+        "bodyText": "Maya, we need a 60-minute dry run before the board convenes. Can we hold Thursday afternoon?"
+      }
+    ],
+    "followUpScenario": {
+      "triggerLabel": "Inject Conflicting Meeting",
+      "injectedMessage": {
+        "id": "msg_040_followup",
+        "from": {
+          "name": "Tom Miller (CFO)",
+          "email": "tom.miller@vortexdynamics.com"
+        },
+        "to": [
+          {
+            "name": "Maya Lin",
+            "email": "maya@vortexdynamics.com"
+          }
+        ],
+        "date": "2026-11-16T03:10:01.827Z",
+        "snippet": "Tom Miller: I locked Thursday 3:00 PM EST for the prep dry-run. Let me know if that works.",
+        "bodyText": "Maya, my only opening before the board meets is Thursday at 3:00 PM to 4:00 PM EST. Let's lock that slot down."
+      },
+      "newLabel": "NEEDS_REVIEW",
+      "newReason": "Direct calendar conflict detected: Thursday 3:00 PM overlaps with existing Investor Sync on Thread #5.",
+      "meetings": [
+        {
+          "title": "Executive Board Dry-Run Rehearsal",
+          "startTime": "2026-11-19T03:10:01.824Z",
+          "endTime": "2026-11-19T04:10:01.824Z",
+          "locationOrLink": "Vortex Main Boardroom",
+          "attendees": [
+            "priya@vortexdynamics.com",
+            "tom.miller@vortexdynamics.com",
+            "maya@vortexdynamics.com"
+          ],
+          "isConflict": true
+        }
+      ]
+    }
+  }
+]

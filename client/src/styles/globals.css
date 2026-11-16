@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-warm: #FAF8F5;
+    --text-ink: #111827;
+  }
+
+  body {
+    background-color: var(--bg-warm);
+    color: var(--text-ink);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
