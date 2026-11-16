@@ -54,16 +54,16 @@
 ---
 
 ## Phase 4: Assistant Workspace UI (Power 3-Pane Desktop) `[M]`
-- [ ] **4.1**: Set up React Router and Query Client providers in `/client/src/app/`. `[M]`
-- [ ] **4.2**: Build 3-pane layout shell (Sidebar | Center List | Detail Inspector). `[M]`
-- [ ] **4.3**: Implement Left Sidebar with Segment Tabs (Assistant, Client, No Reply, Waiting, Action, Meetings, Needs Review). `[M]`
-- [ ] **4.4**: Implement Sync Status Pill in sidebar header with live status indication. `[M]`
-- [ ] **4.5**: Implement Center Thread List with `<ThreadRow />`, `<LabelBadge />`, and `<ConfidenceDots />`. `[M]`
-- [ ] **4.6**: Implement Thread Reader pane with full email message chain. `[M]`
-- [ ] **4.7**: Implement Right-hand `<AIReasonPanel />` with quoted evidence and one-click override. `[M]`
-- [ ] **4.8**: Implement Reclassification Timeline component showing label history per thread. `[M]`
-- [ ] **4.9**: Implement Keyboard Shortcuts (`j`, `k`, `Enter`, `c`, `a`, `n`, `r`, `e`, `/`). `[M]`
-- [ ] **4.10**: Implement The Quiet Folder view with transparency audit banner. `[M]`
+- [x] **4.1**: Set up React Router and Query Client providers in `/client/src/app/`. `[M]`
+- [x] **4.2**: Build 3-pane layout shell (Sidebar | Center List | Detail Inspector). `[M]`
+- [x] **4.3**: Implement Left Sidebar with Segment Tabs (Assistant, Client, No Reply, Waiting, Action, Meetings, Needs Review). `[M]`
+- [x] **4.4**: Implement Sync Status Pill in sidebar header with live status indication. `[M]`
+- [x] **4.5**: Implement Center Thread List with `<ThreadRow />`, `<LabelBadge />`, and `<ConfidenceDots />`. `[M]`
+- [x] **4.6**: Implement Thread Reader pane with full email message chain. `[M]`
+- [x] **4.7**: Implement Right-hand `<AIReasonPanel />` with quoted evidence and one-click override. `[M]`
+- [x] **4.8**: Implement Reclassification Timeline component showing label history per thread. `[M]`
+- [x] **4.9**: Implement Keyboard Shortcuts (`j`, `k`, `Enter`, `c`, `a`, `n`, `r`, `e`, `/`). `[M]`
+- [x] **4.10**: Implement The Quiet Folder view with transparency audit banner. `[M]`
 
 ---
 
