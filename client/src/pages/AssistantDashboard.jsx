@@ -40,7 +40,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function AssistantDashboard() {
+export function AssistantDashboard({ initialOpenPlaybook = false }) {
   const { user, client } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -58,7 +58,7 @@ export function AssistantDashboard() {
 
   // Modals & Drawers
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [isPlaybookOpen, setIsPlaybookOpen] = useState(false);
+  const [isPlaybookOpen, setIsPlaybookOpen] = useState(initialOpenPlaybook);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [collapsedMessages, setCollapsedMessages] = useState({});
 

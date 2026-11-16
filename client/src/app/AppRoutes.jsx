@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from '../features/auth/AuthContext.jsx';
 import { Login } from '../pages/Login.jsx';
@@ -10,9 +10,21 @@ import { AccountsPage } from '../pages/AccountsPage.jsx';
 import { PrototypeHelpPopover } from '../components/PrototypeHelpPopover.jsx';
 import { Landing } from '../pages/Landing.jsx';
 import { AgentControlRoom } from '../pages/AgentControlRoom.jsx';
+import { toast } from 'sonner';
+
+function RoleForbiddenRedirect({ userRole, allowedRoles }) {
+  useEffect(() => {
+    const targetArea = allowedRoles.includes('assistant') ? 'assistants' : 'clients';
+    toast.error(`That area is for ${targetArea}.`);
+  }, [allowedRoles]);
+
+  const homePath = userRole === 'client' ? '/client' : '/assistant';
+  return <Navigate to={homePath} replace />;
+}
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -26,11 +38,12 @@ function ProtectedRoute({ children, allowedRoles }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    const nextParam = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?next=${nextParam}`} replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to={user.role === 'client' ? '/client' : '/assistant'} replace />;
+    return <RoleForbiddenRedirect userRole={user.role} allowedRoles={allowedRoles} />;
   }
 
   return children;
@@ -124,6 +137,22 @@ export function AppRoutes() {
             element={
               <ProtectedRoute allowedRoles={['assistant']}>
                 <AccountsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/accounts"
+            element={
+              <ProtectedRoute allowedRoles={['assistant']}>
+                <AccountsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/playbook"
+            element={
+              <ProtectedRoute allowedRoles={['assistant']}>
+                <AssistantDashboard initialOpenPlaybook={true} />
               </ProtectedRoute>
             }
           />

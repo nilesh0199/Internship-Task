@@ -1,15 +1,37 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext.jsx';
 import { Mail, Lock, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export function Login() {
   const { login, demoLogin } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextParam = searchParams.get('next');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  function getRedirectPath(role) {
+    if (nextParam) {
+      try {
+        const decoded = decodeURIComponent(nextParam);
+        if (decoded.startsWith('/') && !decoded.startsWith('//')) {
+          const isClientRoute = decoded.startsWith('/client');
+          if (role === 'client' && isClientRoute) {
+            return decoded;
+          }
+          if (role === 'assistant' && !isClientRoute) {
+            return decoded;
+          }
+        }
+      } catch {
+        // Ignore malformed next param
+      }
+    }
+    return role === 'client' ? '/client' : '/assistant';
+  }
 
   async function handleStandardLogin(e) {
     e.preventDefault();
@@ -17,11 +39,8 @@ export function Login() {
     setLoading(true);
     try {
       const res = await login(email, password);
-      if (res.data?.user?.role === 'client') {
-        navigate('/client');
-      } else {
-        navigate('/assistant');
-      }
+      const userRole = res.data?.user?.role;
+      navigate(getRedirectPath(userRole), { replace: true });
     } catch (err) {
       setError(err.message || 'Login failed. Please check credentials.');
     } finally {
@@ -34,11 +53,8 @@ export function Login() {
     setLoading(true);
     try {
       const res = await demoLogin(role);
-      if (role === 'client') {
-        navigate('/client');
-      } else {
-        navigate('/assistant');
-      }
+      const userRole = res.data?.user?.role || role;
+      navigate(getRedirectPath(userRole), { replace: true });
     } catch (err) {
       setError(err.message || 'Demo initialization failed');
     } finally {
