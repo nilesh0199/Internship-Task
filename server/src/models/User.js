@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema(
     orgId: { type: String, required: true, index: true },
     clientId: { type: String, default: null }, // Linked client profile for client accounts
     avatarUrl: { type: String, default: null },
+    lastLoginAt: { type: Date, default: null },
     preferences: {
       notificationsEnabled: { type: Boolean, default: true },
       theme: { type: String, enum: ['editorial', 'light', 'dark'], default: 'editorial' },

@@ -541,6 +541,25 @@ export const store = {
     return userDoc;
   },
 
+  async updateUser(userId, updateData) {
+    if (isRealDBConnected()) {
+      return await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true });
+    }
+    const idx = memoryUsers.findIndex((u) => u._id === userId || String(u._id) === String(userId));
+    if (idx !== -1) {
+      memoryUsers[idx] = { ...memoryUsers[idx], ...updateData, updatedAt: new Date() };
+      return memoryUsers[idx];
+    }
+    return null;
+  },
+
+  async findUserByClientId(clientId) {
+    if (isRealDBConnected()) {
+      return await User.findOne({ clientId });
+    }
+    return memoryUsers.find((u) => u.clientId === clientId) || null;
+  },
+
   // Clients
   async getClientByOrgId(orgId) {
     if (isRealDBConnected()) {
@@ -564,6 +583,22 @@ export const store = {
     }
     memoryClients.push(doc);
     return doc;
+  },
+
+  async updateClient(clientId, updateData) {
+    if (isRealDBConnected()) {
+      return await Client.findByIdAndUpdate(clientId, { $set: updateData }, { new: true });
+    }
+    const idx = memoryClients.findIndex((c) => c._id === clientId);
+    if (idx !== -1) {
+      memoryClients[idx] = { ...memoryClients[idx], ...updateData, updatedAt: new Date() };
+      return memoryClients[idx];
+    }
+    if (memoryClients.length > 0) {
+      memoryClients[0] = { ...memoryClients[0], ...updateData, updatedAt: new Date() };
+      return memoryClients[0];
+    }
+    return null;
   },
 
   async updatePlaybook(clientId, playbookUpdates) {
@@ -892,7 +927,13 @@ export const store = {
   // Invites
   async createInvite(inviteData) {
     const id = 'inv_' + Date.now();
-    const doc = { _id: id, ...inviteData, createdAt: new Date() };
+    const doc = {
+      _id: id,
+      status: 'pending',
+      ...inviteData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
     if (isRealDBConnected()) {
       return await Invite.create(doc);
     }
@@ -900,18 +941,62 @@ export const store = {
     return doc;
   },
 
-  async findInvite(tokenOrCode) {
+  async findInviteByTokenHash(tokenHash) {
     if (isRealDBConnected()) {
-      return await Invite.findOne({
-        $or: [{ token: tokenOrCode }, { code: tokenOrCode }],
-        status: 'pending',
-      });
+      return await Invite.findOne({ tokenHash });
     }
-    return (
-      memoryInvites.find(
-        (i) => (i.token === tokenOrCode || i.code === tokenOrCode) && i.status === 'pending'
-      ) || null
+    return memoryInvites.find((i) => i.tokenHash === tokenHash) || null;
+  },
+
+  async findLatestInviteByClient({ orgId, clientId }) {
+    if (isRealDBConnected()) {
+      return await Invite.findOne({ orgId, clientId }).sort({ createdAt: -1 });
+    }
+    const matches = memoryInvites
+      .filter((i) => i.orgId === orgId && (i.clientId === clientId || !clientId))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return matches[0] || null;
+  },
+
+  async updateInvite(idOrHash, updateData) {
+    if (isRealDBConnected()) {
+      return await Invite.findOneAndUpdate(
+        { $or: [{ _id: idOrHash }, { tokenHash: idOrHash }] },
+        { $set: { ...updateData, updatedAt: new Date() } },
+        { new: true }
+      );
+    }
+    const idx = memoryInvites.findIndex(
+      (i) => i._id === idOrHash || i.tokenHash === idOrHash
     );
+    if (idx !== -1) {
+      memoryInvites[idx] = { ...memoryInvites[idx], ...updateData, updatedAt: new Date() };
+      return memoryInvites[idx];
+    }
+    return null;
+  },
+
+  async revokePendingInvitesForClient({ orgId, clientId, email }) {
+    if (isRealDBConnected()) {
+      return await Invite.updateMany(
+        {
+          orgId,
+          $or: [{ clientId }, { email: email?.toLowerCase() }],
+          status: 'pending',
+        },
+        { $set: { status: 'revoked', updatedAt: new Date() } }
+      );
+    }
+    memoryInvites.forEach((inv) => {
+      if (
+        inv.orgId === orgId &&
+        (inv.clientId === clientId || (email && inv.email.toLowerCase() === email.toLowerCase())) &&
+        inv.status === 'pending'
+      ) {
+        inv.status = 'revoked';
+        inv.updatedAt = new Date();
+      }
+    });
   },
 
   // Agent Runs & Autonomous Audit Logs

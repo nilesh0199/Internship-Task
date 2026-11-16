@@ -8,6 +8,7 @@ import { AIReasonPanel } from '../components/AIReasonPanel.jsx';
 import { DraftEditor } from '../components/DraftEditor.jsx';
 import { CommandPaletteModal } from '../components/CommandPaletteModal.jsx';
 import { PlaybookModal } from '../components/PlaybookModal.jsx';
+import { ClientProfileModal } from '../components/ClientProfileModal.jsx';
 import { ActivityLogDrawer } from '../components/ActivityLogDrawer.jsx';
 import { LabelBadge } from '../components/LabelBadge.jsx';
 import Avatar from '../components/Avatar.jsx';
@@ -59,6 +60,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
   // Modals & Drawers
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isPlaybookOpen, setIsPlaybookOpen] = useState(initialOpenPlaybook);
+  const [isClientProfileOpen, setIsClientProfileOpen] = useState(false);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [collapsedMessages, setCollapsedMessages] = useState({});
 
@@ -314,19 +316,25 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
         {/* ================================================================= */}
         <aside className="w-60 bg-[#FAF8F5] border-r border-borderMuted/70 flex flex-col flex-shrink-0 select-none">
           {/* Client Boss Profile Card */}
-          <div className="m-3 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card">
+          <button
+            type="button"
+            onClick={() => setIsClientProfileOpen(true)}
+            className="m-3 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card hover:border-black/15 transition-all text-left group cursor-pointer active:scale-98"
+            title="Manage Priya's Profile & Invitation Link"
+          >
             <div className="flex items-center gap-2.5">
               <Avatar name={client?.name || 'Priya Sharma'} email={client?.email} size="md" />
-              <div className="truncate">
-                <div className="text-xs font-bold text-ink-900 truncate tracking-tight">
-                  {client?.name || 'Priya Sharma'}
+              <div className="truncate flex-1">
+                <div className="text-xs font-bold text-ink-900 truncate tracking-tight group-hover:text-accent transition-colors flex items-center justify-between">
+                  <span>{client?.name || 'Priya Sharma'}</span>
+                  <span className="text-[10px] text-accent font-medium font-mono hidden group-hover:inline">Invite →</span>
                 </div>
                 <div className="text-[11px] text-ink-500 truncate">
                   {client?.title || 'Founder & CEO'}
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
           {/* Segments Navigation List */}
           <nav className="flex-1 overflow-y-auto app-pane-scroll px-2.5 py-1 space-y-1 text-xs">
@@ -711,6 +719,12 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
         isOpen={isPlaybookOpen}
         onClose={() => setIsPlaybookOpen(false)}
         onPlaybookUpdated={loadThreads}
+      />
+
+      <ClientProfileModal
+        isOpen={isClientProfileOpen}
+        onClose={() => setIsClientProfileOpen(false)}
+        onClientUpdated={loadThreads}
       />
 
       <ActivityLogDrawer
