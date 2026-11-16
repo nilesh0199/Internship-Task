@@ -83,13 +83,13 @@
 ---
 
 ## Phase 6: AI Collaboration & Draft-for-Approval Lane `[M]`
-- [ ] **6.1**: Implement AI Draft Generator (`POST /api/ai/generate-draft`) referencing client persona and tone. `[M]`
-- [ ] **6.2**: Implement Assistant Draft Composer with "Send to Client for Approval" action. `[M]`
-- [ ] **6.3**: Connect draft approval state between Client Queue and Assistant Workspace. `[M]`
-- [ ] **6.4**: Implement simulated/safe email send controller gated by `SEND_ENABLED`. `[M]`
-- [ ] **6.5**: Implement Aging & Proactive Nudge banners (threads in client queue > 24h/48h). `[M]`
-- [ ] **6.6**: Implement Command Palette (Cmd+K) with LLM tool calling over MongoDB threads. `[M]`
-- [ ] **6.7**: Implement Meetings strip with calendar conflict badge detection. `[M]`
+- [x] **6.1**: Implement AI Draft Generator (`POST /api/ai/generate-draft`) referencing client persona and tone. `[M]`
+- [x] **6.2**: Implement Assistant Draft Composer with "Send to Client for Approval" action. `[M]`
+- [x] **6.3**: Connect draft approval state between Client Queue and Assistant Workspace. `[M]`
+- [x] **6.4**: Implement simulated/safe email send controller gated by `SEND_ENABLED`. `[M]`
+- [x] **6.5**: Implement Aging & Proactive Nudge banners (threads in client queue > 24h/48h). `[M]`
+- [x] **6.6**: Implement Command Palette (Cmd+K) with LLM tool calling over MongoDB threads. `[M]`
+- [x] **6.7**: Implement Meetings strip with calendar conflict badge detection. `[M]`
 
 ---
 

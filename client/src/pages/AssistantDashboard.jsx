@@ -484,6 +484,26 @@ export function AssistantDashboard() {
 
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <button
+                        onClick={async () => {
+                          try {
+                            const res = await api.get(`/ai/summarize/${selectedThreadData.thread._id}`);
+                            if (res.ok) {
+                              toast.info('Conversation Summary', {
+                                description: res.data.summary,
+                                duration: 8000,
+                              });
+                            }
+                          } catch (err) {
+                            toast.error('Summarize failed: ' + err.message);
+                          }
+                        }}
+                        className="px-2.5 py-1 rounded-lg border border-borderMuted text-xs font-medium text-ink-700 hover:bg-ink-100 transition flex items-center gap-1"
+                        title="Summarize conversation"
+                      >
+                        <Sparkles className="h-3.5 w-3.5 text-accent" />
+                        <span>Summarize</span>
+                      </button>
+                      <button
                         onClick={() => handleToggleArchive(selectedThreadData.thread)}
                         className="p-1.5 rounded-lg border border-borderMuted text-ink-600 hover:bg-ink-100 transition"
                         title="Archive thread"
