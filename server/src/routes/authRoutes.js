@@ -6,6 +6,7 @@ import {
   demoLogin,
   getMe,
   logout,
+  getClients,
   createInvite,
   getClientProfile,
   updateClientProfile,
@@ -13,11 +14,12 @@ import {
   revokeInvite,
   validateInviteToken,
   acceptInvite,
+  getAuthStatus,
   SignupSchema,
   LoginSchema,
   DemoLoginSchema,
 } from '../controllers/authController.js';
-import { authRequired, roleRequired, validate, authRateLimiter } from '../middleware/index.js';
+import { authRequired, roleRequired, validate, authRateLimiter, loginRateLimiter } from '../middleware/index.js';
 
 const router = express.Router();
 
@@ -41,12 +43,14 @@ const AcceptInviteSchema = z.object({
 });
 
 router.post('/signup', authRateLimiter, validate(SignupSchema), signup);
-router.post('/login', authRateLimiter, validate(LoginSchema), login);
+router.post('/login', loginRateLimiter, validate(LoginSchema), login);
 router.post('/demo-login', validate(DemoLoginSchema), demoLogin);
+router.get('/status', getAuthStatus);
 router.get('/me', authRequired, getMe);
 router.post('/logout', logout);
 
 // Assistant Client Profile & Invite Management
+router.get('/clients', authRequired, roleRequired(['assistant']), getClients);
 router.get('/client-profile', authRequired, roleRequired(['assistant']), getClientProfile);
 router.put(
   '/client-profile',

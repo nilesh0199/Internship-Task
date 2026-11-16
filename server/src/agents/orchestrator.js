@@ -66,7 +66,10 @@ export async function runAgentsForThread(thread, trigger = 'ingest', overrideCtx
   }
 
   const orgId = thread.orgId || overrideCtx.orgId;
-  const client = overrideCtx.client || (await store.getClientByOrgId(orgId));
+  const client =
+    overrideCtx.client ||
+    (thread.clientId ? await store.getClientById(thread.clientId) : null) ||
+    (await store.getClientByOrgId(orgId));
   const playbook = client?.playbook || {};
   const messages = overrideCtx.messages || (await store.getMessagesByThreadId(thread._id || thread.id)) || [];
 
@@ -107,6 +110,20 @@ export async function runAgentsForThread(thread, trigger = 'ingest', overrideCtx
         continue;
       }
 
+      // Check notes applied
+      let notesApplied = result.details?.notesApplied || null;
+      if (!notesApplied) {
+        const agentMem = client?.agentMemory?.[agent.id] || { instruction: '', memories: [] };
+        const activeMems = (agentMem.memories || []).filter((m) => m.enabled !== false);
+        if (result.usedLLM && (agentMem.instruction || activeMems.length > 0)) {
+          notesApplied = activeMems.length > 0
+            ? `Used instruction + ${activeMems.length} ${activeMems.length === 1 ? 'memory' : 'memories'}`
+            : 'Used instruction';
+        } else if (!result.usedLLM && (agentMem.instruction || activeMems.length > 0)) {
+          notesApplied = 'notes not applied (AI unavailable)';
+        }
+      }
+
       // 3. Persist AgentRun record in store
       const runRecord = await store.addAgentRun({
         agentId: agent.id,
@@ -123,6 +140,7 @@ export async function runAgentsForThread(thread, trigger = 'ingest', overrideCtx
         undo: result.undo || null,
         usedLLM: !!result.usedLLM,
         fallbackUsed: !!result.fallbackUsed,
+        notesApplied,
         durationMs: result.durationMs || Date.now() - startedAt.getTime(),
         startedAt,
       });
@@ -277,27 +295,74 @@ export async function getAgentRegistryWithStats(orgId, client) {
   });
 }
 
+const clientRunLocks = new Map();
+
 /**
- * Lightweight scheduler interval (every 5 minutes)
- * Enabled only when process.env.ENABLE_AGENT_TICK === 'true'
+ * Executes agents across all active threads for a specific client
+ * Guarded by per-client in-process lock
+ */
+export async function runAgentsForClient(clientId, orgId, trigger = 'schedule_tick') {
+  if (clientRunLocks.get(clientId)) {
+    logger.debug({ clientId }, '[Orchestrator] Client agent run in progress, skipping overlapping run');
+    return { skipped: true, clientId };
+  }
+  clientRunLocks.set(clientId, true);
+  try {
+    const client = await store.getClientById(clientId);
+    const threads = await store.getThreads({ orgId, clientId, isArchived: false });
+    let totalRuns = 0;
+
+    await processInChunks(threads, 3, async (thread) => {
+      try {
+        const runs = await runAgentsForThread(thread, trigger, { orgId, client });
+        totalRuns += runs.length;
+      } catch (err) {
+        logger.warn({ threadId: thread._id, err: err.message }, '[Orchestrator] Batch agent failure on client thread');
+      }
+    });
+
+    return {
+      clientId,
+      threadsProcessed: threads.length,
+      runsGenerated: totalRuns,
+    };
+  } finally {
+    clientRunLocks.delete(clientId);
+  }
+}
+
+/**
+ * Autonomous background agent scheduler (every 3 minutes per client)
+ * Guarded by per-client in-process lock and randomized jitter (1000-5000ms)
+ * Enabled by default unless process.env.ENABLE_AGENT_TICK === 'false' or in test environment
  */
 let schedulerInterval = null;
 
 export function startAgentScheduler() {
-  if (process.env.ENABLE_AGENT_TICK !== 'true') {
+  if (process.env.ENABLE_AGENT_TICK === 'false' || process.env.NODE_ENV === 'test') {
     return;
   }
   if (schedulerInterval) return;
 
-  logger.info('[Orchestrator] Starting 5-minute agent background scheduler tick');
+  logger.info('[Orchestrator] Starting 3-minute per-client background scheduler');
   schedulerInterval = setInterval(async () => {
     try {
-      const orgId = 'org_vortex_001'; // Default demo org
-      await runAgentsForOrg(orgId, 'schedule_tick');
+      const orgId = 'org_vortex_001';
+      const clients = await store.getClientsByOrgId(orgId);
+      for (const c of clients) {
+        const jitterMs = Math.floor(1000 + Math.random() * 4000);
+        setTimeout(async () => {
+          try {
+            await runAgentsForClient(c._id, orgId, 'schedule_tick');
+          } catch (cErr) {
+            logger.warn({ clientId: c._id, err: cErr.message }, '[Orchestrator] Background client tick failure');
+          }
+        }, jitterMs);
+      }
     } catch (err) {
       logger.error({ err: err.message }, '[Orchestrator] Scheduler tick failed');
     }
-  }, 5 * 60 * 1000);
+  }, 3 * 60 * 1000);
 }
 
 export function stopAgentScheduler() {

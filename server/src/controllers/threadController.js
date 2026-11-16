@@ -8,7 +8,7 @@ import { env } from '../config/env.js';
  */
 export async function getThreads(req, res, next) {
   try {
-    const { segment = 'all', search, limit = 50, accountId } = req.query;
+    const { segment = 'all', search, limit = 50, accountId, clientId } = req.query;
 
     const filters = {
       isArchived: segment === 'archived',
@@ -16,6 +16,12 @@ export async function getThreads(req, res, next) {
 
     if (req.user?.orgId) {
       filters.orgId = req.user.orgId;
+    }
+
+    if (req.user?.role === 'client' && req.user.clientId) {
+      filters.clientId = req.user.clientId;
+    } else if (req.user?.role === 'assistant' && clientId) {
+      filters.clientId = clientId;
     }
 
     if (accountId) {
@@ -103,6 +109,11 @@ export async function getThreadById(req, res, next) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 
+    // Strict client scoping for client role: cannot access cross-client threads
+    if (req.user?.role === 'client' && req.user.clientId && thread.clientId && thread.clientId !== req.user.clientId) {
+      return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
+    }
+
     // Client role access gate: must be clientVisible and not in quiet folder
     if (req.user?.role === 'client') {
       if (thread.clientVisible === false && thread.currentLabel !== 'CLIENT_TO_REPLY') {
@@ -164,6 +175,24 @@ export async function updateThread(req, res, next) {
 }
 
 /**
+ * Assistant archive thread action
+ */
+export async function archiveThread(req, res, next) {
+  try {
+    const { id } = req.params;
+    const existing = await store.getThreadById(id);
+    if (!existing || (existing.orgId && req.user?.orgId && existing.orgId !== req.user.orgId)) {
+      return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
+    }
+
+    const thread = await store.updateThread(id, { isArchived: true });
+    return res.status(200).json({ ok: true, data: thread });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * Assistant manual override of AI label
  */
 export async function overrideLabel(req, res, next) {
@@ -172,7 +201,11 @@ export async function overrideLabel(req, res, next) {
     const { newLabel, note = '' } = req.body;
 
     const thread = await store.getThreadById(id);
-    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
+    if (
+      !thread ||
+      (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId) ||
+      (req.user?.role === 'client' && req.user.clientId && thread.clientId && thread.clientId !== req.user.clientId)
+    ) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 
@@ -244,7 +277,11 @@ export async function clientDecision(req, res, next) {
     const { action, note = '', draftId } = req.body; // 'approve', 'hand_to_assistant', 'snooze', 'handled'
 
     const thread = await store.getThreadById(id);
-    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
+    if (
+      !thread ||
+      (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId) ||
+      (req.user?.role === 'client' && req.user.clientId && thread.clientId && thread.clientId !== req.user.clientId)
+    ) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 
@@ -310,6 +347,23 @@ export async function clientDecision(req, res, next) {
     }
 
     return res.status(200).json({ ok: true, data: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/assistant/today
+ * Cross-client command view for Assistant Maya: prioritized "Needs you now", client cards, meetings, overnight runs
+ */
+export async function getTodaySummary(req, res, next) {
+  try {
+    const orgId = req.user?.orgId || 'org_vortex_001';
+    const summary = await store.getTodaySummary(orgId);
+    return res.status(200).json({
+      ok: true,
+      data: summary,
+    });
   } catch (err) {
     next(err);
   }

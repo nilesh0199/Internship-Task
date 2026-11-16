@@ -26,7 +26,10 @@ export const RunAgentsSchema = z.object({
 export async function getAgents(req, res, next) {
   try {
     const orgId = req.user?.orgId || 'org_vortex_001';
-    const client = await store.getClientByOrgId(orgId);
+    const targetClientId = req.query?.clientId;
+    const client = targetClientId
+      ? await store.getClientByOrgAndId(orgId, targetClientId)
+      : await store.getClientByOrgId(orgId);
     const registry = await getAgentRegistryWithStats(orgId, client);
 
     return res.status(200).json({
@@ -45,10 +48,13 @@ export async function getAgents(req, res, next) {
 export async function updateAgentPolicy(req, res, next) {
   try {
     const { id } = req.params;
-    const { enabled, autonomy } = req.body;
+    const { enabled, autonomy, clientId } = req.body;
     const orgId = req.user?.orgId || 'org_vortex_001';
+    const targetClientId = clientId || req.query?.clientId;
 
-    const client = await store.getClientByOrgId(orgId);
+    const client = targetClientId
+      ? await store.getClientByOrgAndId(orgId, targetClientId)
+      : await store.getClientByOrgId(orgId);
     if (!client) {
       return res.status(404).json({
         ok: false,
@@ -123,11 +129,12 @@ export async function updateAgentPolicy(req, res, next) {
  */
 export async function getAgentRuns(req, res, next) {
   try {
-    const { threadId, agentId, outcome, limit = 50 } = req.query;
+    const { threadId, agentId, outcome, clientId, limit = 50 } = req.query;
     const orgId = req.user?.orgId || 'org_vortex_001';
 
     const runs = await store.getAgentRuns({
       orgId,
+      clientId,
       threadId,
       agentId,
       outcome,
@@ -286,6 +293,323 @@ export async function getAgentStream(req, res, next) {
         timestamp: new Date().toISOString(),
         count: runs.length,
         runs,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/agents/status
+ * Heartbeat and execution status for background agent ticker
+ */
+export async function getAgentStatus(req, res, next) {
+  try {
+    const orgId = req.user?.orgId || 'org_vortex_001';
+    const runs = await store.getAgentRuns({ orgId, limit: 1 });
+    const lastRun = runs[0];
+    const isGlobalEnabled = process.env.AGENTS_ENABLED !== 'false';
+    const isTickEnabled = process.env.ENABLE_AGENT_TICK !== 'false';
+
+    return res.status(200).json({
+      ok: true,
+      data: {
+        isRunning: isGlobalEnabled && isTickEnabled,
+        enabled: isGlobalEnabled,
+        tickEnabled: isTickEnabled,
+        lastRunAt: lastRun ? lastRun.createdAt : new Date(),
+        activeAgentsCount: 6,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/agents/:id/memory
+ * Read standing instruction and active memories for this client + agent
+ */
+export async function getAgentMemory(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { clientId } = req.query;
+    const orgId = req.user?.orgId || 'org_vortex_001';
+    const client = clientId
+      ? await store.getClientByOrgAndId(orgId, clientId)
+      : await store.getClientByOrgId(orgId);
+
+    if (!client) {
+      return res.status(404).json({ ok: false, error: { message: 'Client not found', code: 'NOT_FOUND' } });
+    }
+
+    const memory = await store.getAgentMemory(client._id, id);
+    return res.status(200).json({ ok: true, data: memory });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PUT /api/agents/:id/memory
+ * Update standing instruction (max 500 chars)
+ */
+export async function updateAgentMemory(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { clientId } = req.query;
+    const { instruction } = req.body;
+    const orgId = req.user?.orgId || 'org_vortex_001';
+    const client = clientId
+      ? await store.getClientByOrgAndId(orgId, clientId)
+      : await store.getClientByOrgId(orgId);
+
+    if (!client) {
+      return res.status(404).json({ ok: false, error: { message: 'Client not found', code: 'NOT_FOUND' } });
+    }
+
+    // Sanitize and length-limit (max 500 chars)
+    const sanitizedInstruction = typeof instruction === 'string'
+      ? instruction.slice(0, 500).replace(/<[^>]*>/g, '').trim()
+      : '';
+
+    const updatedClient = await store.updateAgentMemory(client._id, id, { instruction: sanitizedInstruction }, {
+      actorId: req.user._id,
+      actorName: req.user.name,
+      orgId,
+    });
+
+    const agentMem = updatedClient?.agentMemory?.[id] || { instruction: sanitizedInstruction, memories: [] };
+    return res.status(200).json({ ok: true, data: agentMem });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/agents/:id/memories
+ * Add a memory entry (max 200 chars)
+ */
+export async function addAgentMemoryEntry(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { clientId } = req.query;
+    const { text, source = 'manual', pinned = false, enabled = true } = req.body;
+    const orgId = req.user?.orgId || 'org_vortex_001';
+    const client = clientId
+      ? await store.getClientByOrgAndId(orgId, clientId)
+      : await store.getClientByOrgId(orgId);
+
+    if (!client) {
+      return res.status(404).json({ ok: false, error: { message: 'Client not found', code: 'NOT_FOUND' } });
+    }
+
+    if (!text || typeof text !== 'string') {
+      return res.status(400).json({ ok: false, error: { message: 'Memory text is required', code: 'INVALID_INPUT' } });
+    }
+
+    const sanitizedText = text.slice(0, 200).replace(/<[^>]*>/g, '').trim();
+
+    const entry = await store.addAgentMemoryEntry(
+      client._id,
+      id,
+      {
+        text: sanitizedText,
+        source: source === 'learned' ? 'learned' : 'manual',
+        pinned: !!pinned,
+        enabled: enabled !== false,
+      },
+      {
+        actorId: req.user._id,
+        actorName: req.user.name,
+        orgId,
+      }
+    );
+
+    return res.status(201).json({ ok: true, data: entry });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/agents/:id/memories/:memoryId
+ * Remove a specific memory entry
+ */
+export async function deleteAgentMemoryEntry(req, res, next) {
+  try {
+    const { id, memoryId } = req.params;
+    const { clientId } = req.query;
+    const orgId = req.user?.orgId || 'org_vortex_001';
+    const client = clientId
+      ? await store.getClientByOrgAndId(orgId, clientId)
+      : await store.getClientByOrgId(orgId);
+
+    if (!client) {
+      return res.status(404).json({ ok: false, error: { message: 'Client not found', code: 'NOT_FOUND' } });
+    }
+
+    await store.removeAgentMemoryEntry(client._id, id, memoryId, {
+      actorId: req.user._id,
+      actorName: req.user.name,
+      orgId,
+    });
+
+    return res.status(200).json({ ok: true, message: 'Memory removed successfully' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PATCH /api/agents/:id/memories/:memoryId
+ * Toggle enable/pinned or update text of a memory entry
+ */
+export async function toggleAgentMemoryEntry(req, res, next) {
+  try {
+    const { id, memoryId } = req.params;
+    const { clientId } = req.query;
+    const { enabled, pinned, text } = req.body;
+    const orgId = req.user?.orgId || 'org_vortex_001';
+    const client = clientId
+      ? await store.getClientByOrgAndId(orgId, clientId)
+      : await store.getClientByOrgId(orgId);
+
+    if (!client) {
+      return res.status(404).json({ ok: false, error: { message: 'Client not found', code: 'NOT_FOUND' } });
+    }
+
+    const updates = {};
+    if (typeof enabled === 'boolean') updates.enabled = enabled;
+    if (typeof pinned === 'boolean') updates.pinned = pinned;
+    if (typeof text === 'string') updates.text = text.slice(0, 200).trim();
+
+    const updated = await store.toggleAgentMemoryEntry(client._id, id, memoryId, updates, {
+      actorId: req.user._id,
+      actorName: req.user.name,
+      orgId,
+    });
+
+    return res.status(200).json({ ok: true, data: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/agents/:id/dry-run
+ * Dry-run preview of an agent on a sample thread: with notes vs without notes
+ */
+export async function dryRunAgent(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { clientId, threadId } = req.body || {};
+    const orgId = req.user?.orgId || 'org_vortex_001';
+    const client = clientId
+      ? await store.getClientByOrgAndId(orgId, clientId)
+      : await store.getClientByOrgId(orgId);
+
+    if (!client) {
+      return res.status(404).json({ ok: false, error: { message: 'Client not found', code: 'NOT_FOUND' } });
+    }
+
+    let thread = null;
+    if (threadId) {
+      thread = await store.getThreadById(threadId);
+    }
+    if (!thread) {
+      const threads = await store.getThreads({ orgId, clientId: client._id, isArchived: false });
+      thread = threads[0] || (await store.getThreads({ orgId }))[0];
+    }
+
+    if (!thread) {
+      return res.status(404).json({ ok: false, error: { message: 'No sample thread found for dry run', code: 'THREAD_NOT_FOUND' } });
+    }
+
+    const messages = await store.getMessagesByThreadId(thread._id || thread.id);
+    const agent = AGENT_REGISTRY.find((a) => a.id === id);
+    if (!agent) {
+      return res.status(404).json({ ok: false, error: { message: 'Agent not found', code: 'AGENT_NOT_FOUND' } });
+    }
+
+    // 1. Run WITHOUT notes (clean memory)
+    const clientWithoutNotes = {
+      ...client,
+      agentMemory: {
+        ...(client.agentMemory || {}),
+        [id]: { instruction: '', memories: [] },
+      },
+    };
+    const ctxWithoutNotes = {
+      trigger: 'manual',
+      orgId,
+      client: clientWithoutNotes,
+      playbook: client.playbook || {},
+      messages,
+      autonomy: 'propose',
+      isDryRun: true,
+    };
+
+    let resultWithoutNotes = null;
+    try {
+      resultWithoutNotes = await agent.run({ ...thread }, ctxWithoutNotes);
+    } catch (e) {
+      resultWithoutNotes = { outcome: 'error', summary: e.message };
+    }
+
+    // 2. Run WITH notes
+    const ctxWithNotes = {
+      trigger: 'manual',
+      orgId,
+      client,
+      playbook: client.playbook || {},
+      messages,
+      autonomy: 'propose',
+      isDryRun: true,
+    };
+
+    let resultWithNotes = null;
+    try {
+      resultWithNotes = await agent.run({ ...thread }, ctxWithNotes);
+    } catch (e) {
+      resultWithNotes = { outcome: 'error', summary: e.message };
+    }
+
+    const mem = client.agentMemory?.[id] || { instruction: '', memories: [] };
+    const enabledMemCount = (mem.memories || []).filter((m) => m.enabled !== false).length;
+    let notesSummary = 'No active notes configured';
+    if (mem.instruction && enabledMemCount > 0) {
+      notesSummary = `Applied instruction + ${enabledMemCount} active ${enabledMemCount === 1 ? 'memory' : 'memories'}`;
+    } else if (mem.instruction) {
+      notesSummary = 'Applied standing instruction';
+    } else if (enabledMemCount > 0) {
+      notesSummary = `Applied ${enabledMemCount} active ${enabledMemCount === 1 ? 'memory' : 'memories'}`;
+    }
+
+    return res.status(200).json({
+      ok: true,
+      data: {
+        agentId: id,
+        thread: {
+          _id: thread._id,
+          subject: thread.subject,
+          currentLabel: thread.currentLabel,
+          snippet: thread.snippet,
+        },
+        withoutNotes: {
+          action: resultWithoutNotes?.action,
+          outcome: resultWithoutNotes?.outcome,
+          summary: resultWithoutNotes?.summary,
+          confidence: resultWithoutNotes?.confidence,
+        },
+        withNotes: {
+          action: resultWithNotes?.action,
+          outcome: resultWithNotes?.outcome,
+          summary: resultWithNotes?.summary,
+          confidence: resultWithNotes?.confidence,
+          notesApplied: notesSummary,
+        },
       },
     });
   } catch (err) {

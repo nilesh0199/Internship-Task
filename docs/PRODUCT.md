@@ -24,12 +24,19 @@ Reply responsibility is **never content-universal**—it is strictly **client-sp
 
 ---
 
-## 3. User Personas
+## 3. User Personas & Multi-Client Operational Model
 
 | Persona | Role | Key Goals & Behavior | Pain Points |
 | :--- | :--- | :--- | :--- |
-| **Maya** | Personal Assistant / EA | Power user. Operates on desktop with dual monitors. Manages inbox organization, scheduling, follow-ups, and drafts. Demands keyboard shortcuts, batch triage, auditability, and speed. | Anxious about missing VIP emails or misinterpreting client intentions; constantly chases Priya for replies. |
-| **Priya Sharma** | Founder & CEO (Client) | Mobile-first executive. Wants near-zero time spent in raw email. Needs distilled decisions, clear choices, and one-tap approvals. | Overwhelmed by long email chains; dreads opening her inbox; misses critical contract deadlines. |
+| **Maya Lin** | Executive Assistant (PA) | Manages multiple executive clients (Priya & Rohan). Uses persistent client tabs and a cross-client "Today" command dashboard. Configures Agent Notes and handles escalated decisions. | Anxious about missing VIP threads or context-switching between executive priorities without a unified command view. |
+| **Priya Sharma** | Founder & CEO, Vortex Dynamics (Client 1) | Hands-on founder. Personally handles investors, legal contracts > $1,000, and hiring approvals. Delegates vendors and routine administration. | Overwhelmed by email volume; needs one-tap decision cards and curated briefings. |
+| **Rohan Kapoor** | COO, Apex Freight Logistics (Client 2) | Ultra-delegator. Handles only board members, government audits (DOT/OSHA), and personal family items. Assistant handles all invoices up to $15,000, carrier negotiations, and scheduling. | Dreads operational noise; demands short, crisp drafts signed from "Rohan's Office". |
+
+### Multi-Client Architecture Principles
+1. **Assistant owns the client roster**: Maya manages multiple executive clients within her organization (`org_vortex_001`).
+2. **Absolute Client Isolation**: A client user is cryptographically bound to their `clientId` and sees only their own decision cards and client-visible threads. Accessing cross-client IDs returns a strict HTTP 404.
+3. **AI Agents Work Per-Client**: AI agents are not separate users—they are the assistant's specialized workforce acting according to each client's specific playbook and agent notes.
+4. **No Persona Switcher**: In compliance with real authentication standards, no persona switcher exists. Clients and assistants use separate sessions and authentication cookies.
 
 ---
 
@@ -170,9 +177,63 @@ A centralized management console for assistants:
 - **Live Activity Feed**: Real-time event log with human-readable explanations, execution latency, LLM vs rule indicator, and instant **1-Click Undo**.
 - **Zero-Send Hard Safety Gate**: Agents can never transmit external messages; sending always requires explicit human confirmation.
 
+### 6.14. Per-Client Agent Memory ("Agent Notes")
+Each executive client maintains an independent agent memory store (`client.agentMemory`) that shapes how autonomous agents behave for that specific client without altering code:
+- **Standing Instructions**: Freeform guidance up to 500 characters injected directly into LLM prompts (e.g. for Drafting: *"Sign as 'Rohan's Office'. Never use exclamation marks. Under 40 words."*).
+- **Active Memories**: Dynamic bullet entries up to 200 characters categorized as user-defined (`source: 'user'`) or auto-learned from assistant overrides (`source: 'learned'`).
+- **Memory Controls**: Assistant can pin critical memories, temporarily disable them, or delete stale instructions.
+- **Strict Guardrail Invariant**: Agent Notes can never loosen hard security boundaries. For example, Guardian Agent notes only *widen* watchwords and strictness; user preferences cannot downgrade VIP protection or override financial scrutiny rules.
+- **Side-by-Side Dry-Run Preview**: Assistant can test memory changes against real client threads using `POST /api/agents/:id/dry-run` to inspect `withNotes` vs `withoutNotes` diffs before saving.
+
+### 6.15. Background Agent Execution & Live Feed
+Autonomous agents operate continuously in the background to keep executive inboxes pristine:
+- **3-Minute Autonomous Ticker**: Server runs an interval ticker that queries pending threads across all clients and triggers autonomous passes with randomized jitter (1–5s) and per-client in-process concurrency locks.
+- **Top Bar Status Indicator**: Persistent live indicator displays `"Agents running · last ran X min ago"` or turns amber if the scheduler is paused.
+- **Demo Live Feed (`DEMO_LIVE_FEED`)**: A simulated inbound message injector fires every 75 seconds in demo environments, introducing alternating threads for Priya Sharma and Rohan Kapoor to exhibit real-time agent triage and classification.
+
 ---
 
-## 7. Product Roadmap (Future Phases — Post-Prototype)
+## 8. Authentication & Real Role Separation Architecture
+
+> [!IMPORTANT]
+> **Product Model Invariant**: Assistant (a human PA) and Client (a human executive) are two real users with distinct accounts, credentials, and passwords. AI agents are **not** users; they work for the assistant and are managed via the Agent Control Room. No user can switch personas without authenticating with that account's credentials.
+
+### 8.1. Account Isolation & Role Scoping
+1. **Persona Switcher Removed**: The legacy client-side role switcher was completely removed. There is no route or backdoor (`POST /api/auth/switch-role` is deleted and returns 404) permitting a user to become another user.
+2. **Account Menu**: Users have standard account navigation: avatar initials, display name, role badge, connected accounts navigation (for assistants), and an authoritative **Sign Out** button that wipes the `httpOnly` JWT session cookie.
+3. **Role-Enforced Routing**:
+   - `client/src/app/AppRoutes.jsx` wraps routes in `<ProtectedRoute allowedRoles={['assistant']}>` (`/assistant`, `/agents`, `/accounts`, `/playbook`, `/onboarding`) and `<ProtectedRoute allowedRoles={['client']}>` (`/client`).
+   - Access attempts to wrong-role routes trigger a polite toast (`"That area is for assistants/clients."`) and redirect users to their own home view.
+4. **Authoritative Server Security**:
+   - Middleware `authRequired` validates the cryptographic JWT cookie.
+   - Middleware `roleRequired(['assistant'])` or `roleRequired(['client'])` enforces permission at every endpoint. Client tokens receive `403 Forbidden` on assistant routes; assistant tokens receive `403 Forbidden` on client decision routes.
+
+### 8.2. Cryptographic Single-Use Client Invite Flow
+1. **Invite Generation (`POST /api/auth/invite-client`)**:
+   - Maya opens the Client Profile modal in her sidebar and clicks **"Invite client"** (or **"Resend invite"**).
+   - Server generates a cryptographically secure 32-byte token (`crypto.randomBytes(32).toString('hex')`).
+   - **Zero Database Exposure**: The database stores only the SHA-256 hash (`crypto.createHash('sha256').update(token).digest('hex')`). Even if database contents are read, the raw token is never exposed.
+   - The invite is bound to `orgId + clientId + email` with a 7-day expiration (`expiresAt`).
+   - The API returns `{ inviteUrl: "${CLIENT_URL}/invite/${rawToken}" }` for Maya to copy and deliver to Priya.
+2. **Invite Acceptance (`/invite/:token`)**:
+   - Priya opens the single-use invite URL. The token is validated against active, non-expired, non-revoked records.
+   - Priya sets a password (minimum 10 characters with visual strength hints).
+   - Password is hashed using **bcrypt cost factor 12**.
+   - Upon acceptance, the invite status updates to `accepted`, invalidating the token permanently (subsequent submissions return `400 INVITE_ALREADY_USED`).
+   - An `httpOnly` session cookie is issued and Priya is redirected directly to `/client`.
+
+### 8.3. Dual-Window Live Sync
+1. **Lightweight Polling**:
+   - `AssistantDashboard.jsx` polls every ~8 seconds in the background (`loadThreads(true)`).
+   - When Priya approves or defers an item in her browser window or incognito session, Maya's dashboard updates counts and labels live without page reloads.
+2. **Demo Mode Governance (`DEMO_MODE`)**:
+   - Controlled by the `DEMO_MODE` environment variable (default `true` in development, `false` in production).
+   - When active, pre-seeds known demo accounts (Maya Lin & Priya Sharma) with password `password123` and provides collapsible quick-copy helper cards on `/login`.
+   - When `DEMO_MODE=false`, sample account seeding and `POST /api/auth/demo-login` are completely disabled (HTTP 404).
+
+---
+
+## 9. Product Roadmap (Future Phases — Post-Prototype)
 
 1. **Autonomous Calendar Rescheduling**: Two-way Google Calendar / Outlook Calendar integration with automatic conflict resolution.
 2. **Multi-Client Switching**: Seamless tenant switching for assistants who support multiple executives.

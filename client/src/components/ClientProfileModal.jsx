@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function ClientProfileModal({ isOpen, onClose, onClientUpdated }) {
+export function ClientProfileModal({ isOpen, onClose, onClientUpdated, clientId }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [inviting, setInviting] = useState(false);
@@ -39,19 +39,20 @@ export function ClientProfileModal({ isOpen, onClose, onClientUpdated }) {
     if (isOpen) {
       loadClientProfile();
     }
-  }, [isOpen]);
+  }, [isOpen, clientId]);
 
   async function loadClientProfile() {
     setLoading(true);
     try {
-      const res = await api.get('/auth/client-profile');
+      const qParam = clientId ? `?clientId=${clientId}` : '';
+      const res = await api.get(`/auth/client-profile${qParam}`);
       if (res.ok && res.data) {
         if (res.data.client) {
           setClientData({
-            name: res.data.client.name || 'Priya Sharma',
-            email: res.data.client.email || 'priya@vortexdynamics.com',
-            title: res.data.client.title || 'Founder & CEO',
-            company: res.data.client.company || 'Vortex Dynamics',
+            name: res.data.client.name || 'Executive Client',
+            email: res.data.client.email || 'client@example.com',
+            title: res.data.client.title || 'Executive',
+            company: res.data.client.company || 'Company',
           });
         }
         setInviteStatus(res.data.inviteStatus || 'not_invited');
@@ -69,7 +70,7 @@ export function ClientProfileModal({ isOpen, onClose, onClientUpdated }) {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await api.put('/auth/client-profile', clientData);
+      const res = await api.put('/auth/client-profile', { ...clientData, clientId });
       if (res.ok) {
         toast.success('Client profile updated');
         onClientUpdated?.(res.data.client);
@@ -85,7 +86,7 @@ export function ClientProfileModal({ isOpen, onClose, onClientUpdated }) {
     setInviting(true);
     setCopied(false);
     try {
-      const res = await api.post('/auth/invite-client', clientData);
+      const res = await api.post('/auth/invite-client', { ...clientData, clientId });
       if (res.ok && res.data) {
         setGeneratedInviteUrl(res.data.inviteUrl);
         setInviteStatus('pending');
@@ -104,7 +105,7 @@ export function ClientProfileModal({ isOpen, onClose, onClientUpdated }) {
     setInviting(true);
     setCopied(false);
     try {
-      const res = await api.post('/auth/resend-invite', clientData);
+      const res = await api.post('/auth/resend-invite', { ...clientData, clientId });
       if (res.ok && res.data) {
         setGeneratedInviteUrl(res.data.inviteUrl);
         setInviteStatus('pending');

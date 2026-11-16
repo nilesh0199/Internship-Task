@@ -307,6 +307,7 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
               outcome: r.outcome,
               action: r.action,
               summary: r.summary,
+              notesApplied: r.notesApplied,
               canUndo: r.undo && !r.undoneAt,
               isUndone: !!r.undoneAt,
             })),
@@ -326,12 +327,17 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
                   <div key={item.id} className="relative pl-3 text-xs space-y-1">
                     <div className="absolute -left-[17px] top-1.5 h-2 w-2 rounded-full bg-accent ring-4 ring-[#FAF8F5]" />
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 font-semibold text-ink-900">
+                      <div className="flex items-center gap-1.5 font-semibold text-ink-900 flex-wrap">
                         <Bot className="h-3 w-3 text-accent" />
                         <span className="capitalize">{item.agentId} Agent</span>
                         <span className="text-[10px] px-1.5 py-0.2 rounded font-mono font-normal uppercase bg-ink-100 text-ink-600">
                           {item.outcome.replace('_', ' ')}
                         </span>
+                        {item.notesApplied && (
+                          <span className="text-[10px] text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded font-mono border border-emerald-200/60">
+                            {item.notesApplied}
+                          </span>
+                        )}
                       </div>
                       {item.canUndo && (
                         <button

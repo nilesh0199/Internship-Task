@@ -7,10 +7,19 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [demoMode, setDemoMode] = useState(true);
 
-  // Check existing session on boot
+  // Check existing session and server config on boot
   useEffect(() => {
     refreshSession();
+    api
+      .get('/auth/status')
+      .then((res) => {
+        if (res?.ok && res.data?.demoMode !== undefined) {
+          setDemoMode(res.data.demoMode);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   async function refreshSession() {
@@ -31,8 +40,10 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function login(email, password) {
-    const res = await api.post('/auth/login', { email, password });
+  async function login(email, password, expectedRole) {
+    const payload = { email, password };
+    if (expectedRole) payload.expectedRole = expectedRole;
+    const res = await api.post('/auth/login', payload);
     if (res.ok && res.data?.user) {
       setUser(res.data.user);
       await refreshSession();
@@ -43,7 +54,8 @@ export function AuthProvider({ children }) {
   async function demoLogin(role = 'assistant') {
     setLoading(true);
     try {
-      const res = await api.post('/auth/demo-login', { role });
+      // In the new product model, 1-click demo login is only available for Assistant Maya
+      const res = await api.post('/auth/demo-login', { role: 'assistant' });
       if (res.ok && res.data?.user) {
         setUser(res.data.user);
         try {
@@ -86,6 +98,7 @@ export function AuthProvider({ children }) {
         user,
         client,
         loading,
+        demoMode,
         login,
         demoLogin,
         signup,

@@ -6,7 +6,10 @@ import { OutlookProvider } from '../providers/outlook/OutlookProvider.js';
 
 export async function getPlaybook(req, res, next) {
   try {
-    const client = await store.getClientByOrgId(req.user.orgId);
+    const targetClientId = req.user?.role === 'client' ? req.user.clientId : (req.query?.clientId || req.body?.clientId);
+    const client = targetClientId
+      ? await store.getClientByOrgAndId(req.user.orgId, targetClientId)
+      : await store.getClientByOrgId(req.user.orgId);
     return res.status(200).json({ ok: true, data: client?.playbook || {} });
   } catch (err) {
     next(err);
@@ -15,7 +18,10 @@ export async function getPlaybook(req, res, next) {
 
 export async function updatePlaybook(req, res, next) {
   try {
-    const client = await store.getClientByOrgId(req.user.orgId);
+    const targetClientId = req.query?.clientId || req.body?.clientId;
+    const client = targetClientId
+      ? await store.getClientByOrgAndId(req.user.orgId, targetClientId)
+      : await store.getClientByOrgId(req.user.orgId);
     if (!client) {
       return res.status(404).json({ ok: false, error: { message: 'Client profile not found', code: 'NOT_FOUND' } });
     }
@@ -27,7 +33,7 @@ export async function updatePlaybook(req, res, next) {
       actorName: req.user.name,
       actorRole: req.user.role,
       action: 'PLAYBOOK_UPDATED',
-      details: { rulesCount: req.body.topicRules?.length },
+      details: { rulesCount: req.body.topicRules?.length, clientId: client._id },
     });
 
     return res.status(200).json({ ok: true, data: updated.playbook });
@@ -39,7 +45,10 @@ export async function updatePlaybook(req, res, next) {
 export async function addPlaybookRule(req, res, next) {
   try {
     const { topic, disposition, description } = req.body;
-    const client = await store.getClientByOrgId(req.user.orgId);
+    const targetClientId = req.query?.clientId || req.body?.clientId;
+    const client = targetClientId
+      ? await store.getClientByOrgAndId(req.user.orgId, targetClientId)
+      : await store.getClientByOrgId(req.user.orgId);
     if (!client) {
       return res.status(404).json({ ok: false, error: { message: 'Client not found', code: 'NOT_FOUND' } });
     }

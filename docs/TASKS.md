@@ -131,6 +131,35 @@
 
 ---
 
+## Phase 11: Real Authentication & Role Separation `[M]`
+- [x] **11.1**: Eliminate Persona Switcher (`RoleSwitcher.jsx`, client `switchRole`, server `POST /api/auth/switch-role`) and replace with standard `AccountMenu` (avatar initials, role badge, connected accounts navigation, and authoritative sign out that clears the `httpOnly` cookie). `[M]`
+- [x] **11.2**: Role-protected routes: `<ProtectedRoute allowedRoles={['assistant']}>` (`/assistant`, `/agents`, `/accounts`, `/playbook`, `/onboarding`) and `<ProtectedRoute allowedRoles={['client']}>` (`/client`). Wrong-role attempts redirect to role home with toast alert (`"That area is for assistants/clients."`). Server enforces `roleRequired` across all endpoints. `[M]`
+- [x] **11.3**: Real client invite flow: `POST /api/auth/invite-client` generates 32-byte crypto token, stores SHA-256 hash in DB, 7-day expiration, bound to `orgId + clientId + email`. Single-use acceptance page at `/invite/:token` enforces 10+ char password, hashes with bcrypt cost 12, marks invite accepted, sets auth cookie, and logs into `/client`. `[M]`
+- [x] **11.4**: Login quality: show/hide password toggle, inline field validation, generic `"Incorrect email or password"` to prevent enumeration, `loginRateLimiter` (10 failed attempts / 15 min / IP+email combination), honest `/forgot-password` placeholder, and graceful 401 handling in `client/src/lib/api.js`. `[M]`
+- [x] **11.5**: Demo mode governance & dual-window sync: `DEMO_MODE` env var, assistant-only 1-click demo login, collapsible demo accounts card with quick-fill and clipboard copy on `/login`, dual-window ~8s background polling sync in `AssistantDashboard.jsx`, and subtle Demo Workspace banner across app views. `[M]`
+- [x] **11.6**: Comprehensive test suite in `server/test/auth.test.js` with 9 passing tests covering 404 on removed switch-role, 403 on assistant routes for client, 403 on client-decision for assistant, single-use invite token, expired invite rejection, SHA-256 hash storage verification, login rate limiting (HTTP 429), `DEMO_MODE=false` 404, and clientVisible org-scoped thread isolation. `[M]`
+
+---
+
+## Phase 12: Multi-Client PA Operations, Today Command View & Agent Memory `[M]`
+- [x] **12.1**: Multi-Client Audit & Data Partitioning: audit all store queries, ingest pipelines, agents, playbook, and seed data to strictly scope by both `orgId` and `clientId`. Client isolation strictly enforced: client users requesting or acting on cross-client IDs receive HTTP 404. Seed second executive client (Rohan Kapoor, COO of Apex Freight Logistics) with 20 realistic precomputed threads, distinct playbook thresholds ($15k vs $1k), pending invite `inv_rohan_001`, and 3 contrasting decision pairs. `[M]`
+- [x] **12.2**: Client Tabs & "Today" Command Dashboard: implement `AssistantTopBar.jsx` with persistent brand link, client switcher tabs (`[Today] [Priya Sharma (badge)] [Rohan Kapoor (badge)] [+ Add Client]`), agent running status pill, Control Room shortcut, and Account Menu. Build `AssistantTodayView.jsx` with greeting, executive cards (Needs Maya, Waiting on Client, Handled Today, Meetings, Conflicts), meetings conflict strip, prioritized "Needs You Now" stack jumping directly to client inbox threads, and overnight agent activity feed with 1-click Undo. `[M]`
+- [x] **12.3**: Per-Client Agent Notes ("Agent Memory"): implement `ClientAgentsTab.jsx` for configuring per-client agent standing instructions (max 500 chars) and active memories (max 200 chars, pin, disable, delete, You/Learned chips). Implement side-by-side Dry Run preview (`POST /api/agents/:id/dry-run`) showing `withNotes` vs `withoutNotes` without modifying database state. Enforce strictness-only invariant on Guardian Agent so notes can never loosen safety guardrails. `[M]`
+- [x] **12.4**: Background Agent Execution & Live Feed: implement 3-minute ticker in `server/src/agents/orchestrator.js` with per-client in-process concurrency locking (`clientRunLocks`) and randomized jitter (1–5s). Added `demoLiveFeed.js` injecting simulated inbound messages every 75s alternating between Priya and Rohan. Added top-bar agent status pill showing `"Agents running · last ran X min ago"` or amber indicator when paused. `[M]`
+- [x] **12.5**: Automated Testing: comprehensive test suite in `server/test/multi_client.test.js` with 7 passing test cases covering client query separation, client isolation 404s, Today aggregation, Agent Memory CRUD, dry-run previews, and Guardian strictness enforcement (total 24/24 passing tests across repo). `[M]`
+
+---
+
+## Phase 13: Login Role Chooser & Editorial Client Decision Desk `[M]`
+- [x] **13.1**: Login Role Chooser Modal: centered modal first on "Log in" ("How are you signing in?") with two large choice cards: "I'm an assistant" and "I'm a client", animated entrance, ESC to close, keyboard accessible, deep links `/login?role=assistant|client` skipping chooser. `[M]`
+- [x] **13.2**: Role-Specific Login Forms & Mismatch Handling: Assistant form has signup link, 1-click demo workspace button, and Maya Lin demo card; Client form has no signup link, invitation helper modal, and Priya Sharma demo card. Server validates credentials first, checks `expectedRole`, and returns friendly HTTP 400 (`ROLE_MISMATCH`) switching form automatically without leaking bad credentials (generic 401). Post-login routes by role (`/assistant/today` or `/client`). `[M]`
+- [x] **13.3**: Editorial Client Decision Desk Redesign: full-width 3-zone layout (Desktop >=1024px, max 1440px). Left rail (~280px sticky) with greeting, plain-language summary, vertical navigator (Today, This week, Later, Waiting on others, Handled), Next deadline countdown, and keyboard hints (`j`/`k`, `Enter`, `a`, `h`, `s`, `d`). Middle column (~440px) with scannable urgency rows, avatars, 1-line question, sender + age, due chip, and draft ready badge. Right pane decision sheet with Fraunces headline, "Prepared by Maya with Daybook agents", "What's being asked" paragraph, context bullets, quiet blockquote evidence, consequence line, editable draft preview, and sticky action bar. `[M]`
+- [x] **13.4**: Responsive Client View: Tablet (768px–1023px) 2-pane collapsible layout with slide-over drawer; Mobile (<768px) single column with full-width rows and sticky bottom action bar. `[M]`
+- [x] **13.5**: Toast Placement & Polish: toasts moved to `bottom-right` on desktop and `bottom-center` on mobile, capped at 3 visible, short duration (3.5s), avoiding header and user account menu. `[M]`
+- [x] **13.6**: Comprehensive Test Suite: 29 out of 29 automated tests passing across `agents.test.js`, `auth.test.js`, and `multi_client.test.js` covering memory injection sanitization, Guardian note invariance, disabled memory exclusion, background scheduler client locking, and login role mismatch handling. `[M]`
+
+---
+
 ## Known Issues & Prototype Reviewer Guidance
 
 1. **Email Sending Safety Flag**:

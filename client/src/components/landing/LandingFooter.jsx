@@ -78,14 +78,6 @@ export default function LandingFooter() {
                 )}
               </div>
 
-              <button
-                onClick={() => handleDemo('client')}
-                disabled={!!loadingRole}
-                className="min-h-[44px] px-6 py-3.5 rounded-full bg-white/15 hover:bg-white/20 text-white border border-white/20 text-xs sm:text-sm font-semibold transition active:scale-[0.98] cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-              >
-                <span>{loadingRole === 'client' ? 'Booting Priya...' : 'Launch as Founder Priya'}</span>
-              </button>
-
               <a
                 href="https://github.com/nilesh0199/Internship-Task"
                 target="_blank"

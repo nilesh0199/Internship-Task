@@ -13,6 +13,27 @@ const TopicRuleSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const AgentMemoryEntrySchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true },
+    text: { type: String, required: true, maxlength: 200 },
+    source: { type: String, enum: ['manual', 'learned'], default: 'manual' },
+    pinned: { type: Boolean, default: false },
+    enabled: { type: Boolean, default: true },
+    createdAt: { type: Date, default: Date.now },
+    createdBy: { type: String, default: 'Maya Lin' },
+  },
+  { _id: false }
+);
+
+const AgentMemoryConfigSchema = new mongoose.Schema(
+  {
+    instruction: { type: String, default: '', maxlength: 500 },
+    memories: [AgentMemoryEntrySchema],
+  },
+  { _id: false }
+);
+
 const PlaybookSchema = new mongoose.Schema(
   {
     vipSenders: [{ type: String, lowercase: true, trim: true }],
@@ -90,6 +111,17 @@ const ClientSchema = new mongoose.Schema(
         financialThresholds: { maxAssistantApprovalUsd: 1000 },
         customInstructions: 'If an email is from my sister Anjali Sharma, always route to Client to Reply.',
         updatedAt: new Date(),
+      }),
+    },
+    agentMemory: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({
+        triage: { instruction: '', memories: [] },
+        scheduling: { instruction: '', memories: [] },
+        followup: { instruction: '', memories: [] },
+        drafting: { instruction: '', memories: [] },
+        digest: { instruction: '', memories: [] },
+        guardian: { instruction: '', memories: [] },
       }),
     },
   },

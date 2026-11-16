@@ -4,8 +4,10 @@ import {
   getThreads,
   getThreadById,
   updateThread,
+  archiveThread,
   overrideLabel,
   clientDecision,
+  getTodaySummary,
 } from '../controllers/threadController.js';
 import {
   getPlaybook,
@@ -29,6 +31,7 @@ const GetThreadsQuerySchema = z.object({
   search: z.string().optional(),
   limit: z.string().optional(),
   accountId: z.string().optional(),
+  clientId: z.string().optional(),
 });
 
 const OverrideLabelBodySchema = z.object({
@@ -66,6 +69,10 @@ const SaveDraftBodySchema = z.object({
   status: z.enum(['draft', 'pending_client', 'approved', 'sent']).optional(),
 });
 
+// Today Command View (Cross-client)
+router.get('/assistant/today', authRequired, roleRequired(['assistant']), getTodaySummary);
+router.get('/today', authRequired, roleRequired(['assistant']), getTodaySummary);
+
 // Threads (Shared reads, role-governed actions)
 router.get('/threads', authRequired, validate(GetThreadsQuerySchema, 'query'), getThreads);
 router.get('/threads/:id', authRequired, validate(IdParamSchema, 'params'), getThreadById);
@@ -79,6 +86,21 @@ router.post(
   validate(IdParamSchema, 'params'),
   validate(OverrideLabelBodySchema),
   overrideLabel
+);
+router.post(
+  '/threads/:id/override-label',
+  authRequired,
+  roleRequired(['assistant']),
+  validate(IdParamSchema, 'params'),
+  validate(OverrideLabelBodySchema),
+  overrideLabel
+);
+router.post(
+  '/threads/:id/archive',
+  authRequired,
+  roleRequired(['assistant']),
+  validate(IdParamSchema, 'params'),
+  archiveThread
 );
 
 // Client-only: decision actions from queue

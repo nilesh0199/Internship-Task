@@ -46,6 +46,7 @@ const AgentRunSchema = new mongoose.Schema(
     undoneAt: { type: Date, default: null },
     usedLLM: { type: Boolean, default: false },
     fallbackUsed: { type: Boolean, default: false },
+    notesApplied: { type: String, default: null },
     durationMs: { type: Number, default: 0 },
     startedAt: { type: Date, default: Date.now },
   },

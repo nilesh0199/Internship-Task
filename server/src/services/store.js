@@ -1,7 +1,9 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
+import { env } from '../config/env.js';
 import { isRealDBConnected } from '../config/db.js';
 import {
   User,
@@ -41,6 +43,11 @@ let memoryAgentRuns = [];
  */
 export async function initSeedData() {
   try {
+    if (!env.DEMO_MODE) {
+      logger.info('[Store] DEMO_MODE is disabled; skipping demo data seeding.');
+      return;
+    }
+
     const seedPath = path.resolve(__dirname, '../seed/threads.json');
     if (!fs.existsSync(seedPath)) {
       logger.warn('[Store] Seed file not found at: ' + seedPath);
@@ -50,7 +57,7 @@ export async function initSeedData() {
     const raw = fs.readFileSync(seedPath, 'utf8');
     const threadsData = JSON.parse(raw);
 
-    const passwordHash = await bcrypt.hash('password123', 10);
+    const passwordHash = await bcrypt.hash('password123', 12);
 
     // Initial demo users
     memoryUsers = [
@@ -82,7 +89,7 @@ export async function initSeedData() {
       },
     ];
 
-    // Initial client profile & playbook
+    // Initial client profiles & playbooks (Priya Sharma + Rohan Kapoor)
     memoryClients = [
       {
         _id: 'client_priya_001',
@@ -119,7 +126,148 @@ export async function initSeedData() {
           ],
           financialThresholds: { maxAssistantApprovalUsd: 1000 },
           customInstructions: 'If an email is from my sister Anjali Sharma, always route to Client to Reply.',
+          agentAutonomy: {
+            triage: 'auto',
+            scheduling: 'propose',
+            followup: 'propose',
+            drafting: 'propose',
+            digest: 'auto',
+            guardian: 'auto',
+          },
           updatedAt: new Date(),
+        },
+        agentMemory: {
+          triage: {
+            instruction: 'Investors, lawyers and anything with money > $1,000 or deadlines go to Priya. Routine vendors and scheduling go to Maya.',
+            memories: [
+              { id: 'mem_p_t1', text: 'Mark Suster and Anjali Sharma are VIPs; always route to Priya.', source: 'manual', pinned: true, enabled: true, createdAt: new Date(), createdBy: 'Maya Lin' },
+              { id: 'mem_p_t2', text: 'Fenwick & West legal communications must always be reviewed by Priya.', source: 'manual', pinned: false, enabled: true, createdAt: new Date(), createdBy: 'Maya Lin' },
+            ],
+          },
+          drafting: {
+            instruction: 'Concise, visionary founder tone. Sign off as Priya.',
+            memories: [
+              { id: 'mem_p_d1', text: 'Always acknowledge investor introductions within 24 hours.', source: 'manual', pinned: true, enabled: true, createdAt: new Date(), createdBy: 'Maya Lin' },
+            ],
+          },
+          followup: {
+            instruction: 'Follow up with investors after 3 days if no reply.',
+            memories: [],
+          },
+          scheduling: {
+            instruction: 'Buffer 15 minutes between external investor meetings.',
+            memories: [],
+          },
+          digest: {
+            instruction: 'Show investor decision drafts and high-priority legal approvals first.',
+            memories: [],
+          },
+          guardian: {
+            instruction: 'Flag any term sheets, SAFE agreements, or founder equity discussions.',
+            memories: [
+              { id: 'mem_p_g1', text: 'Never auto-file threads mentioning equity dilution or option grants.', source: 'manual', pinned: true, enabled: true, createdAt: new Date(), createdBy: 'Maya Lin' },
+            ],
+          },
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        _id: 'client_rohan_002',
+        orgId: 'org_vortex_001',
+        name: 'Rohan Kapoor',
+        email: 'rohan@apexlogistics.com',
+        title: 'Chief Operating Officer',
+        company: 'Apex Freight Logistics',
+        avatarUrl: null,
+        playbook: {
+          vipSenders: [
+            'marcus.vance@apexlogistics.com',
+            'elena.rostova@vanguardcap.com',
+            'arthur.pendelton@summitlogistics.com',
+            'mira.kapoor@gmail.com',
+          ],
+          vipDomains: ['vanguardcap.com', 'summitlogistics.com', 'apexlogistics.com'],
+          topicRules: [
+            {
+              topic: 'Board Resolutions & Shareholder Voting',
+              disposition: 'ALWAYS_CLIENT',
+              description: 'All board-level governance, equity and quarterly shareholder votes',
+            },
+            {
+              topic: 'Regulatory & Maritime Legal Proceedings',
+              disposition: 'ALWAYS_CLIENT',
+              description: 'DOT, maritime commission, customs audits, and litigation matters',
+            },
+            {
+              topic: 'Personal & Family Communications',
+              disposition: 'ALWAYS_CLIENT',
+              description: 'Emails from sister Mira Kapoor and immediate family',
+            },
+            {
+              topic: 'Fleet Fuel, Maintenance & Warehouse Vendors',
+              disposition: 'ASSISTANT_CAN_HANDLE',
+              description: 'Maya approves quotes, vendor inquiries, and routine bills under $15,000',
+            },
+            {
+              topic: 'Executive Calendar & Flight Dispatch',
+              disposition: 'ASSISTANT_CAN_HANDLE',
+              description: 'Coordination of site visits, pilot schedules, and hotel blocks',
+            },
+            {
+              topic: 'Cold Freight Solicitations',
+              disposition: 'NEVER_BOTHER_CLIENT',
+              description: 'Unsolicited logistics brokers and SaaS demos',
+            },
+          ],
+          financialThresholds: { maxAssistantApprovalUsd: 15000 },
+          customInstructions:
+            'Rohan delegates all vendor bills, maintenance escalations, and scheduling to Maya Lin. Only bother Rohan for board matters, legal actions, or emails from Marcus Vance and Mira Kapoor.',
+          agentAutonomy: {
+            triage: 'auto',
+            scheduling: 'auto',
+            followup: 'auto',
+            drafting: 'propose',
+            digest: 'auto',
+            guardian: 'auto',
+          },
+          updatedAt: new Date(),
+        },
+        agentMemory: {
+          triage: {
+            instruction:
+              'Vendors, warehouse invoices and logistics operations go to Maya. Only board matters, lawsuits, and emails from Marcus Vance or Mira go to Rohan.',
+            memories: [
+              { id: 'mem_r_t1', text: 'Marcus Vance is the CEO; his emails must always reach Rohan.', source: 'manual', pinned: true, enabled: true, createdAt: new Date(), createdBy: 'Maya Lin' },
+              { id: 'mem_r_t2', text: 'Freight vendor pricing updates under $15,000 should be handled by Maya.', source: 'manual', pinned: false, enabled: true, createdAt: new Date(), createdBy: 'Maya Lin' },
+            ],
+          },
+          drafting: {
+            instruction: "Short, warm, no exclamation marks. Sign off as Rohan's office.",
+            memories: [
+              { id: 'mem_r_d1', text: 'Never use exclamation marks in external vendor correspondence.', source: 'manual', pinned: true, enabled: true, createdAt: new Date(), createdBy: 'Maya Lin' },
+            ],
+          },
+          followup: {
+            instruction: 'Nudge freight vendors after 2 days, never nudge board members.',
+            memories: [
+              { id: 'mem_r_f1', text: 'Elena Rostova and Arthur Pendelton should never receive automated nudges.', source: 'manual', pinned: true, enabled: true, createdAt: new Date(), createdBy: 'Maya Lin' },
+            ],
+          },
+          scheduling: {
+            instruction: 'Keep mornings open for warehouse site inspections; schedule meetings after 1:00 PM.',
+            memories: [],
+          },
+          digest: {
+            instruction: 'Highlight pending board votes and any legal risk items at the top of the morning brief.',
+            memories: [],
+          },
+          guardian: {
+            instruction: 'Watch for maritime demurrage fines, union grievances, and board resolutions.',
+            memories: [
+              { id: 'mem_r_g1', text: 'Escalate any thread mentioning port labor strikes or union negotiations.', source: 'manual', pinned: true, enabled: true, createdAt: new Date(), createdBy: 'Maya Lin' },
+            ],
+          },
         },
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -140,19 +288,63 @@ export async function initSeedData() {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        _id: 'acc_demo_02',
+        orgId: 'org_vortex_001',
+        clientId: 'client_rohan_002',
+        provider: 'demo',
+        emailAddress: 'rohan@apexlogistics.com',
+        status: 'idle',
+        lastSyncedAt: new Date(),
+        scopes: ['mail.read', 'mail.send'],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
+
+    // Seed Rohan's pending invite (has no user account)
+    const rawRohanToken = 'rohan_invite_token_demo_32chars_test';
+    const rohanTokenHash = crypto.createHash('sha256').update(rawRohanToken).digest('hex');
+    memoryInvites = [
+      {
+        _id: 'inv_rohan_001',
+        orgId: 'org_vortex_001',
+        clientId: 'client_rohan_002',
+        email: 'rohan@apexlogistics.com',
+        role: 'client',
+        tokenHash: rohanTokenHash,
+        status: 'pending',
+        invitedBy: 'user_maya',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        acceptedAt: null,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
+      },
+    ];
+
+    // Load Rohan's threads and combine
+    let rohanThreadsData = [];
+    const rohanSeedPath = path.resolve(__dirname, '../seed/rohan_threads.json');
+    if (fs.existsSync(rohanSeedPath)) {
+      try {
+        rohanThreadsData = JSON.parse(fs.readFileSync(rohanSeedPath, 'utf8'));
+      } catch (err) {
+        logger.warn('[Store] Could not parse rohan_threads.json: ' + err.message);
+      }
+    }
+    const combinedThreadsData = [...threadsData, ...rohanThreadsData];
 
     // Hydrate threads and messages
     memoryThreads = [];
     memoryMessages = [];
     memoryClassificationEvents = [];
 
-    for (const t of threadsData) {
+    for (const t of combinedThreadsData) {
       const threadDoc = {
         _id: t.id,
-        orgId: 'org_vortex_001',
-        clientId: 'client_priya_001',
-        connectedAccountId: 'acc_demo_01',
+        orgId: t.orgId || 'org_vortex_001',
+        clientId: t.clientId || 'client_priya_001',
+        connectedAccountId: t.connectedAccountId || (t.clientId === 'client_rohan_002' ? 'acc_demo_02' : 'acc_demo_01'),
         provider: 'demo',
         providerThreadId: t.providerThreadId || t.id,
         subject: t.subject,
@@ -470,6 +662,66 @@ export async function initSeedData() {
         startedAt: new Date(now - 1000 * 60 * 60),
         createdAt: new Date(now - 1000 * 60 * 60),
       },
+      {
+        _id: 'run_seed_rohan_001',
+        agentId: 'guardian',
+        orgId: 'org_vortex_001',
+        clientId: 'client_rohan_002',
+        threadId: 'th_r_18',
+        trigger: 'ingest',
+        action: 'guardian_escalated',
+        outcome: 'escalated',
+        summary: 'Guardian escalated: Teamsters collective bargaining contract grievance detected. Flagged for review.',
+        details: { violationReasons: ['Contains union/legal grievance terms', 'Teamsters contract notice'] },
+        confidence: 0.96,
+        requiresHuman: true,
+        undo: null,
+        usedLLM: false,
+        fallbackUsed: false,
+        durationMs: 10,
+        startedAt: new Date(now - 1000 * 60 * 18),
+        createdAt: new Date(now - 1000 * 60 * 18),
+      },
+      {
+        _id: 'run_seed_rohan_002',
+        agentId: 'triage',
+        orgId: 'org_vortex_001',
+        clientId: 'client_rohan_002',
+        threadId: 'th_r_04',
+        trigger: 'ingest',
+        action: 'route_assistant_queue',
+        outcome: 'auto_handled',
+        summary: "Routed to Assistant Workspace: Fleetmatics GPS tracking ($2,400) under Rohan's $15k delegation limit.",
+        details: { label: 'ASSISTANT_TO_REPLY', confidence: 0.96 },
+        confidence: 0.96,
+        requiresHuman: false,
+        undo: null,
+        usedLLM: false,
+        fallbackUsed: false,
+        durationMs: 14,
+        startedAt: new Date(now - 1000 * 60 * 30),
+        createdAt: new Date(now - 1000 * 60 * 30),
+      },
+      {
+        _id: 'run_seed_rohan_003',
+        agentId: 'triage',
+        orgId: 'org_vortex_001',
+        clientId: 'client_rohan_002',
+        threadId: 'th_r_07',
+        trigger: 'ingest',
+        action: 'escalate_client_queue',
+        outcome: 'auto_handled',
+        summary: 'Routed to Client Decision Queue: Board Resolution Acquisition signoff requested by Elena Rostova by 5 PM.',
+        details: { label: 'CLIENT_TO_REPLY', confidence: 0.99 },
+        confidence: 0.99,
+        requiresHuman: true,
+        undo: null,
+        usedLLM: false,
+        fallbackUsed: false,
+        durationMs: 11,
+        startedAt: new Date(now - 1000 * 60 * 45),
+        createdAt: new Date(now - 1000 * 60 * 45),
+      },
     ];
 
     // Seed agent proposal drafts
@@ -561,18 +813,36 @@ export const store = {
   },
 
   // Clients
+  async getClientsByOrgId(orgId) {
+    if (isRealDBConnected()) {
+      return await Client.find({ orgId }).lean();
+    }
+    return memoryClients.filter((c) => c.orgId === orgId);
+  },
+
   async getClientByOrgId(orgId) {
     if (isRealDBConnected()) {
-      return await Client.findOne({ orgId });
+      return await Client.findOne({ orgId }).lean();
     }
-    return memoryClients.find((c) => c.orgId === orgId) || memoryClients[0] || null;
+    return memoryClients.find((c) => c.orgId === orgId) || null;
   },
 
   async getClientById(id) {
     if (isRealDBConnected()) {
-      return await Client.findById(id);
+      return await Client.findById(id).lean();
     }
-    return memoryClients.find((c) => c._id === id) || memoryClients[0] || null;
+    return memoryClients.find((c) => c._id === id || String(c._id) === String(id)) || null;
+  },
+
+  async getClientByOrgAndId(orgId, clientId) {
+    if (isRealDBConnected()) {
+      return await Client.findOne({ _id: clientId, orgId }).lean();
+    }
+    return (
+      memoryClients.find(
+        (c) => (c._id === clientId || String(c._id) === String(clientId)) && c.orgId === orgId
+      ) || null
+    );
   },
 
   async createClient(clientData) {
@@ -589,14 +859,10 @@ export const store = {
     if (isRealDBConnected()) {
       return await Client.findByIdAndUpdate(clientId, { $set: updateData }, { new: true });
     }
-    const idx = memoryClients.findIndex((c) => c._id === clientId);
+    const idx = memoryClients.findIndex((c) => c._id === clientId || String(c._id) === String(clientId));
     if (idx !== -1) {
       memoryClients[idx] = { ...memoryClients[idx], ...updateData, updatedAt: new Date() };
       return memoryClients[idx];
-    }
-    if (memoryClients.length > 0) {
-      memoryClients[0] = { ...memoryClients[0], ...updateData, updatedAt: new Date() };
-      return memoryClients[0];
     }
     return null;
   },
@@ -609,7 +875,7 @@ export const store = {
         { new: true }
       );
     }
-    const client = memoryClients.find((c) => c._id === clientId) || memoryClients[0];
+    const client = memoryClients.find((c) => c._id === clientId || String(c._id) === String(clientId));
     if (client) {
       client.playbook = { ...client.playbook, ...playbookUpdates, updatedAt: new Date() };
       return client;
@@ -625,6 +891,238 @@ export const store = {
     return await this.updatePlaybook(clientId, { topicRules: rules });
   },
 
+  // Agent Memory ("Agent Notes" per client)
+  async getAgentMemory(clientId, agentId) {
+    const client = await this.getClientById(clientId);
+    if (!client) return { instruction: '', memories: [] };
+    const memory = client.agentMemory?.[agentId] || { instruction: '', memories: [] };
+    return memory;
+  },
+
+  async updateAgentMemory(clientId, agentId, data) {
+    const client = await this.getClientById(clientId);
+    if (!client) return null;
+    const currentMemories = client.agentMemory || {};
+    const updatedAgentMemory = {
+      ...currentMemories,
+      [agentId]: {
+        instruction:
+          typeof data.instruction === 'string'
+            ? data.instruction.slice(0, 500)
+            : currentMemories[agentId]?.instruction || '',
+        memories: Array.isArray(data.memories)
+          ? data.memories
+          : currentMemories[agentId]?.memories || [],
+      },
+    };
+    return await this.updateClient(clientId, { agentMemory: updatedAgentMemory });
+  },
+
+  async addAgentMemoryEntry(clientId, agentId, entry) {
+    const client = await this.getClientById(clientId);
+    if (!client) return null;
+    const currentMemories = client.agentMemory || {};
+    const agentConfig = currentMemories[agentId] || { instruction: '', memories: [] };
+    const newEntry = {
+      id: entry.id || 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      text: (entry.text || '').slice(0, 200),
+      source: entry.source || 'manual',
+      pinned: !!entry.pinned,
+      enabled: entry.enabled !== false,
+      createdAt: new Date(),
+      createdBy: entry.createdBy || 'Maya Lin',
+    };
+    const updatedList = [newEntry, ...(agentConfig.memories || [])];
+    await this.updateAgentMemory(clientId, agentId, {
+      instruction: agentConfig.instruction,
+      memories: updatedList,
+    });
+    return newEntry;
+  },
+
+  async removeAgentMemoryEntry(clientId, agentId, memoryId) {
+    const client = await this.getClientById(clientId);
+    if (!client) return null;
+    const currentMemories = client.agentMemory || {};
+    const agentConfig = currentMemories[agentId] || { instruction: '', memories: [] };
+    const updatedList = (agentConfig.memories || []).filter((m) => m.id !== memoryId);
+    return await this.updateAgentMemory(clientId, agentId, {
+      instruction: agentConfig.instruction,
+      memories: updatedList,
+    });
+  },
+
+  async toggleAgentMemoryEntry(clientId, agentId, memoryId, updates) {
+    const client = await this.getClientById(clientId);
+    if (!client) return null;
+    const currentMemories = client.agentMemory || {};
+    const agentConfig = currentMemories[agentId] || { instruction: '', memories: [] };
+    let updatedItem = null;
+    const updatedList = (agentConfig.memories || []).map((m) => {
+      if (m.id === memoryId) {
+        updatedItem = { ...m, ...updates };
+        return updatedItem;
+      }
+      return m;
+    });
+    await this.updateAgentMemory(clientId, agentId, {
+      instruction: agentConfig.instruction,
+      memories: updatedList,
+    });
+    return updatedItem;
+  },
+
+  // Today Cross-Client Aggregated Command Dashboard Summary
+  async getTodaySummary(orgId) {
+    const clients = await this.getClientsByOrgId(orgId);
+    const threads = await this.getThreads({ orgId, isArchived: false });
+    const runs = await this.getAgentRuns({ orgId, limit: 100 });
+
+    const clientSummaries = [];
+    let totalNeedsMaya = 0;
+    let totalWaitingOnClients = 0;
+    let totalHandledToday = 0;
+    let totalMeetingsToday = 0;
+    let totalConflicts = 0;
+
+    for (const c of clients) {
+      const cThreads = threads.filter((t) => t.clientId === c._id);
+      const needsMaya = cThreads.filter(
+        (t) =>
+          (t.currentLabel === 'ASSISTANT_TO_REPLY' ||
+            t.currentLabel === 'NEEDS_REVIEW' ||
+            t.reviewState === 'FLAGGED') &&
+          !t.isArchived
+      ).length;
+      const waitingOnClient = cThreads.filter(
+        (t) =>
+          (t.currentLabel === 'CLIENT_TO_REPLY' || t.clientVisible) &&
+          !t.isArchived &&
+          t.clientStatus !== 'handled'
+      ).length;
+      const meetings = cThreads.flatMap((t) => t.meetings || []);
+      const conflicts = meetings.filter((m) => m.isConflict).length;
+
+      const cRuns = runs.filter((r) => r.clientId === c._id);
+      const handledToday = cRuns.filter(
+        (r) => r.outcome === 'auto_handled' || r.outcome === 'reversed'
+      ).length;
+
+      totalNeedsMaya += needsMaya;
+      totalWaitingOnClients += waitingOnClient;
+      totalHandledToday += handledToday;
+      totalMeetingsToday += meetings.length;
+      totalConflicts += conflicts;
+
+      clientSummaries.push({
+        clientId: c._id,
+        name: c.name,
+        email: c.email,
+        title: c.title,
+        company: c.company,
+        needsMaya,
+        waitingOnClient,
+        handledToday,
+        meetingsToday: meetings.length,
+        conflicts,
+        threadsCount: cThreads.length,
+      });
+    }
+
+    // Prioritized "Needs You Now" stack:
+    // Merges Needs Review, Agent Proposals, Handed back, Aging client items
+    const priorityThreads = threads
+      .filter((t) => {
+        const isNeedsReview = t.currentLabel === 'NEEDS_REVIEW' || t.reviewState === 'FLAGGED';
+        const isAssistantReply = t.currentLabel === 'ASSISTANT_TO_REPLY';
+        const isHandedBack = t.clientStatus === 'handed_back';
+        const isAging =
+          t.isWaiting &&
+          t.waitingSince &&
+          Date.now() - new Date(t.waitingSince).getTime() > 2 * 24 * 60 * 60 * 1000;
+        return (isNeedsReview || isAssistantReply || isHandedBack || isAging) && !t.isArchived;
+      })
+      .map((t) => {
+        const client = clients.find((c) => c._id === t.clientId);
+        let priorityScore = 1;
+        let urgencyReason = 'Needs assistant reply';
+
+        if (t.dueDate && new Date(t.dueDate).getTime() - Date.now() < 24 * 60 * 60 * 1000) {
+          priorityScore = 10;
+          urgencyReason = 'Upcoming deadline today';
+        } else if (t.currentLabel === 'NEEDS_REVIEW' || t.reviewState === 'FLAGGED') {
+          priorityScore = 9;
+          urgencyReason = 'Guardian risk flag / Needs Review';
+        } else if (t.clientStatus === 'handed_back') {
+          priorityScore = 8;
+          urgencyReason = 'Handed back by client';
+        } else if (t.meetings?.some((m) => m.isConflict)) {
+          priorityScore = 7;
+          urgencyReason = 'Calendar meeting conflict';
+        } else if (t.isImportant) {
+          priorityScore = 6;
+          urgencyReason = 'Marked important';
+        }
+
+        return {
+          threadId: t._id,
+          clientId: t.clientId,
+          clientName: client?.name || 'Executive Client',
+          clientCompany: client?.company || '',
+          subject: t.subject,
+          snippet: t.snippet,
+          currentLabel: t.currentLabel,
+          confidence: t.confidence,
+          dueDate: t.dueDate,
+          priorityScore,
+          urgencyReason,
+          meetings: t.meetings || [],
+          lastMessageAt: t.lastMessageAt,
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.priorityScore - a.priorityScore ||
+          new Date(b.lastMessageAt) - new Date(a.lastMessageAt)
+      );
+
+    // Cross-client meetings
+    const allMeetings = threads.flatMap((t) => {
+      const client = clients.find((c) => c._id === t.clientId);
+      return (t.meetings || []).map((m) => ({
+        ...m,
+        threadId: t._id,
+        clientId: t.clientId,
+        clientName: client?.name || 'Executive Client',
+      }));
+    });
+
+    // Overnight / recent 8 agent runs
+    const overnightRuns = runs.slice(0, 8).map((r) => {
+      const client = clients.find((c) => c._id === r.clientId);
+      return {
+        ...r,
+        clientName: client?.name || 'Client',
+      };
+    });
+
+    return {
+      summarySentence: `${totalNeedsMaya} things need you across ${clients.length} clients. ${totalHandledToday} were handled by agents.`,
+      totalNeedsMaya,
+      totalWaitingOnClients,
+      totalHandledToday,
+      totalMeetingsToday,
+      totalConflicts,
+      clients: clientSummaries,
+      clientCards: clientSummaries,
+      priorityThreads: priorityThreads.slice(0, 15),
+      needsYouNow: priorityThreads.slice(0, 15),
+      needsYouNowCount: priorityThreads.length,
+      meetings: allMeetings,
+      overnightRuns,
+    };
+  },
+
   // Threads
   async getThreads(filters = {}) {
     let threads = [];
@@ -632,6 +1130,12 @@ export const store = {
       threads = await Thread.find(filters).sort({ lastMessageAt: -1 }).lean();
     } else {
       threads = [...memoryThreads];
+      if (filters.orgId) {
+        threads = threads.filter((t) => t.orgId === filters.orgId);
+      }
+      if (filters.clientId) {
+        threads = threads.filter((t) => t.clientId === filters.clientId);
+      }
       if (filters.currentLabel) {
         threads = threads.filter((t) => t.currentLabel === filters.currentLabel);
       }

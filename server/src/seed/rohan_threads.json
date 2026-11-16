@@ -1,0 +1,931 @@
+[
+  {
+    "id": "th_r_01",
+    "providerThreadId": "th_r_01",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Emergency Port Authority Logistics Hearing - Conflict",
+    "snippet": "Commissioner Davis requested an urgent hearing on Tuesday at 2:00 PM regarding Terminal 4 berthing rights.",
+    "participants": [
+      { "name": "Commissioner Davis", "email": "davis@portofla.gov" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" },
+      { "name": "Maya Lin", "email": "maya@vortexdynamics.com", "isAssistant": true }
+    ],
+    "lastMessageAt": "2026-11-16T08:30:00.000Z",
+    "lastMessageId": "msg_r_01_2",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NEEDS_REVIEW",
+    "aiLabel": "NEEDS_REVIEW",
+    "manualOverride": false,
+    "confidence": 0.94,
+    "reviewState": "FLAGGED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-17T17:00:00.000Z",
+    "meetings": [
+      {
+        "title": "Port Authority Emergency Hearing",
+        "date": "2026-11-17T14:00:00.000Z",
+        "durationMinutes": 60,
+        "isConflict": true,
+        "conflictingWith": "Board Governance Committee"
+      }
+    ],
+    "aiReason": {
+      "reason": "Calendar overlap detected: Port Authority hearing at 2:00 PM conflicts with Board Governance Committee.",
+      "quote": "Commissioner Davis requested an urgent hearing on Tuesday at 2:00 PM regarding Terminal 4 berthing rights.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_01_1",
+        "from": { "name": "Commissioner Davis", "email": "davis@portofla.gov" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "Emergency Port Authority Logistics Hearing - Terminal 4",
+        "date": "2026-11-16T07:15:00.000Z",
+        "snippet": "We must convene regarding berthing allocation disputes on Tuesday at 2:00 PM.",
+        "bodyText": "Rohan,\n\nWe must convene regarding berthing allocation disputes on Tuesday at 2:00 PM at Port Administration HQ. Please confirm your attendance.\n\nCommissioner Davis"
+      },
+      {
+        "id": "msg_r_01_2",
+        "from": { "name": "Maya Lin", "email": "maya@vortexdynamics.com" },
+        "to": [{ "name": "Commissioner Davis", "email": "davis@portofla.gov" }],
+        "subject": "RE: Emergency Port Authority Logistics Hearing - Terminal 4",
+        "date": "2026-11-16T08:30:00.000Z",
+        "snippet": "Checking Rohan's calendar for conflict resolution with the Board Governance Committee.",
+        "bodyText": "Commissioner Davis,\n\nI am reviewing Rohan's executive calendar now. Rohan has a prior commitment with the Apex Board Governance Committee at 2:00 PM. I am evaluating potential conflict-free rescheduling slots.\n\nBest regards,\nMaya Lin\nOffice of Rohan Kapoor"
+      }
+    ]
+  },
+  {
+    "id": "th_r_02",
+    "providerThreadId": "th_r_02",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Maritime Fuel Surcharge Hedging Agreement - Q4 Review",
+    "snippet": "Awaiting final rate card confirmation from Maersk commercial sales team.",
+    "participants": [
+      { "name": "Charles Lind", "email": "charles.lind@maersk.com" },
+      { "name": "Maya Lin", "email": "maya@vortexdynamics.com", "isAssistant": true }
+    ],
+    "lastMessageAt": "2026-11-11T14:20:00.000Z",
+    "lastMessageId": "msg_r_02_1",
+    "lastDirection": "OUTBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.95,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": true,
+    "waitingSince": "2026-11-11T14:20:00.000Z",
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": null,
+    "aiReason": {
+      "reason": "Awaiting external counterparty reply for 5 days. Follow-Up Agent prepared gentle check-in nudge.",
+      "quote": "Please let us know once the VP of Shipping has countersigned the index fuel rate.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_02_1",
+        "from": { "name": "Maya Lin", "email": "maya@vortexdynamics.com" },
+        "to": [{ "name": "Charles Lind", "email": "charles.lind@maersk.com" }],
+        "subject": "Maritime Fuel Surcharge Hedging Agreement - Q4 Review",
+        "date": "2026-11-11T14:20:00.000Z",
+        "snippet": "Please let us know once the VP of Shipping has countersigned the index fuel rate.",
+        "bodyText": "Hi Charles,\n\nFollowing up on our draft bunker adjustment agreement. Please let us know once your VP of Commercial Shipping has countersigned the index fuel rate schedule.\n\nWarmly,\nMaya Lin"
+      }
+    ]
+  },
+  {
+    "id": "th_r_03",
+    "providerThreadId": "th_r_03",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "FreightWaves Daily Dispatch #884 - Global Intermodal Trends",
+    "snippet": "Unsubscribe from daily alerts. Spot container rates ease 4% across Pacific trade lanes.",
+    "participants": [
+      { "name": "FreightWaves Daily", "email": "editor@freightwaves.com" }
+    ],
+    "lastMessageAt": "2026-11-16T05:00:00.000Z",
+    "lastMessageId": "msg_r_03_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "dueDate": null,
+    "aiReason": {
+      "reason": "Automated trade publication newsletter; auto-filed to Quiet Folder.",
+      "quote": "Unsubscribe from daily alerts. Spot container rates ease 4% across Pacific trade lanes.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_03_1",
+        "from": { "name": "FreightWaves Daily", "email": "editor@freightwaves.com" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "FreightWaves Daily Dispatch #884",
+        "date": "2026-11-16T05:00:00.000Z",
+        "snippet": "Spot container rates ease 4% across Pacific trade lanes.",
+        "bodyText": "Today's supply chain headlines: Spot rates decline, driver capacity improves in Midwest corridor. To unsubscribe click here."
+      }
+    ]
+  },
+  {
+    "id": "th_r_04",
+    "providerThreadId": "th_r_04",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Fleetmatics GPS Cloud Tracking - Tier Upgrade ($2,400/yr)",
+    "snippet": "Notice of annual telematics software rate adjustment of $2,400 for 120 tracking beacons.",
+    "participants": [
+      { "name": "Fleetmatics Billing", "email": "billing@fleetmatics-cloud.com" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-16T09:10:00.000Z",
+    "lastMessageId": "msg_r_04_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.96,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-20T17:00:00.000Z",
+    "aiReason": {
+      "reason": "Vendor software adjustment ($2,400) is well below Rohan's $15,000 delegation limit. Maya Lin can approve directly.",
+      "quote": "Notice of annual telematics software rate adjustment of $2,400 for 120 tracking beacons.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_04_1",
+        "from": { "name": "Fleetmatics Billing", "email": "billing@fleetmatics-cloud.com" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "Fleetmatics GPS Cloud Tracking - Tier Upgrade ($2,400/yr)",
+        "date": "2026-11-16T09:10:00.000Z",
+        "snippet": "Notice of annual telematics software rate adjustment of $2,400 for 120 tracking beacons.",
+        "bodyText": "Hello Rohan,\n\nOur annual GPS asset tracking subscription for your 120 trailer beacons renews next week at $2,400 per year. Please confirm if we should process on file card.\n\nFleetmatics Accounts"
+      }
+    ]
+  },
+  {
+    "id": "th_r_05",
+    "providerThreadId": "th_r_05",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Intro: Supply Chain Optimization Consultant",
+    "snippet": "Kevin Cho reached out offering specialized cross-dock route optimization advisory.",
+    "participants": [
+      { "name": "Kevin Cho", "email": "kevin.cho@logisticsnetwork.org" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-16T09:45:00.000Z",
+    "lastMessageId": "msg_r_05_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.94,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": null,
+    "aiReason": {
+      "reason": "Rohan's delegation playbook assigns consulting inquiries and non-board introductions to Maya Lin to screen.",
+      "quote": "Kevin Cho reached out offering specialized cross-dock route optimization advisory.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_05_1",
+        "from": { "name": "Kevin Cho", "email": "kevin.cho@logisticsnetwork.org" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "Intro: Supply Chain Optimization Advisory",
+        "date": "2026-11-16T09:45:00.000Z",
+        "snippet": "Would love 15 minutes to share benchmarking on Pacific port container turnaround.",
+        "bodyText": "Rohan,\n\nI was introduced through the Council of Supply Chain Management. We help high-throughput regional carriers shave 12% off dwell time. Would you or your team have 15 minutes this month?\n\nKevin Cho"
+      }
+    ]
+  },
+  {
+    "id": "th_r_06",
+    "providerThreadId": "th_r_06",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Long Beach Terminal 4 Crane Maintenance Contract ($8,500)",
+    "snippet": "Harbor Industrial submitted the annual gantry crane service contract for $8,500.",
+    "participants": [
+      { "name": "Harbor Industrial", "email": "dispatch@harborindustrial.net" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-15T16:00:00.000Z",
+    "lastMessageId": "msg_r_06_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.97,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-22T17:00:00.000Z",
+    "aiReason": {
+      "reason": "Facility vendor maintenance under Rohan's $15,000 threshold. Maya Lin can approve and sign invoice.",
+      "quote": "Harbor Industrial submitted the annual gantry crane service contract for $8,500.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_06_1",
+        "from": { "name": "Harbor Industrial", "email": "dispatch@harborindustrial.net" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "Long Beach Terminal 4 Crane Maintenance Contract ($8,500)",
+        "date": "2026-11-15T16:00:00.000Z",
+        "snippet": "Annual crane preventive maintenance agreement is attached for execution.",
+        "bodyText": "Rohan & Team,\n\nAttached is our annual preventive maintenance service quote for the 4 gantry cranes at Terminal 4. Total is $8,500 including semi-annual wire rope inspection.\n\nHarbor Industrial Service"
+      }
+    ]
+  },
+  {
+    "id": "th_r_07",
+    "providerThreadId": "th_r_07",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "URGENT: Board Resolution - Acquisition of Midwest Hub",
+    "snippet": "Board Member Elena Rostova requires Rohan's signature on the acquisition resolution by 5:00 PM today.",
+    "participants": [
+      { "name": "Elena Rostova", "email": "elena.rostova@vanguardcap.com" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" },
+      { "name": "Marcus Vance", "email": "marcus.vance@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-16T10:00:00.000Z",
+    "lastMessageId": "msg_r_07_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-16T17:00:00.000Z",
+    "aiReason": {
+      "reason": "VIP Board Member Elena Rostova requesting executive signature on board resolution with 5 PM deadline.",
+      "quote": "Please sign the enclosed board resolution approving the $14M Midwest freight cross-dock acquisition.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_07_1",
+        "from": { "name": "Elena Rostova", "email": "elena.rostova@vanguardcap.com" },
+        "to": [
+          { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" },
+          { "name": "Marcus Vance", "email": "marcus.vance@apexlogistics.com" }
+        ],
+        "subject": "URGENT: Board Resolution - Acquisition of Midwest Hub",
+        "date": "2026-11-16T10:00:00.000Z",
+        "snippet": "Please sign the enclosed board resolution approving the $14M Midwest freight cross-dock acquisition by 5 PM.",
+        "bodyText": "Rohan,\n\nThe Vanguard investment committee has formally voted in favor of the Chicago intermodal acquisition. We require your written officer signature on Resolution 2026-04 before 5:00 PM EST today.\n\nElena Rostova\nManaging Partner, Vanguard Capital\nApex Board Member"
+      }
+    ]
+  },
+  {
+    "id": "th_r_08",
+    "providerThreadId": "th_r_08",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Department of Transportation Safety Audit - Legal Review",
+    "snippet": "Outside counsel Scott Jenkins outlining DOT hours-of-service compliance audit responses.",
+    "participants": [
+      { "name": "Scott Jenkins", "email": "s.jenkins@fenwick.com" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-16T08:15:00.000Z",
+    "lastMessageId": "msg_r_08_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.98,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-18T17:00:00.000Z",
+    "aiReason": {
+      "reason": "Regulatory compliance and legal action; requires COO personal review per Playbook.",
+      "quote": "We need your signoff on our formal submission to the Federal Motor Carrier Safety Administration.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_08_1",
+        "from": { "name": "Scott Jenkins", "email": "s.jenkins@fenwick.com" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "Department of Transportation Safety Audit - Legal Review",
+        "date": "2026-11-16T08:15:00.000Z",
+        "snippet": "We need your signoff on our formal submission to the Federal Motor Carrier Safety Administration.",
+        "bodyText": "Rohan,\n\nWe have prepared our formal response to the FMCSA safety audit findings. Given the regulatory penalties involved, this requires your executive review and signoff before Wednesday.\n\nScott Jenkins\nFenwick & West LLP"
+      }
+    ]
+  },
+  {
+    "id": "th_r_09",
+    "providerThreadId": "th_r_09",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "CEO Confidential: Q4 Operating Margins & Bonus Pools",
+    "snippet": "Marcus Vance sharing confidential Q4 executive bonus structure and operating margins.",
+    "participants": [
+      { "name": "Marcus Vance", "email": "marcus.vance@apexlogistics.com" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-15T18:30:00.000Z",
+    "lastMessageId": "msg_r_09_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": true,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-17T12:00:00.000Z",
+    "aiReason": {
+      "reason": "Direct message from CEO Marcus Vance (VIP) regarding executive compensation and Q4 targets.",
+      "quote": "Rohan, let's align on the executive incentive pool before the board compensation meeting.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_09_1",
+        "from": { "name": "Marcus Vance", "email": "marcus.vance@apexlogistics.com" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "CEO Confidential: Q4 Operating Margins & Bonus Pools",
+        "date": "2026-11-15T18:30:00.000Z",
+        "snippet": "Rohan, let's align on the executive incentive pool before the board compensation meeting.",
+        "bodyText": "Rohan,\n\nPlease review the attached confidential slide on our operations bonus allocation. I want your feedback on the fleet manager incentives before Elena and Arthur review it.\n\nMarcus"
+      }
+    ]
+  },
+  {
+    "id": "th_r_10",
+    "providerThreadId": "th_r_10",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Dinner this Friday & Mom's anniversary surprise",
+    "snippet": "Mira Kapoor asking if Rohan can make it to family dinner at 7:30 PM.",
+    "participants": [
+      { "name": "Mira Kapoor", "email": "mira.kapoor@gmail.com" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-16T11:00:00.000Z",
+    "lastMessageId": "msg_r_10_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "CLIENT_TO_REPLY",
+    "aiLabel": "CLIENT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.98,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": true,
+    "clientStatus": "pending",
+    "dueDate": null,
+    "aiReason": {
+      "reason": "Immediate family member (sister Mira Kapoor, VIP). Personal family correspondence.",
+      "quote": "Are we still on for dinner this Friday? Mom has no idea about the anniversary weekend.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_10_1",
+        "from": { "name": "Mira Kapoor", "email": "mira.kapoor@gmail.com" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "Dinner this Friday & Mom's anniversary surprise",
+        "date": "2026-11-16T11:00:00.000Z",
+        "snippet": "Are we still on for dinner this Friday? Mom has no idea about the anniversary weekend.",
+        "bodyText": "Hey Rohan,\n\nAre you still free for dinner this Friday at 7:30? We need to finalize the travel bookings for Mom and Dad's 40th anniversary. Let me know!\n\nMira"
+      }
+    ]
+  },
+  {
+    "id": "th_r_11",
+    "providerThreadId": "th_r_11",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Inland Freight Diesel Rebate Forms - State of California",
+    "snippet": "California Department of Tax and Fee Administration submitting Q3 clean diesel tax rebate claim.",
+    "participants": [
+      { "name": "CDTFA Clean Diesel", "email": "dieselrebates@cdtfa.ca.gov" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-15T11:20:00.000Z",
+    "lastMessageId": "msg_r_11_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.95,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-25T17:00:00.000Z",
+    "aiReason": {
+      "reason": "Routine state tax rebate filing; administrative workflow for Maya Lin.",
+      "quote": "Submit Form CDTFA-401-E for clean fuel tax credit verification.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_11_1",
+        "from": { "name": "CDTFA Clean Diesel", "email": "dieselrebates@cdtfa.ca.gov" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "Inland Freight Diesel Rebate Forms - Q3",
+        "date": "2026-11-15T11:20:00.000Z",
+        "snippet": "Submit Form CDTFA-401-E for clean fuel tax credit verification.",
+        "bodyText": "Notice to carrier: Q3 documentation for alternative clean diesel rebate is due by Nov 25."
+      }
+    ]
+  },
+  {
+    "id": "th_r_12",
+    "providerThreadId": "th_r_12",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Driver High-Visibility Uniform Reorder - Winter Gear",
+    "snippet": "Cintas representative following up on high-visibility winter outerwear order for 240 drivers.",
+    "participants": [
+      { "name": "Sarah Jenkins", "email": "s.jenkins@cintas-supplies.com" },
+      { "name": "Maya Lin", "email": "maya@vortexdynamics.com", "isAssistant": true }
+    ],
+    "lastMessageAt": "2026-11-16T08:50:00.000Z",
+    "lastMessageId": "msg_r_12_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.97,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-19T17:00:00.000Z",
+    "aiReason": {
+      "reason": "Driver equipment supplies; routine operations handled by Maya Lin.",
+      "quote": "Total order estimate is $4,200 for 240 insulated safety parkas.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_12_1",
+        "from": { "name": "Sarah Jenkins", "email": "s.jenkins@cintas-supplies.com" },
+        "to": [{ "name": "Maya Lin", "email": "maya@vortexdynamics.com" }],
+        "subject": "Driver High-Visibility Uniform Reorder",
+        "date": "2026-11-16T08:50:00.000Z",
+        "snippet": "Total order estimate is $4,200 for 240 insulated safety parkas.",
+        "bodyText": "Hi Maya,\n\nFollowing up on our quote for the winter high-vis parkas for the Ontario terminal drivers. Total order comes to $4,200. Let me know if approved to ship.\n\nSarah"
+      }
+    ]
+  },
+  {
+    "id": "th_r_13",
+    "providerThreadId": "th_r_13",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Rescheduling: Warehouse Tour with Oakland Port Commissioners",
+    "snippet": "Commissioners asking to move Thursday facility walkthrough to 3:30 PM.",
+    "participants": [
+      { "name": "Port Protocol", "email": "events@oaklandport.com" },
+      { "name": "Maya Lin", "email": "maya@vortexdynamics.com", "isAssistant": true }
+    ],
+    "lastMessageAt": "2026-11-16T09:20:00.000Z",
+    "lastMessageId": "msg_r_13_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.98,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-17T12:00:00.000Z",
+    "meetings": [
+      {
+        "title": "Oakland Port Tour",
+        "date": "2026-11-19T15:30:00.000Z",
+        "durationMinutes": 45,
+        "isConflict": false
+      }
+    ],
+    "aiReason": {
+      "reason": "Facility walkthrough coordination; Maya Lin handles scheduling.",
+      "quote": "Can we push the facility walkthrough by 30 minutes to 3:30 PM?",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_13_1",
+        "from": { "name": "Port Protocol", "email": "events@oaklandport.com" },
+        "to": [{ "name": "Maya Lin", "email": "maya@vortexdynamics.com" }],
+        "subject": "Rescheduling: Oakland Port Walkthrough",
+        "date": "2026-11-16T09:20:00.000Z",
+        "snippet": "Can we push the facility walkthrough by 30 minutes to 3:30 PM?",
+        "bodyText": "Hi Maya,\n\nDue to the traffic on the bridge, the commissioners would like to adjust the tour start time to 3:30 PM on Thursday. Please confirm if that suits Rohan's schedule.\n\nPort Events"
+      }
+    ]
+  },
+  {
+    "id": "th_r_14",
+    "providerThreadId": "th_r_14",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Catering Order Confirmation: Apex Logistics All-Hands BBQ",
+    "snippet": "Smokehouse Catering invoice confirmation for 180 headcount annual terminal BBQ ($3,600).",
+    "participants": [
+      { "name": "Smokehouse Catering", "email": "orders@smokehousebbq.la" },
+      { "name": "Maya Lin", "email": "maya@vortexdynamics.com", "isAssistant": true }
+    ],
+    "lastMessageAt": "2026-11-15T14:10:00.000Z",
+    "lastMessageId": "msg_r_14_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": null,
+    "aiReason": {
+      "reason": "Administrative staff catering invoice ($3,600); routine assistant approval.",
+      "quote": "Smokehouse Catering invoice confirmation for 180 headcount annual terminal BBQ.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_14_1",
+        "from": { "name": "Smokehouse Catering", "email": "orders@smokehousebbq.la" },
+        "to": [{ "name": "Maya Lin", "email": "maya@vortexdynamics.com" }],
+        "subject": "Catering Order Confirmation: Apex Logistics All-Hands BBQ",
+        "date": "2026-11-15T14:10:00.000Z",
+        "snippet": "Your booking for Friday Nov 20 is confirmed. Deposit received.",
+        "bodyText": "Hi Maya,\n\nThank you for booking with Smokehouse Catering. Attached is the receipt for the 50% deposit on the Apex annual BBQ.\n\nSmokehouse Team"
+      }
+    ]
+  },
+  {
+    "id": "th_r_15",
+    "providerThreadId": "th_r_15",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Hotel Block Confirmation: Chicago Intermodal Expo",
+    "snippet": "Hyatt Regency Chicago confirmation for executive suite reservations Nov 28-30.",
+    "participants": [
+      { "name": "Hyatt Reservations", "email": "reservations@hyatt.com" },
+      { "name": "Maya Lin", "email": "maya@vortexdynamics.com", "isAssistant": true }
+    ],
+    "lastMessageAt": "2026-11-14T10:05:00.000Z",
+    "lastMessageId": "msg_r_15_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.98,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": true,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": null,
+    "aiReason": {
+      "reason": "Executive travel accommodation confirmation; Maya Lin manages travel records.",
+      "quote": "Hyatt Regency Chicago confirmation for executive suite reservations Nov 28-30.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_15_1",
+        "from": { "name": "Hyatt Reservations", "email": "reservations@hyatt.com" },
+        "to": [{ "name": "Maya Lin", "email": "maya@vortexdynamics.com" }],
+        "subject": "Hotel Block Confirmation - Chicago Intermodal Expo",
+        "date": "2026-11-14T10:05:00.000Z",
+        "snippet": "Confirmation #8849201 for Rohan Kapoor.",
+        "bodyText": "Your reservation at Hyatt Regency McCormick Place is confirmed for Nov 28 - Nov 30."
+      }
+    ]
+  },
+  {
+    "id": "th_r_16",
+    "providerThreadId": "th_r_16",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Automated Weigh Station Electronic Toll Receipt - I-5 Corridor",
+    "snippet": "PrePass automated transponder notification: 48 truck weigh-in charges billed ($192.00).",
+    "participants": [
+      { "name": "PrePass Billing", "email": "no-reply@prepass-auto.com" }
+    ],
+    "lastMessageAt": "2026-11-16T04:30:00.000Z",
+    "lastMessageId": "msg_r_16_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "dueDate": null,
+    "aiReason": {
+      "reason": "Automated electronic toll tollway receipt. Muted to Quiet Folder.",
+      "quote": "PrePass automated transponder notification: 48 truck weigh-in charges billed.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_16_1",
+        "from": { "name": "PrePass Billing", "email": "no-reply@prepass-auto.com" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "PrePass Electronic Toll Statement",
+        "date": "2026-11-16T04:30:00.000Z",
+        "snippet": "Automated daily toll transponder receipt.",
+        "bodyText": "Your account was automatically charged $192.00 for 48 bypass weigh station events."
+      }
+    ]
+  },
+  {
+    "id": "th_r_17",
+    "providerThreadId": "th_r_17",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "System Alert: Fleet Telematics Server Backup Complete",
+    "snippet": "AWS automated notification: Nightly database snapshot for fleet telemetry was successful.",
+    "participants": [
+      { "name": "AWS Notifications", "email": "no-reply-aws@amazon.com" }
+    ],
+    "lastMessageAt": "2026-11-16T03:00:00.000Z",
+    "lastMessageId": "msg_r_17_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NO_REPLY_NEEDED",
+    "aiLabel": "NO_REPLY_NEEDED",
+    "manualOverride": false,
+    "confidence": 0.99,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": false,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": true,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "handled",
+    "dueDate": null,
+    "aiReason": {
+      "reason": "Automated cloud backup notification. Muted to Quiet Folder.",
+      "quote": "Nightly database snapshot for fleet telemetry was successful.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_17_1",
+        "from": { "name": "AWS Notifications", "email": "no-reply-aws@amazon.com" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "AWS Backup Notification - Snapshot ID #99281",
+        "date": "2026-11-16T03:00:00.000Z",
+        "snippet": "Snapshot completed at 03:00 UTC.",
+        "bodyText": "Nightly backup snapshot of RDS telemetry cluster succeeded without warnings."
+      }
+    ]
+  },
+  {
+    "id": "th_r_18",
+    "providerThreadId": "th_r_18",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Contract Breach Notice: Union Teamsters Local 396 Grievance",
+    "snippet": "Teamsters representative filing formal notice of grievance concerning mandatory overtime shifts.",
+    "participants": [
+      { "name": "Hector Ramirez", "email": "h.ramirez@teamsterslocal396.org" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-16T10:15:00.000Z",
+    "lastMessageId": "msg_r_18_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NEEDS_REVIEW",
+    "aiLabel": "NEEDS_REVIEW",
+    "manualOverride": false,
+    "confidence": 0.96,
+    "reviewState": "FLAGGED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-17T17:00:00.000Z",
+    "aiReason": {
+      "reason": "Guardian Agent flagged risk keywords: 'Contract Breach Notice' and 'Grievance'. Escalated for human review.",
+      "quote": "This communication constitutes formal notice of contract grievance under Article 14 Section 2.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_18_1",
+        "from": { "name": "Hector Ramirez", "email": "h.ramirez@teamsterslocal396.org" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "Contract Breach Notice: Union Teamsters Local 396 Grievance",
+        "date": "2026-11-16T10:15:00.000Z",
+        "snippet": "Formal notice of contract grievance under collective bargaining agreement.",
+        "bodyText": "Mr. Kapoor,\n\nPlease be advised that Local 396 has registered a formal grievance regarding non-agreed mandatory overtime shifts at the Inland Empire distribution center. We request an executive conciliation conference within 48 hours.\n\nHector Ramirez\nBusiness Agent, Teamsters Local 396"
+      }
+    ]
+  },
+  {
+    "id": "th_r_19",
+    "providerThreadId": "th_r_19",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Vendor Dispute: $16,500 Demurrage Charge on Cargo Vessel 412",
+    "snippet": "Evergreen Marine invoicing $16,500 in excess port container detention fees.",
+    "participants": [
+      { "name": "Evergreen Line Billing", "email": "disputes@evergreen-marine.com" },
+      { "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }
+    ],
+    "lastMessageAt": "2026-11-16T10:45:00.000Z",
+    "lastMessageId": "msg_r_19_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "NEEDS_REVIEW",
+    "aiLabel": "NEEDS_REVIEW",
+    "manualOverride": false,
+    "confidence": 0.94,
+    "reviewState": "FLAGGED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": true,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-18T17:00:00.000Z",
+    "aiReason": {
+      "reason": "Invoice amount ($16,500) exceeds Rohan's $15,000 assistant delegation threshold. Escalated to Needs Review.",
+      "quote": "Disputed demurrage invoice total is $16,500 for container detention beyond free time.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_19_1",
+        "from": { "name": "Evergreen Line Billing", "email": "disputes@evergreen-marine.com" },
+        "to": [{ "name": "Rohan Kapoor", "email": "rohan@apexlogistics.com" }],
+        "subject": "Vendor Dispute: $16,500 Demurrage Charge on Cargo Vessel 412",
+        "date": "2026-11-16T10:45:00.000Z",
+        "snippet": "Disputed demurrage invoice total is $16,500 for container detention beyond free time.",
+        "bodyText": "Apex Logistics Accounts,\n\nWe are reviewing your contest of invoice #DEM-49281. The demurrage fees totaling $16,500 remain due as the free time expired prior to gate turnaround. Please confirm if Rohan will authorize settlement.\n\nEvergreen Marine Claims"
+      }
+    ]
+  },
+  {
+    "id": "th_r_20",
+    "providerThreadId": "th_r_20",
+    "clientId": "client_rohan_002",
+    "orgId": "org_vortex_001",
+    "subject": "Dispatch Schedule Confirmation: BNSF Rail Yard Hand-off",
+    "snippet": "Drafting Agent prepared pre-drafted confirmation for Maya Lin's one-click approval.",
+    "participants": [
+      { "name": "BNSF Dispatch", "email": "operations@bnsf-dispatch.net" },
+      { "name": "Maya Lin", "email": "maya@vortexdynamics.com", "isAssistant": true }
+    ],
+    "lastMessageAt": "2026-11-16T11:15:00.000Z",
+    "lastMessageId": "msg_r_20_1",
+    "lastDirection": "INBOUND",
+    "currentLabel": "ASSISTANT_TO_REPLY",
+    "aiLabel": "ASSISTANT_TO_REPLY",
+    "manualOverride": false,
+    "confidence": 0.95,
+    "reviewState": "AUTO_APPLIED",
+    "isActionRequired": true,
+    "isWaiting": false,
+    "isImportant": false,
+    "isArchived": false,
+    "isRead": false,
+    "clientVisible": false,
+    "clientStatus": "pending",
+    "dueDate": "2026-11-17T09:00:00.000Z",
+    "aiReason": {
+      "reason": "Drafting Agent synthesized context-aware rail dispatch confirmation draft for Maya's one-click approval.",
+      "quote": "BNSF Dispatch asking for driver tractor numbers for the 6:00 AM intermodal hand-off.",
+      "confidence": "high",
+      "model": "rule_engine"
+    },
+    "messages": [
+      {
+        "id": "msg_r_20_1",
+        "from": { "name": "BNSF Dispatch", "email": "operations@bnsf-dispatch.net" },
+        "to": [{ "name": "Maya Lin", "email": "maya@vortexdynamics.com" }],
+        "subject": "Dispatch Schedule Confirmation: BNSF Rail Yard Hand-off",
+        "date": "2026-11-16T11:15:00.000Z",
+        "snippet": "BNSF Dispatch asking for driver tractor numbers for the 6:00 AM intermodal hand-off.",
+        "bodyText": "Maya,\n\nWe have 30 container chassis scheduled for rail pickup tomorrow morning at 6:00 AM at the Commerce yard. Please send driver names and tractor numbers so gate security can clear them.\n\nBNSF Operations"
+      }
+    ]
+  }
+]

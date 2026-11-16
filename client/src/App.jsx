@@ -6,7 +6,13 @@ export default function App() {
   return (
     <>
       <AppRoutes />
-      <Toaster position="top-right" richColors closeButton />
+      <Toaster
+        position="bottom-right"
+        richColors
+        closeButton
+        visibleToasts={3}
+        duration={3500}
+      />
     </>
   );
 }

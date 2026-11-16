@@ -11,6 +11,7 @@ import { PrototypeHelpPopover } from '../components/PrototypeHelpPopover.jsx';
 import { Landing } from '../pages/Landing.jsx';
 import { AgentControlRoom } from '../pages/AgentControlRoom.jsx';
 import { InviteAcceptPage } from '../pages/InviteAcceptPage.jsx';
+import { ForgotPassword } from '../pages/ForgotPassword.jsx';
 import { toast } from 'sonner';
 
 function RoleForbiddenRedirect({ userRole, allowedRoles }) {
@@ -93,6 +94,7 @@ export function AppRoutes() {
           <Route path="/" element={<RootRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/invite/:token" element={<InviteAcceptPage />} />
           <Route
             path="/onboarding"

@@ -4,7 +4,7 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock.js';
 import { X, Plus, Trash2, ShieldCheck, Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function PlaybookModal({ isOpen, onClose, onPlaybookUpdated }) {
+export function PlaybookModal({ isOpen, onClose, onPlaybookUpdated, clientId, clientName = 'Client' }) {
   const [playbook, setPlaybook] = useState({
     vipSenders: [],
     vipDomains: [],
@@ -33,12 +33,13 @@ export function PlaybookModal({ isOpen, onClose, onPlaybookUpdated }) {
     if (isOpen) {
       loadPlaybook();
     }
-  }, [isOpen]);
+  }, [isOpen, clientId]);
 
   async function loadPlaybook() {
     setLoading(true);
     try {
-      const res = await api.get('/playbook');
+      const qParam = clientId ? `?clientId=${clientId}` : '';
+      const res = await api.get(`/playbook${qParam}`);
       if (res.ok && res.data) {
         setPlaybook({
           vipSenders: res.data.vipSenders || [],
@@ -58,9 +59,10 @@ export function PlaybookModal({ isOpen, onClose, onPlaybookUpdated }) {
   async function handleSave() {
     setSaving(true);
     try {
-      const res = await api.put('/playbook', playbook);
+      const qParam = clientId ? `?clientId=${clientId}` : '';
+      const res = await api.put(`/playbook${qParam}`, playbook);
       if (res.ok) {
-        toast.success('Priya\'s Delegation Playbook saved and active in AI prompt');
+        toast.success(`${clientName}'s Delegation Playbook saved and active in AI prompt`);
         onPlaybookUpdated?.(res.data);
         onClose();
       }

@@ -45,12 +45,50 @@ export class GuardianAgent extends BaseAgent {
     const senderEmail = (latestMsg.from?.email || senders[0] || '').toLowerCase().trim();
     const senderDomain = senderEmail.split('@')[1] || '';
 
+    // 0. Parse Guardian notes from client agentMemory (STRICTER ONLY)
+    const guardianMemory = ctx.client?.agentMemory?.guardian;
+    const customWatchwords = [];
+    const customWatchEmails = [];
+    let guardianNotesSummary = null;
+
+    if (guardianMemory) {
+      const instruction = guardianMemory.instruction || '';
+      const memories = (guardianMemory.memories || []).filter((m) => m.enabled !== false);
+      const combinedNotes = `${instruction} ${memories.map((m) => m.text).join(' ')}`.toLowerCase();
+
+      // Extract emails mentioned in notes
+      const foundEmails = combinedNotes.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
+      customWatchEmails.push(...foundEmails);
+
+      // Extract risk watchwords from notes (all terms of 4+ chars excluding standard English stop words)
+      const stopWords = new Set([
+        'always', 'flag', 'never', 'watch', 'check', 'alert', 'notice', 'with',
+        'from', 'that', 'this', 'have', 'been', 'client', 'agent', 'please', 'about'
+      ]);
+      const noteWords = combinedNotes.match(/\b[a-z]{4,}\b/g) || [];
+      for (const w of noteWords) {
+        if (!stopWords.has(w) && !customWatchwords.includes(w)) {
+          customWatchwords.push(w);
+        }
+      }
+
+      if (instruction || memories.length > 0) {
+        guardianNotesSummary = memories.length > 0
+          ? `Applied instruction + ${memories.length} ${memories.length === 1 ? 'memory' : 'memories'}`
+          : 'Applied instruction';
+      }
+    }
+
+    const isCustomWatchSender = customWatchEmails.includes(senderEmail);
+    const hasCustomWatchSignal = customWatchwords.some((word) => textToScan.includes(word));
+
     // 1. VIP Check
     const vipSenders = (playbook.vipSenders || []).map((s) => s.toLowerCase().trim());
     const vipDomains = (playbook.vipDomains || []).map((d) => d.toLowerCase().trim());
     const isVip =
       vipSenders.includes(senderEmail) ||
       vipDomains.includes(senderDomain) ||
+      isCustomWatchSender ||
       (thread.participants || []).some((p) => p.isVip);
 
     // 2. Financial & Wire terms
@@ -117,6 +155,7 @@ export class GuardianAgent extends BaseAgent {
     if (hasLegalSignal) violationReasons.push('Contains legal/contract terms');
     if (directlyAddressed) violationReasons.push(`Executive client (${clientFirst}) directly addressed`);
     if (hasDeadlineSignal) violationReasons.push('Contains urgent time-sensitive deadline');
+    if (hasCustomWatchSignal) violationReasons.push('Matches keyword in client Guardian safety instructions');
 
     // VIOLATION: If any risk signals exist on an auto-filed or no-reply thread, Guardian REVERSES!
     if ((isAutoFiled || recentTriageRun) && violationReasons.length > 0) {
@@ -164,6 +203,7 @@ export class GuardianAgent extends BaseAgent {
           violationReasons,
           restoredLabel: 'NEEDS_REVIEW',
           previousLabel: thread.currentLabel,
+          notesApplied: guardianNotesSummary,
         },
         confidence: 1.0,
         requiresHuman: true,
@@ -181,6 +221,7 @@ export class GuardianAgent extends BaseAgent {
         hasFinancialSignal,
         hasLegalSignal,
         directlyAddressed,
+        notesApplied: guardianNotesSummary,
       },
       confidence: 1.0,
       requiresHuman: false,

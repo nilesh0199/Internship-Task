@@ -281,7 +281,7 @@ export default function HeroSection() {
           <button
             onClick={() => handleDemoLaunch('assistant')}
             disabled={!!loadingRole}
-            className={`min-h-[44px] px-5 py-3 rounded-full ${
+            className={`min-h-[44px] px-6 py-3 rounded-full ${
               user ? 'bg-white hover:bg-ink-50 border border-black/[0.09] text-ink-800' : 'bg-ink-900 hover:bg-ink-800 text-white shadow-card hover:shadow-card-hover'
             } text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`}
           >
@@ -289,21 +289,12 @@ export default function HeroSection() {
             {!user && <ArrowRight className="h-4 w-4" />}
           </button>
 
-          <button
-            onClick={() => handleDemoLaunch('client')}
-            disabled={!!loadingRole}
-            className="min-h-[44px] px-5 py-3 rounded-full bg-white hover:bg-ink-50 border border-black/[0.09] text-ink-800 text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-soft hover:shadow-card transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          >
-            <UserCheck className="h-4 w-4 text-label-client" />
-            <span>{loadingRole === 'client' ? 'Booting Priya...' : 'Try Demo as Client'}</span>
-          </button>
-
           {!user && (
             <button
               onClick={() => navigate('/login')}
-              className="min-h-[44px] px-4 py-3 rounded-full text-ink-600 hover:text-ink-900 text-xs sm:text-sm font-semibold transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+              className="min-h-[44px] px-5 py-3 rounded-full bg-white hover:bg-ink-50 border border-black/[0.09] text-ink-800 text-xs sm:text-sm font-semibold transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
-              Sign in & Connect
+              Sign In
             </button>
           )}
         </motion.div>

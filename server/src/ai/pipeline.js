@@ -41,12 +41,15 @@ export async function runClassificationPipeline(thread, messages = [], forceReru
     };
   } else {
     // 2. Stage 2: Context assembly (Client playbook + last 10 corrections)
-    const client = await store.getClientByOrgId(thread.orgId);
+    const client =
+      (thread.clientId ? await store.getClientById(thread.clientId) : null) ||
+      (await store.getClientByOrgId(thread.orgId));
     const playbook = client?.playbook || {};
-    const corrections = await store.getCorrections(thread.clientId, 10);
+    const corrections = await store.getCorrections(thread.clientId || client?._id, 10);
+    const triageMemory = client?.agentMemory?.triage || null;
 
     // 3. Stage 3 & 4: LLM Invocation + Schema Validation & Fallback
-    const llmResult = await invokeClassificationLLM(thread, messages, playbook, corrections);
+    const llmResult = await invokeClassificationLLM(thread, messages, playbook, corrections, triageMemory);
 
     // 4. Stage 5: In-Code Risk Guardrails
     const guardrailResult = enforceRiskGuardrails(llmResult, thread, messages, playbook);

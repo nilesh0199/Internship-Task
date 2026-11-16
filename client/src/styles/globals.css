@@ -57,6 +57,17 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #D1D5DB;
   }
+  /* Sonner mobile positioning: bottom-center above any mobile bottom action bar */
+  @media (max-width: 640px) {
+    [data-sonner-toaster] {
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) !important;
+      bottom: 24px !important;
+      width: calc(100vw - 32px) !important;
+      max-width: 400px !important;
+    }
+  }
 }
 
 @layer utilities {

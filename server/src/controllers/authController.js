@@ -19,10 +19,11 @@ export const SignupSchema = z.object({
 export const LoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  expectedRole: z.enum(['assistant', 'client']).optional(),
 });
 
 export const DemoLoginSchema = z.object({
-  role: z.enum(['assistant', 'client']).default('assistant'),
+  role: z.literal('assistant').default('assistant'),
 });
 
 /**
@@ -70,7 +71,7 @@ export async function signup(req, res, next) {
       });
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 12);
     const orgId = 'org_' + Date.now();
 
     let clientId = null;
@@ -132,13 +133,13 @@ export async function signup(req, res, next) {
  */
 export async function login(req, res, next) {
   try {
-    const { email, password } = req.body;
+    const { email, password, expectedRole } = req.body;
     const user = await store.findUserByEmail(email);
 
     if (!user) {
       return res.status(401).json({
         ok: false,
-        error: { message: 'Invalid email or password.', code: 'INVALID_CREDENTIALS' },
+        error: { message: 'Incorrect email or password', code: 'INVALID_CREDENTIALS' },
       });
     }
 
@@ -146,9 +147,25 @@ export async function login(req, res, next) {
     if (!isMatch) {
       return res.status(401).json({
         ok: false,
-        error: { message: 'Invalid email or password.', code: 'INVALID_CREDENTIALS' },
+        error: { message: 'Incorrect email or password', code: 'INVALID_CREDENTIALS' },
       });
     }
+
+    // Role mismatch check: credentials are valid, but chosen role doesn't match account role
+    if (expectedRole && user.role !== expectedRole) {
+      const roleLabel = user.role === 'client' ? 'client' : 'assistant';
+      return res.status(400).json({
+        ok: false,
+        error: {
+          message: `That account is a ${roleLabel} account. Choose 'I'm a ${roleLabel}'.`,
+          code: 'ROLE_MISMATCH',
+          actualRole: user.role,
+        },
+      });
+    }
+
+    // Update last login timestamp
+    await store.updateUser?.(user._id, { lastLoginAt: new Date() }).catch(() => {});
 
     const token = signToken({ userId: user._id, role: user.role, orgId: user.orgId });
     setAuthCookie(res, token);
@@ -172,12 +189,42 @@ export async function login(req, res, next) {
 }
 
 /**
- * Handle 1-click instant demo login for reviewers
+ * Returns public auth status / config (demo mode availability)
+ */
+export async function getAuthStatus(req, res) {
+  return res.status(200).json({
+    ok: true,
+    data: {
+      demoMode: !!env.DEMO_MODE,
+      sendEnabled: !!env.SEND_ENABLED,
+    },
+  });
+}
+
+/**
+ * Handle 1-click instant demo login for reviewers (Maya assistant only)
  */
 export async function demoLogin(req, res, next) {
   try {
-    const role = req.body?.role || req.query?.role || 'assistant'; // 'assistant' or 'client'
-    const targetEmail = role === 'client' ? 'priya@vortexdynamics.com' : 'maya@vortexdynamics.com';
+    if (!env.DEMO_MODE) {
+      return res.status(404).json({
+        ok: false,
+        error: { message: 'Demo mode is disabled on this server.', code: 'DEMO_MODE_DISABLED' },
+      });
+    }
+
+    const role = req.body?.role || req.query?.role || 'assistant';
+    if (role !== 'assistant') {
+      return res.status(400).json({
+        ok: false,
+        error: {
+          message: '1-click demo login is only available for the Assistant demo account (Maya Lin). Clients must sign in with their password.',
+          code: 'CLIENT_DEMO_LOGIN_DISABLED',
+        },
+      });
+    }
+
+    const targetEmail = 'maya@vortexdynamics.com';
     let user = await store.findUserByEmail(targetEmail);
 
     if (!user) {
@@ -193,6 +240,9 @@ export async function demoLogin(req, res, next) {
       });
     }
 
+    // Update lastLoginAt
+    await store.updateUser?.(user._id, { lastLoginAt: new Date() }).catch(() => {});
+
     const token = signToken({ userId: user._id, role: user.role, orgId: user.orgId });
     setAuthCookie(res, token);
 
@@ -202,7 +252,7 @@ export async function demoLogin(req, res, next) {
       await store.initSeedData?.();
     }
 
-    logger.info({ role: user.role, email: user.email }, '[Auth] Demo login successful');
+    logger.info({ role: user.role, email: user.email }, '[Auth] Demo login successful (Maya Lin)');
 
     return res.status(200).json({
       ok: true,
@@ -339,11 +389,85 @@ export async function createInvite(req, res, next) {
 }
 
 /**
+ * List all clients for the assistant's organization with status and counts
+ */
+export async function getClients(req, res, next) {
+  try {
+    const clients = await store.getClientsByOrgId(req.user.orgId);
+    const enriched = await Promise.all(
+      clients.map(async (client) => {
+        const clientUser = await store.findUserByEmail(client.email);
+        const latestInvite = await store.findLatestInviteByClient({
+          orgId: req.user.orgId,
+          clientId: client._id,
+        });
+
+        let inviteStatus = 'not_invited';
+        let expiresAt = null;
+        if (clientUser && clientUser.lastLoginAt) {
+          inviteStatus = 'active';
+        } else if (latestInvite) {
+          if (latestInvite.status === 'accepted') {
+            inviteStatus = 'active';
+          } else if (latestInvite.status === 'revoked') {
+            inviteStatus = 'revoked';
+          } else if (new Date(latestInvite.expiresAt) < new Date()) {
+            inviteStatus = 'expired';
+            expiresAt = latestInvite.expiresAt;
+          } else if (latestInvite.status === 'pending') {
+            inviteStatus = 'pending';
+            expiresAt = latestInvite.expiresAt;
+          }
+        }
+
+        const threads = await store.getThreads({ orgId: req.user.orgId, clientId: client._id });
+        const needsReviewCount = threads.filter(
+          (t) => (t.currentLabel === 'NEEDS_REVIEW' || t.currentLabel === 'ASSISTANT_TO_REPLY') && !t.isArchived
+        ).length;
+        const clientActionCount = threads.filter(
+          (t) => t.currentLabel === 'CLIENT_TO_REPLY' && !t.isArchived && t.clientStatus !== 'handled'
+        ).length;
+
+        return {
+          _id: client._id,
+          id: client._id,
+          name: client.name,
+          email: client.email,
+          title: client.title,
+          company: client.company,
+          avatar: client.avatar,
+          inviteStatus,
+          expiresAt,
+          lastLoginAt: clientUser?.lastLoginAt || null,
+          needsReviewCount,
+          clientActionCount,
+          totalThreads: threads.length,
+        };
+      })
+    );
+
+    return res.status(200).json({
+      ok: true,
+      data: { clients: enriched },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * Get client profile and invite status for assistant
  */
 export async function getClientProfile(req, res, next) {
   try {
-    const client = await store.getClientByOrgId(req.user.orgId);
+    const { clientId } = req.query;
+    let client = null;
+    if (clientId) {
+      client = await store.getClientByOrgAndId(req.user.orgId, clientId);
+    } else {
+      client = await store.getClientByOrgId(req.user.orgId);
+    }
+
     if (!client) {
       return res.status(404).json({
         ok: false,
@@ -401,7 +525,14 @@ export async function getClientProfile(req, res, next) {
  */
 export async function updateClientProfile(req, res, next) {
   try {
-    let client = await store.getClientByOrgId(req.user.orgId);
+    const targetClientId = req.body?.clientId || req.query?.clientId;
+    let client = null;
+    if (targetClientId) {
+      client = await store.getClientByOrgAndId(req.user.orgId, targetClientId);
+    } else {
+      client = await store.getClientByOrgId(req.user.orgId);
+    }
+
     if (!client) {
       return res.status(404).json({
         ok: false,
@@ -439,7 +570,14 @@ export async function resendInvite(req, res, next) {
  */
 export async function revokeInvite(req, res, next) {
   try {
-    const client = await store.getClientByOrgId(req.user.orgId);
+    const targetClientId = req.body?.clientId || req.query?.clientId;
+    let client = null;
+    if (targetClientId) {
+      client = await store.getClientByOrgAndId(req.user.orgId, targetClientId);
+    } else {
+      client = await store.getClientByOrgId(req.user.orgId);
+    }
+
     if (!client) {
       return res.status(404).json({
         ok: false,

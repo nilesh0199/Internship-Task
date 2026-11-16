@@ -24,13 +24,14 @@ Before beginning the walkthrough, here is the transparent breakdown of simulated
 
 ```
 0:00 - 0:25  | Scene 1: The Problem & Connected Accounts
-0:25 - 0:50  | Scene 2: Assistant Workspace & AI "Why" Reasoning
-0:50 - 1:20  | Scene 3: Manual Override & Playbook Synthesis
-1:20 - 1:45  | Scene 4: Live Message Injection & Reclassification
-1:45 - 2:15  | Scene 5: Client Decision Queue (Mobile Simulation)
-2:15 - 2:35  | Scene 6: Live Reflection & Draft Dispatch
-2:35 - 2:50  | Scene 7: Command Palette (Cmd+K) & Tool Calling
-2:50 - 3:00  | Scene 8: Quiet Folder & Daily Assurance
+0:25 - 0:45  | Scene 2: Multi-Client "Today" Command Dashboard
+0:45 - 1:10  | Scene 3: Client Inboxes & "Why" Reasoning Panel
+1:10 - 1:35  | Scene 4: Per-Client Agent Notes & Side-by-Side Dry Run
+1:35 - 2:00  | Scene 5: Live Message Injection & Reclassification
+2:00 - 2:30  | Scene 6: Client Decision Queue (Mobile Simulation)
+2:30 - 2:50  | Scene 7: Agent Control Room & Zero-Trust Safety
+2:50 - 3:05  | Scene 8: Dual-Window Reflection & Draft Dispatch
+3:05 - 3:15  | Scene 9: Command Palette (Cmd+K) & Quiet Folder
 ```
 
 ---
@@ -39,12 +40,20 @@ Before beginning the walkthrough, here is the transparent breakdown of simulated
 - **Visual**: Open browser at `http://localhost:5173/`. Show the clean, editorial landing page. Click **"Settings & Accounts"**.
 - **Action**: Highlight the Connected Accounts card showing Google Gmail, Microsoft Outlook, and the Demo Mailbox. Point to the green sync pill (`"Synced 1m ago"`).
 - **Voice-Over**:
-  > *"Executive Assistants don't just manage an inbox—they manage their boss's professional life. But today, assistants drown in 200+ emails a day with one paralyzing ambiguity: who is supposed to reply to this? Welcome to Daybook Mail. We support live OAuth for Gmail and Outlook, but for this demo, let's explore our pre-loaded executive environment for founder Priya Sharma and her assistant Maya."*
+  > *"Executive Assistants don't just manage one inbox—they manage multiple executive clients. But today, assistants drown in 200+ emails a day with paralyzing ambiguity: who needs to reply, and under which client's specific delegation rules? Welcome to Daybook Mail."*
 
 ---
 
-### Scene 2: Assistant Workspace & The "Why" Panel (0:25 – 0:50)
-- **Visual**: Switch to `/assistant`. Show the 3-pane desktop layout: Segments on the left, Thread list in center, Thread reader and AI panel on the right.
+### Scene 2: Multi-Client "Today" Command Dashboard (0:25 – 0:45)
+- **Visual**: Switch to `/assistant/today`. Highlight the top-bar client tabs: `[Today]`, `[Priya Sharma (12)]`, `[Rohan Kapoor (8)]`, `[+ Add Client]`, and the agent running status pill.
+- **Action**: Point out the executive client summary cards (Priya: founder/investor focus vs Rohan: freight/logistics delegator), Today's Scheduled Meetings strip with conflict warnings, and the prioritized "Needs You Now" stack.
+- **Voice-Over**:
+  > *"Maya starts her morning on the Today command dashboard. In one unified view across all her clients, she sees Priya Sharma and Rohan Kapoor side-by-side: who needs Maya, what is waiting on the client, and schedule conflicts. The 'Needs You Now' stack ranks highest-priority items first, letting Maya jump directly into any client's inbox."*
+
+---
+
+### Scene 3: Client Inboxes & The "Why" Panel (0:45 – 1:10)
+- **Visual**: Click the `Priya Sharma` tab (`/assistant/c/client_priya_001/inbox`). Show the 3-pane desktop layout: Segments on the left, Thread list in center, Thread reader and AI panel on the right.
 - **Action**: Click on Thread #1: `Series A Expansion Term Sheet - Final Execution Deadline`.
 - **Action**: Highlight the right-hand **AI Reason Panel**. Point out:
   - Label: `CLIENT_TO_REPLY` (Terracotta badge)
@@ -52,7 +61,16 @@ Before beginning the walkthrough, here is the transparent breakdown of simulated
   - The quoted evidence callout box.
   - The structured decision question.
 - **Voice-Over**:
-  > *"Here in Maya's 3-pane dashboard, emails are automatically separated by who owns the next action. On this Series A term sheet, the AI classified it as Client to Reply. Why? Look at the AI Reason Panel: our hard guardrail detected legal signature terms and a 5 PM deadline from VIP board member Mark Suster. Notice the confidence dots—we never confuse users with raw percentages, only high, medium, or low trust indicators."*
+  > *"Clicking Priya's tab brings up her dedicated 3-pane inbox. On this Series A term sheet, the AI classified it as Client to Reply. Why? Look at the AI Reason Panel: our hard guardrail detected legal signature terms and a 5 PM deadline from VIP board member Mark Suster. Notice the confidence dots—we never confuse users with raw percentages, only high, medium, or low trust indicators."*
+
+---
+
+### Scene 4: Per-Client Agent Notes & Side-by-Side Dry Run (1:10 – 1:35)
+- **Visual**: In Priya's tab, click the **"Agents"** subnav item (`/assistant/c/client_priya_001/agents`).
+- **Action**: Highlight the 6 specialized agent cards, standing instructions, and active memories (user vs learned).
+- **Action**: Click **"Preview Notes"** on the Drafting Agent to open the Side-by-Side Dry Run modal comparing *"Without Notes"* vs *"With Notes"*.
+- **Voice-Over**:
+  > *"Every executive is different. In the Agents tab, Maya configures client-specific Agent Notes. For Drafting, Priya prefers short, decisive bullets signed 'Maya for Priya', while Rohan's notes demand crisp executive prose signed 'Rohan's Office' without exclamation points. Maya can click 'Preview Notes' to see a side-by-side dry run on real threads before saving, verifying how the agent adapts without changing a line of code."*
 
 ---
 
@@ -74,20 +92,23 @@ Before beginning the walkthrough, here is the transparent breakdown of simulated
 
 ---
 
-### Scene 5: Client Decision Queue on Mobile Width (1:45 – 2:15)
-- **Visual**: Switch browser view to mobile width (390px, iPhone view) or navigate to `/client`.
-- **Visual**: Show the warm serif headline: *"Good morning, Priya. 3 decisions need your attention today."*
-- **Action**: Tap on the Acme Corp Decision Card:
-  - Serif question: *"Approve 20% enterprise discount amendment for Acme Corp?"*
-  - Context bullets.
-  - Show the action bar: Tap **"Approve Maya's Draft"**.
+### Scene 5: Client Editorial Decision Desk in Dual Window (1:45 – 2:15)
+- **Visual**: Open a second browser window (e.g. Incognito or Chrome profile B) at `http://localhost:5173/login`. Show the centered Role Chooser modal: *"How are you signing in?"* Select **"I'm a client"** and sign in as Priya Sharma (`priya@vortexdynamics.com` / `password123`).
+- **Visual**: Priya lands on `/client`—the full-width Editorial Decision Desk:
+  - **Left Rail (~280px)**: Greeting (*"Good morning, Priya"*), summary sentence (*"3 decisions need you today. Maya and the agents handled 12 more."*), vertical navigator (*Today / This week / Later / Waiting on others / Handled*), Next Deadline countdown, and quick keyboard hint pills (`j`/`k`, `Enter`, `a`, `h`, `s`, `d`).
+  - **Middle Column (~440px)**: Scannable urgency rows with sender avatar, 1-line executive question, relative age, deadline chips, and draft-ready badges.
+  - **Right Decision Sheet**: Selected item rendered in warm editorial Fraunces serif headline, honest byline (*"Prepared by Maya with Daybook agents."*), concise *"What's being asked"* overview, 2–4 key context bullets, quiet blockquote evidence from the message thread, and consequence of delay.
+- **Action**: Tap or select the Acme Corp item:
+  - Headline: *"Approve 20% enterprise discount amendment for Acme Corp?"*
+  - Review Maya's pre-drafted response in the editable preview pane.
+  - Sticky Action Bar: Tap **"Approve Maya's Draft"** (or press shortcut key `a`). An optimistic update animates the item out with a 5-second Sonner undo toast.
 - **Voice-Over**:
-  > *"Now, let's step into Priya's shoes. As a CEO, Priya doesn't open an email client on her phone—she opens her Decision Queue. No long threads, no clutter. Just clean Decision Cards in editorial serif typography. She sees the question, the 4 PM deadline, the consequence of delay, and Maya's pre-drafted reply. With a single tap, Priya approves the draft and moves on."*
+  > *"Now, let's step into Priya's shoes in a second window. As a CEO, Priya has her own separate account. She doesn't open a confusing email client on her phone—she opens her Editorial Decision Desk. No long chains, no noise. Just clean executive decision sheets with Fraunces headlines, distilled context bullets, and Maya's pre-drafted replies. With a single tap or keyboard shortcut 'a', Priya approves Maya's draft, triggering an instant optimistic update."*
 
 ---
 
 ### Scene 5B: The Agent Control Room & Zero-Trust Safety (2:15 – 2:45)
-- **Visual**: In Maya's workspace header or sidebar, click **"Agent Control Room"** (`/agents`).
+- **Visual**: In Maya's workspace (Window A), click **"Agent Control Room"** (`/agents`).
 - **Visual**: Show the top funnel strip: *"40 emails in. 24 handled by agents. 9 need you (Maya). 7 need Priya."*
 - **Action**: Highlight the 6 specialized agent cards (Triage, Scheduling, Follow-up, Drafting, Digest, Guardian).
 - **Action**: Toggle an agent's autonomy level between *Off*, *Propose*, and *Auto*.
@@ -97,12 +118,12 @@ Before beginning the walkthrough, here is the transparent breakdown of simulated
 
 ---
 
-### Scene 6: Live Reflection & Draft Dispatch (2:45 – 3:05)
-- **Visual**: Switch back to desktop `/assistant`.
-- **Action**: Show that the Acme Corp thread now displays a green status badge: `Draft Approved by Priya`.
-- **Action**: Maya clicks **"Send Approved Email"**. The toast confirms simulated transmission and writes an entry into the immutable Activity Log.
+### Scene 6: Dual-Window Live Reflection & Draft Dispatch (2:45 – 3:05)
+- **Visual**: Look at Window A (Maya's desktop workspace). Notice that without pressing reload, Maya's dashboard polled in the background (~8-10s) and automatically updated!
+- **Action**: Show that the Acme Corp thread now displays the green status badge: `Draft Approved by Priya`.
+- **Action**: Maya clicks **"Send Approved Email"**. The toast confirms simulated transmission (`SEND_ENABLED=false` safety gate) and records an immutable audit entry in the Activity Log.
 - **Voice-Over**:
-  > *"Instantly, back in Maya's workspace, the draft reflects Priya's approval. Maya can review the final timestamp and click Send with full confidence. The approval trail is completely audited, and our safety guardrail prevents accidental dispatches."*
+  > *"Now look back at Maya's dashboard in Window A. Without any manual page reload, the two real accounts synced live! The draft reflects Priya's approval. Maya can review the final timestamp and click Send with full confidence. The approval trail is completely audited, and our safety guardrail prevents accidental dispatches."*
 
 ---
 

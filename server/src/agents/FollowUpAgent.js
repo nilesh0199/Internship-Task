@@ -27,8 +27,32 @@ export class FollowUpAgent extends BaseAgent {
   async run(thread, ctx) {
     const startTime = Date.now();
     const playbook = ctx.playbook || {};
-    const followupDays = playbook.agentSettings?.followupDays || 3;
+    let followupDays = playbook.agentSettings?.followupDays || 3;
     const now = Date.now();
+    const client = ctx.client || (await store.getClientByOrgId(thread.orgId));
+    const clientName = client?.name || 'Priya Sharma';
+
+    // Parse Follow-up Agent memory notes
+    const followupMem = client?.agentMemory?.followup;
+    let followupNotesSummary = null;
+    let neverNudgeBoard = false;
+
+    if (followupMem) {
+      const instruction = (followupMem.instruction || '').toLowerCase();
+      const memories = (followupMem.memories || []).filter((m) => m.enabled !== false);
+      const combined = `${instruction} ${memories.map((m) => m.text).join(' ')}`.toLowerCase();
+
+      if (combined.includes('2 days')) followupDays = 2;
+      if (combined.includes('never nudge board') || combined.includes('board member')) {
+        neverNudgeBoard = true;
+      }
+
+      if (followupMem.instruction || memories.length > 0) {
+        followupNotesSummary = memories.length > 0
+          ? `Applied instruction + ${memories.length} ${memories.length === 1 ? 'memory' : 'memories'}`
+          : 'Applied instruction';
+      }
+    }
 
     // Rate-limiting check: Ensure thread was not nudged in the last 24h
     const recentRuns = await store.getAgentRuns({
@@ -55,25 +79,49 @@ export class FollowUpAgent extends BaseAgent {
     if (isWaiting && daysWaiting >= followupDays) {
       const recipient = thread.participants?.[0]?.name || 'there';
       const recipientEmail = thread.participants?.[0]?.email || 'colleague@example.com';
+
+      if (neverNudgeBoard) {
+        const isBoard = (thread.participants || []).some(
+          (p) =>
+            (p.email && playbook.vipSenders?.includes(p.email)) ||
+            p.name?.toLowerCase().includes('board') ||
+            thread.subject?.toLowerCase().includes('board')
+        );
+        if (isBoard) {
+          return this.formatResult({
+            action: 'skip_board_member',
+            outcome: 'skipped',
+            summary: `Follow-up skipped for ${recipient}: Client notes specify never nudging board members.`,
+            details: { recipientEmail, notesApplied: followupNotesSummary },
+            durationMs: Date.now() - startTime,
+          });
+        }
+      }
+
       const draftBody = `Hi ${recipient},
 
 I wanted to quickly circle back on the note below regarding "${thread.subject}". Please let us know if you need any additional details from our end to proceed.
 
 Best regards,
 Maya Lin
-Executive Assistant to Priya Sharma`;
+Executive Assistant to ${clientName}`;
 
-      const draft = await store.saveDraft({
-        threadId: thread._id || thread.id,
-        orgId: thread.orgId,
-        authorId: 'agent_followup',
-        to: [recipientEmail],
-        subject: `Following up: ${thread.subject}`,
-        bodyText: draftBody,
-        bodyHtml: `<p>${draftBody.replace(/\n/g, '<br/>')}</p>`,
-        status: 'agent_proposal',
-        agentProposalType: 'stale_followup',
-      });
+      let draft = null;
+      if (!ctx.isDryRun) {
+        draft = await store.saveDraft({
+          threadId: thread._id || thread.id,
+          orgId: thread.orgId,
+          authorId: 'agent_followup',
+          to: [recipientEmail],
+          subject: `Following up: ${thread.subject}`,
+          bodyText: draftBody,
+          bodyHtml: `<p>${draftBody.replace(/\n/g, '<br/>')}</p>`,
+          status: 'agent_proposal',
+          agentProposalType: 'stale_followup',
+        });
+      } else {
+        draft = { _id: 'draft_dry_run_fu_' + Date.now() };
+      }
 
       return this.formatResult({
         action: 'draft_stale_followup',
@@ -83,10 +131,11 @@ Executive Assistant to Priya Sharma`;
           daysWaiting,
           followupDays,
           draftId: draft._id,
+          notesApplied: followupNotesSummary,
         },
         confidence: 0.95,
         requiresHuman: true,
-        undo: {
+        undo: ctx.isDryRun ? null : {
           type: 'discard_draft',
           payload: { draftId: draft._id },
         },
@@ -94,17 +143,18 @@ Executive Assistant to Priya Sharma`;
       });
     }
 
-    // Case B: Decision pending in Priya's queue for > 24 hours
+    // Case B: Decision pending in executive client queue for > 24 hours
     if (thread.currentLabel === 'CLIENT_TO_REPLY' && thread.clientStatus === 'pending') {
       const pendingHours = Math.floor((now - new Date(thread.lastMessageAt).getTime()) / (3600 * 1000));
       if (pendingHours >= 24) {
         return this.formatResult({
           action: 'nudge_client_decision',
           outcome: 'proposed',
-          summary: `Pending in Priya's queue for ${pendingHours} hours. Recommended Maya ping Priya during afternoon sync.`,
+          summary: `Pending in ${clientName}'s queue for ${pendingHours} hours. Recommended Maya ping ${clientName} during afternoon sync.`,
           details: {
             pendingHours,
             subject: thread.subject,
+            notesApplied: followupNotesSummary,
           },
           confidence: 0.92,
           requiresHuman: true,

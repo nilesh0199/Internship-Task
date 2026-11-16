@@ -27,3 +27,23 @@ export const authRateLimiter = rateLimit({
     },
   },
 });
+
+export const loginRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10, // max 10 failed attempts per 15 minutes per IP + email combination
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) => {
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown-ip';
+    const email = (req.body?.email || '').toLowerCase().trim();
+    return `${ip}_${email}`;
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    ok: false,
+    error: {
+      message: 'Too many failed login attempts. Please wait 15 minutes before trying again.',
+      code: 'LOGIN_RATE_LIMIT_EXCEEDED',
+    },
+  },
+});

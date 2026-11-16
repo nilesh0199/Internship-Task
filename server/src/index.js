@@ -12,6 +12,7 @@ import aiRoutes from './routes/aiRoutes.js';
 import threadRoutes from './routes/threadRoutes.js';
 import agentRoutes from './routes/agentRoutes.js';
 import { startAgentScheduler } from './agents/index.js';
+import { startDemoLiveFeed } from './services/demoLiveFeed.js';
 
 const app = express();
 const PORT = env.PORT;
@@ -77,6 +78,7 @@ app.get('/api/health', (req, res) => {
     db: isMongo ? 'connected' : 'fallback',
     time: new Date().toISOString(),
     environment: env.NODE_ENV,
+    demoMode: !!env.DEMO_MODE,
   });
 });
 
@@ -87,14 +89,21 @@ app.use('/api/ai', aiRoutes);
 app.use('/api', threadRoutes);
 app.use('/api/agents', agentRoutes);
 
-// Start autonomous background scheduler if configured
-startAgentScheduler();
-
 // Centralized error handler
 app.use(errorHandler);
 
 // Start server if not imported
-if (process.env.NODE_ENV !== 'test') {
+const isDirectExecution =
+  process.argv[1] &&
+  (process.argv[1].endsWith('index.js') ||
+    process.argv[1].endsWith('src/index.js') ||
+    process.argv[1].endsWith('src\\index.js'));
+
+if (isDirectExecution && process.env.NODE_ENV !== 'test') {
+  // Start autonomous background scheduler and live demo feed
+  startAgentScheduler();
+  startDemoLiveFeed();
+
   app.listen(PORT, () => {
     const isMongo = isRealDBConnected();
     const banner = [
@@ -109,6 +118,7 @@ if (process.env.NODE_ENV !== 'test') {
       ` Google OAuth:       ${env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? 'Configured & Enabled' : 'Disabled (Missing Credentials)'}`,
       ` Microsoft OAuth:    ${env.MICROSOFT_CLIENT_ID && env.MICROSOFT_CLIENT_SECRET ? 'Configured & Enabled' : 'Disabled (Missing Credentials)'}`,
       ` Email Dispatch:     ${env.SEND_ENABLED ? 'LIVE DISPATCH ENABLED' : 'SAFETY GATE ACTIVE (Simulated Send)'}`,
+      ` Demo Mode:          ${env.DEMO_MODE ? 'ENABLED (Sample Accounts Active)' : 'DISABLED (Isolated Production)'}`,
       ` Health Check:       http://localhost:${PORT}/api/health`,
       '==================================================================',
     ].join('\n');

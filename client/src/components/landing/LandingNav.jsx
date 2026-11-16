@@ -60,7 +60,7 @@ export default function LandingNav() {
     try {
       await demoLogin('assistant');
       toast.success('Signed in as Assistant Maya Lin');
-      navigate('/assistant');
+      navigate('/assistant/today');
     } catch (err) {
       toast.error('Failed to launch demo: ' + (err.message || 'Error'));
     } finally {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import AccountMenu from '../components/AccountMenu.jsx';
+import { DemoWorkspaceBanner } from '../components/DemoWorkspaceBanner.jsx';
 import {
   Bot,
   Sparkles,
@@ -57,31 +58,40 @@ export function AgentControlRoom() {
   const [agents, setAgents] = useState([]);
   const [summary, setSummary] = useState(null);
   const [runs, setRuns] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [clientFilter, setClientFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [runningAgents, setRunningAgents] = useState(false);
   const [undoingRunId, setUndoingRunId] = useState(null);
   const [agentFilter, setAgentFilter] = useState('all');
   const [outcomeFilter, setOutcomeFilter] = useState('all');
+  const [agentStatus, setAgentStatus] = useState({ isRunning: true, lastRunAt: new Date(), enabled: true });
 
   useEffect(() => {
     loadData();
     // 5-second polling for live activity feed
     const interval = setInterval(loadLiveFeed, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [clientFilter]);
 
   async function loadData() {
     setLoading(true);
     try {
-      const [agentsRes, summaryRes, runsRes] = await Promise.all([
-        api.get('/agents'),
+      const clientParam = clientFilter !== 'all' ? `?clientId=${clientFilter}` : '';
+      const runsParam = clientFilter !== 'all' ? `&clientId=${clientFilter}` : '';
+      const [agentsRes, summaryRes, runsRes, clientsRes, statusRes] = await Promise.all([
+        api.get(`/agents${clientParam}`),
         api.get('/agents/summary'),
-        api.get('/agents/runs?limit=40'),
+        api.get(`/agents/runs?limit=50${runsParam}`),
+        api.get('/auth/clients'),
+        api.get('/agents/status'),
       ]);
 
       if (agentsRes.ok) setAgents(agentsRes.data || []);
       if (summaryRes.ok) setSummary(summaryRes.data || null);
       if (runsRes.ok) setRuns(runsRes.data || []);
+      if (clientsRes.ok && clientsRes.data?.clients) setClients(clientsRes.data.clients);
+      if (statusRes.ok && statusRes.data) setAgentStatus(statusRes.data);
     } catch (err) {
       toast.error('Failed to load Agent Control Room: ' + err.message);
     } finally {
@@ -91,10 +101,13 @@ export function AgentControlRoom() {
 
   async function loadLiveFeed() {
     try {
-      const runsRes = await api.get('/agents/runs?limit=40');
+      const runsParam = clientFilter !== 'all' ? `&clientId=${clientFilter}` : '';
+      const runsRes = await api.get(`/agents/runs?limit=50${runsParam}`);
       if (runsRes.ok) setRuns(runsRes.data || []);
       const summaryRes = await api.get('/agents/summary');
       if (summaryRes.ok) setSummary(summaryRes.data || null);
+      const statusRes = await api.get('/agents/status');
+      if (statusRes.ok && statusRes.data) setAgentStatus(statusRes.data);
     } catch {
       // Background poll silently fails
     }
@@ -158,6 +171,7 @@ export function AgentControlRoom() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-ink-900 pb-20 font-sans select-none">
+      <DemoWorkspaceBanner />
       {/* Top Header Bar */}
       <header className="h-16 bg-white/85 backdrop-blur-md border-b border-borderMuted/70 px-6 md:px-10 flex items-center justify-between sticky top-0 z-30 select-none">
         <div className="flex items-center gap-3">
@@ -193,6 +207,25 @@ export function AgentControlRoom() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Agent Ticker Status Pill */}
+          <div
+            className={`hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
+              agentStatus.isRunning
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : 'bg-amber-50 text-amber-800 border-amber-200'
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                agentStatus.isRunning ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+              }`}
+            />
+            <span>Agents running</span>
+            <span className="text-[10px] text-ink-400 font-mono">
+              · 3m tick active
+            </span>
+          </div>
+
           <button
             onClick={handleRunAgentsNow}
             disabled={runningAgents}
@@ -328,7 +361,7 @@ export function AgentControlRoom() {
         {/* 2. Specialized Agent Cards (6 Total)                             */}
         {/* ================================================================= */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-serif font-bold text-ink-900">
                 Specialized Agents
@@ -337,9 +370,22 @@ export function AgentControlRoom() {
                 Independent autonomous modules. Configure per-client autonomy (Off / Propose / Auto).
               </p>
             </div>
-            <span className="text-xs text-ink-500 font-medium">
-              Autonomy Guardrail: No agent transmits email without human action
-            </span>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-ink-600">Client:</span>
+              <select
+                value={clientFilter}
+                onChange={(e) => setClientFilter(e.target.value)}
+                className="text-xs font-semibold bg-white border border-black/15 rounded-xl px-3 py-1.5 outline-none focus:border-accent"
+              >
+                <option value="all">All Clients (Combined Org)</option>
+                {clients.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name} ({c.company})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -587,6 +633,11 @@ export function AgentControlRoom() {
                           {run.trigger && (
                             <span className="text-[10px] font-mono text-ink-400">
                               via {run.trigger}
+                            </span>
+                          )}
+                          {run.notesApplied && (
+                            <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                              {run.notesApplied}
                             </span>
                           )}
                           {isUndone && (

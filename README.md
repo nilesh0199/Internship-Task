@@ -56,11 +56,14 @@ Daybook Mail bridges the gap between high-volume administrative triage and execu
 
 ## 2. Key Features
 
+- **Multi-Client Operations & "Today" Command Dashboard (`/assistant/today`)**: Purpose-built for Executive Assistants managing multiple high-profile clients. Features a persistent top-bar client switcher (`[Today] [Priya Sharma] [Rohan Kapoor] [+ Add Client]`), executive summary cards, scheduled meetings strip with conflict alerts, and a prioritized "Needs You Now" stack jumping directly into client-filtered inboxes.
+- **Per-Client Agent Memory ("Agent Notes") & Side-by-Side Dry Run (`/assistant/c/:clientId/agents`)**: Independent agent memory per client with standing instructions (max 500 chars) and active memories (source: user/learned). Features a side-by-side Dry Run preview showing `withNotes` vs `withoutNotes` without modifying database state. Guardian Agent enforces a strictness-only invariant so notes can never loosen safety guardrails.
 - **Specialized Autonomous Agent Collective & Control Room (`/agents`)**: Six isolated agents (`TriageAgent`, `SchedulingAgent`, `FollowUpAgent`, `DraftingAgent`, `DigestAgent`, `GuardianAgent`) handling routine triage, conflict detection, stale thread check-ins, pre-drafting, and morning briefs autonomously. Governed by a zero-trust **Guardian Agent** that detects VIP/compliance edge cases, reverses bad auto-file actions instantly, and guarantees 1-click Undo for all state mutations.
-- **Editorial Landing Page (`/`)**: High-polish Pinterest-inspired visual presentation with drifting email cards, interactive triage reasoning playground, value propositions, and role-based redirecting for authenticated users.
+- **Real Authentication & Role Separation with Role Chooser Modal**: Zero persona switcher. Assistants and executive clients authenticate with separate credentials. Polished centered Role Chooser modal on "Log in" ("How are you signing in?") with "I'm an assistant" vs "I'm a client" cards, deep links (`/login?role=assistant|client`), and server-enforced role mismatch switching. Single-use client invite flow generates cryptographically secure 32-byte tokens stored as SHA-256 hashes with 7-day expiration.
+- **Editorial Landing Page (`/`)**: High-polish visual presentation with drifting email cards, interactive collective agent showcase, triage reasoning playground, value propositions, and role-based redirecting for authenticated users.
 - **Two Connected Experiences**:
-  - **Assistant Workspace**: High-throughput 3-pane desktop dashboard featuring full keyboard navigation (`j`/`k`, shortcuts), deep AI reasoning inspection, draft-for-approval composer, and timeline audit logs.
-  - **Client Decision Queue**: Ultra-distilled, mobile-friendly single column presenting email as **Decision Cards** in elegant serif typography with one-tap choices (*Approve Maya's Draft*, *Reply Myself*, *Hand to Maya*).
+  - **Assistant Workspace & Today Dashboard (`/assistant/today`)**: High-throughput 3-pane desktop dashboard featuring full keyboard navigation (`j`/`k`, shortcuts), persistent client switcher tabs, scheduled meetings strip with conflict alerts, prioritized "Needs You Now" stack, deep AI reasoning inspection, draft-for-approval composer, and timeline audit logs.
+  - **Client Editorial Decision Desk (`/client`)**: Premium 3-zone executive desk (Desktop >=1024px max 1440px) featuring a left rail navigator (Today, This week, Later, Waiting on others, Handled) with countdown deadline, middle scannable urgency rows, and a right decision sheet in warm editorial Fraunces serif typography with concise "What's being asked" summaries, quiet blockquote evidence, and a sticky action bar (*Approve Maya's Draft*, *Reply Myself*, *Hand to Maya*, *Snooze*, *Mark Handled*). Automatically adapts to tablet drawer and mobile single-column layouts with full keyboard support (`j`/`k`, `Enter`, `a`, `h`, `s`, `d`).
 - **Client Playbook**: Tailored delegation matrix encoding VIP senders, topic rules, spending approval limits, and custom client nuances into the AI classification prompt.
 - **Learning from Corrections**: Manual label overrides are tracked as few-shot training examples, offering an instant **"Make this a rule?"** prompt to update the Playbook.
 - **Risk-Aware Guardrails in Code**: Senders on VIP lists, contracts, and currency amounts > \$500 can *never* resolve to `NO_REPLY_NEEDED`.
@@ -161,12 +164,30 @@ npm run seed
 ```
 
 ### 5. Run Automated Tests
-Execute the native Node test suite verifying the 6-agent collective, Guardian risk reversal, zero-send safety gate, 1-click Undo, and RBAC authorization:
+Execute the native Node test suite verifying the 6-agent collective, Guardian risk reversal, zero-send safety gate, 1-click Undo, real RBAC role isolation, single-use SHA-256 invite flow, and login rate limiting:
 ```bash
 npm test
 ```
+Runs `server/test/agents.test.js` and `server/test/auth.test.js` (17 tests total).
 
-### 6. Production Deployment (Render & Vercel)
+### 6. Dual-Window Testing (Assistant & Client Sync)
+1. **Window A (Maya Lin - Assistant)**:
+   - Navigate to `http://localhost:5173/login`.
+   - Click **"Try Demo as Assistant"** (or sign in with `maya@vortexdynamics.com` / `password123`).
+   - You land on `/assistant` (3-pane desktop workspace).
+2. **Window B (Priya Sharma - Client)**:
+   - Open an Incognito window or separate browser profile at `http://localhost:5173/login`.
+   - Expand the **"Demo accounts"** card and sign in with `priya@vortexdynamics.com` / `password123`.
+   - Priya lands on `/client` (Decision Queue in editorial typography).
+3. **Live Sync in Action**:
+   - In Window B, approve or defer any decision (e.g. approve Acme Corp discount).
+   - In Window A, watch Maya's dashboard update live within ~8-10 seconds without a manual page reload!
+4. **Client Invite Flow**:
+   - In Window A, click the client card in the sidebar to open the Client Profile modal.
+   - Click **"Invite client"** (or "Resend invite") to generate a single-use invite link.
+   - Open that URL (`/invite/:token`) in an incognito window, enter a 10+ char password, and accept to immediately enter `/client`.
+
+### 7. Production Deployment (Render & Vercel)
 - **Backend (Render)**: Deploy using `render.yaml` or create a Node web service (`npm run start --workspace=server`). Set `CLIENT_URL` to your Vercel URL. Ensure `JWT_SECRET` and `TOKEN_ENCRYPTION_KEY` are configured with production-grade random values (the server rejects startup with default keys in production).
 - **Frontend (Vercel)**: Deploy `client` folder. In `client/vercel.json`, replace `REPLACE_WITH_RENDER_URL` with your Render backend URL (e.g. `https://daybook-server.onrender.com`). This edge rewrite routes all `/api/*` calls through the client origin so session cookies are first-party and never blocked.
 - **Cookie SameSite**: Set `COOKIE_SAMESITE=lax` when using the Vercel API rewrite proxy (recommended), or `COOKIE_SAMESITE=none` with secure HTTPS if directly addressing a cross-origin server.

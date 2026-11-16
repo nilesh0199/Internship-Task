@@ -301,7 +301,7 @@ const AGENT_PROFILES = {
 
 export default function AgentsCollectiveSection() {
   const shouldReduceMotion = useReducedMotion();
-  const [activeAgent, setActiveAgent] = useState('drafting');
+  const [activeAgent, setActiveAgent] = useState('triage');
   const [interactiveFeedback, setInteractiveFeedback] = useState(null);
 
   const currentProfile = AGENT_PROFILES[activeAgent] || AGENT_PROFILES.drafting;
@@ -350,6 +350,14 @@ export default function AgentsCollectiveSection() {
                   onClick={() => {
                     setActiveAgent(agent.id);
                     setInteractiveFeedback(null);
+                    // Ensure showcase panel is smoothly scrolled into comfortable view if partially offscreen
+                    const panel = document.getElementById('agent-showcase-panel');
+                    if (panel) {
+                      const rect = panel.getBoundingClientRect();
+                      if (rect.top < 80 || rect.top > window.innerHeight - 250) {
+                        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                      }
+                    }
                   }}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-semibold transition-all duration-200 cursor-pointer active:scale-95 ${
                     isSelected
@@ -361,6 +369,9 @@ export default function AgentsCollectiveSection() {
                 >
                   <Icon className={`h-4 w-4 ${isSelected ? 'text-white' : 'text-accent'}`} />
                   <span>{agent.name}</span>
+                  {isSelected && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  )}
                 </button>
               );
             })}
@@ -373,6 +384,7 @@ export default function AgentsCollectiveSection() {
         {/* Dynamic Agent Showcase Panel */}
         <AnimatePresence mode="wait">
           <motion.div
+            id="agent-showcase-panel"
             key={currentProfile.id}
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
             animate={{ opacity: 1, y: 0 }}

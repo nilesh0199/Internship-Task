@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AccountMenu from '../components/AccountMenu.jsx';
+import { DemoWorkspaceBanner } from '../components/DemoWorkspaceBanner.jsx';
 
 export function AccountsPage() {
   const [accounts, setAccounts] = useState([]);
@@ -115,8 +116,9 @@ export function AccountsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-ink-900 p-6 md:p-12 font-sans select-none">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#FAF8F5] text-ink-900 font-sans select-none">
+      <DemoWorkspaceBanner />
+      <div className="max-w-4xl mx-auto p-6 md:p-12 space-y-8">
         {/* Navigation Bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

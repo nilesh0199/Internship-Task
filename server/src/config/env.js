@@ -22,6 +22,10 @@ const envSchema = z.object({
   MICROSOFT_CLIENT_SECRET: z.string().optional().default(''),
   MICROSOFT_REDIRECT_URI: z.string().default('http://localhost:5000/api/auth/microsoft/callback'),
   COOKIE_SAMESITE: z.enum(['lax', 'none', 'strict']).default(process.env.NODE_ENV === 'production' ? 'none' : 'lax'),
+  DEMO_MODE: z
+    .string()
+    .default(process.env.NODE_ENV === 'production' ? 'false' : 'true')
+    .transform((val) => val === 'true'),
   LOG_LEVEL: z.string().default('info'),
 });
 
