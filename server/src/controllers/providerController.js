@@ -12,6 +12,19 @@ import { logger } from '../utils/logger.js';
  */
 export async function connectGoogle(req, res, next) {
   try {
+    if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
+      if (req.headers.accept?.includes('application/json')) {
+        return res.status(400).json({
+          ok: false,
+          error: {
+            message: 'Google OAuth credentials (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET) are not configured on this server.',
+            code: 'OAUTH_NOT_CONFIGURED',
+          },
+        });
+      }
+      return res.redirect(`${env.CLIENT_URL}/settings/accounts?error=google_oauth_not_configured`);
+    }
+
     const statePayload = {
       userId: req.user._id,
       orgId: req.user.orgId,
@@ -91,6 +104,19 @@ export async function googleCallback(req, res, next) {
  */
 export async function connectMicrosoft(req, res, next) {
   try {
+    if (!env.MICROSOFT_CLIENT_ID || !env.MICROSOFT_CLIENT_SECRET) {
+      if (req.headers.accept?.includes('application/json')) {
+        return res.status(400).json({
+          ok: false,
+          error: {
+            message: 'Microsoft Graph OAuth credentials (MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET) are not configured on this server.',
+            code: 'OAUTH_NOT_CONFIGURED',
+          },
+        });
+      }
+      return res.redirect(`${env.CLIENT_URL}/settings/accounts?error=microsoft_oauth_not_configured`);
+    }
+
     const statePayload = {
       userId: req.user._id,
       orgId: req.user.orgId,

@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { z } from 'zod';
+import { env } from '../config/env.js';
 import { store } from '../services/store.js';
 import { signToken } from '../middleware/auth.js';
 import { logger } from '../utils/logger.js';
@@ -28,10 +29,12 @@ export const DemoLoginSchema = z.object({
  * Sets the secure JWT authentication cookie on response
  */
 function setAuthCookie(res, token) {
+  const sameSite = env.COOKIE_SAMESITE || (env.NODE_ENV === 'production' ? 'none' : 'lax');
+  const isSecure = sameSite === 'none' ? true : env.NODE_ENV === 'production';
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isSecure,
+    sameSite,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/',
   });
@@ -246,7 +249,14 @@ export async function getMe(req, res, next) {
  * Clear session cookie and logout
  */
 export function logout(req, res) {
-  res.clearCookie('token', { path: '/' });
+  const sameSite = env.COOKIE_SAMESITE || (env.NODE_ENV === 'production' ? 'none' : 'lax');
+  const isSecure = sameSite === 'none' ? true : env.NODE_ENV === 'production';
+  res.clearCookie('token', {
+    path: '/',
+    httpOnly: true,
+    secure: isSecure,
+    sameSite,
+  });
   return res.status(200).json({ ok: true, message: 'Logged out successfully' });
 }
 

@@ -1,10 +1,20 @@
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
 
 /**
  * Universal JSON API request helper with credentials (cookies)
  */
 export async function apiRequest(endpoint, options = {}) {
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+  let url;
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+    url = endpoint;
+  } else {
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    if (API_BASE.endsWith('/api') && cleanEndpoint.startsWith('/api/')) {
+      url = `${API_BASE}${cleanEndpoint.slice(4)}`;
+    } else {
+      url = `${API_BASE}${cleanEndpoint}`;
+    }
+  }
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {}),

@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { env } from './config/env.js';
-import { connectDB } from './config/db.js';
+import { connectDB, isRealDBConnected } from './config/db.js';
 import { logger } from './utils/logger.js';
 import { errorHandler, apiRateLimiter } from './middleware/index.js';
 import authRoutes from './routes/authRoutes.js';
@@ -13,23 +13,42 @@ import threadRoutes from './routes/threadRoutes.js';
 
 const app = express();
 const PORT = env.PORT;
-const CLIENT_URL = env.CLIENT_URL;
 
 // Trust reverse proxy for deployment on Render/Heroku
 app.set('trust proxy', 1);
+
+// Strict CORS allowlist
+const rawAllowedOrigins = (env.CLIENT_URL || '')
+  .split(',')
+  .map((o) => o.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
+const devOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:5000',
+  'http://localhost:4173',
+];
+
+const allowedOrigins = Array.from(
+  new Set([
+    ...rawAllowedOrigins,
+    ...(env.NODE_ENV !== 'production' ? devOrigins : []),
+  ])
+);
 
 // Security and utility middleware
 app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+      // Allow requests with no origin (mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
-      // In development allow localhost origins, or match CLIENT_URL
-      if (origin === CLIENT_URL || origin.startsWith('http://localhost:')) {
+      const cleanOrigin = origin.replace(/\/+$/, '');
+      if (allowedOrigins.includes(cleanOrigin)) {
         return callback(null, true);
       }
-      return callback(null, true); // Permissive for prototype evaluation
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
     },
     credentials: true,
   })
@@ -41,15 +60,21 @@ app.use('/api', apiRateLimiter);
 // Connect database (with automatic fallback to in-memory store)
 connectDB();
 
-// Base health check endpoint (compatible with UptimeRobot & Render health checks)
-app.get(['/api/health', '/healthz'], (req, res) => {
+// Ultra lightweight health ping (no DB touch, for load balancers)
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Detailed health check endpoint reflecting real storage state
+app.get('/api/health', (req, res) => {
+  const isMongo = isRealDBConnected();
   res.status(200).json({
     ok: true,
     service: 'Daybook Mail API',
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
+    storage: isMongo ? 'mongodb' : 'in-memory',
+    db: isMongo ? 'connected' : 'fallback',
+    time: new Date().toISOString(),
     environment: env.NODE_ENV,
-    storage: 'resilient_store',
   });
 });
 

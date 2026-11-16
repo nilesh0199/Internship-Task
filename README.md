@@ -158,6 +158,11 @@ To populate MongoDB with Priya Sharma and Maya Lin's 40 demo conversations:
 npm run seed
 ```
 
+### 5. Production Deployment (Render & Vercel)
+- **Backend (Render)**: Deploy using `render.yaml` or create a Node web service (`npm run start --workspace=server`). Set `CLIENT_URL` to your Vercel URL. Ensure `JWT_SECRET` and `TOKEN_ENCRYPTION_KEY` are configured with production-grade random values (the server rejects startup with default keys in production).
+- **Frontend (Vercel)**: Deploy `client` folder. In `client/vercel.json`, replace `REPLACE_WITH_RENDER_URL` with your Render backend URL (e.g. `https://daybook-server.onrender.com`). This edge rewrite routes all `/api/*` calls through the client origin so session cookies are first-party and never blocked.
+- **Cookie SameSite**: Set `COOKIE_SAMESITE=lax` when using the Vercel API rewrite proxy (recommended), or `COOKIE_SAMESITE=none` with secure HTTPS if directly addressing a cross-origin server.
+
 ---
 
 ## 6. Manual Setup Steps for External Services

@@ -21,6 +21,7 @@ export function AccountsPage() {
   const [loading, setLoading] = useState(true);
   const [syncingId, setSyncingId] = useState(null);
   const [simulating, setSimulating] = useState(false);
+  const [storageMode, setStorageMode] = useState(null);
 
   useEffect(() => {
     loadAccounts();
@@ -29,6 +30,14 @@ export function AccountsPage() {
   async function loadAccounts() {
     setLoading(true);
     try {
+      // Check storage mode via health endpoint
+      try {
+        const healthRes = await api.get('/health');
+        if (healthRes?.storage) {
+          setStorageMode(healthRes.storage);
+        }
+      } catch (_) {}
+
       const res = await api.get('/accounts');
       if (res.ok) {
         setAccounts(res.data || []);
@@ -117,6 +126,16 @@ export function AccountsPage() {
             Manage live OAuth2 Google Workspace, Microsoft 365, and simulated demo mailboxes with real-time bidirectional synchronization.
           </p>
         </div>
+
+        {/* In-Memory Persistence Informational Banner */}
+        {storageMode === 'in-memory' && (
+          <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-200/80 shadow-xs flex items-start gap-3">
+            <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-900 leading-relaxed">
+              <strong className="font-semibold">Demo storage: in-memory.</strong> Connected accounts persist for this session only. To persist permanently, set <code className="bg-white/80 px-1.5 py-0.5 rounded font-mono text-[11px] border border-amber-200 text-amber-800">MONGODB_URI</code>.
+            </div>
+          </div>
+        )}
 
         {/* Connected Accounts Card List */}
         <div className="bg-white border border-black/[0.06] rounded-3xl p-7 md:p-8 shadow-card space-y-5">
