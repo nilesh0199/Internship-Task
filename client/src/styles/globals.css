@@ -8,12 +8,25 @@
     --text-ink: #111827;
   }
 
+  html {
+    scroll-behavior: smooth;
+    overflow-x: clip;
+  }
+
   body {
     background-color: var(--bg-warm);
     color: var(--text-ink);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Anchor section scroll offset for sticky header */
+  [id] {
+    scroll-margin-top: 5rem;
   }
 
   /* Universal scroll lock when any modal, drawer, or dialog is open */
@@ -53,5 +66,80 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Keyframe animations for subtle drifting columns */
+  @keyframes drift-up-slow {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(0, -50%, 0);
+    }
+  }
+
+  @keyframes drift-up-medium {
+    0% {
+      transform: translate3d(0, -10%, 0);
+    }
+    100% {
+      transform: translate3d(0, -60%, 0);
+    }
+  }
+
+  @keyframes drift-up-fast {
+    0% {
+      transform: translate3d(0, -5%, 0);
+    }
+    100% {
+      transform: translate3d(0, -55%, 0);
+    }
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scale(1.08);
+      opacity: 0;
+    }
+  }
+
+  @keyframes float-blob {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(12px, -15px, 0) scale(1.05);
+    }
+  }
+
+  .animate-drift-slow {
+    animation: drift-up-slow 40s linear infinite;
+  }
+  .animate-drift-medium {
+    animation: drift-up-medium 32s linear infinite;
+  }
+  .animate-drift-fast {
+    animation: drift-up-fast 48s linear infinite;
+  }
+  .animate-float-blob {
+    animation: float-blob 12s ease-in-out infinite;
+  }
+
+  .pause-hover:hover {
+    animation-play-state: paused !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-drift-slow,
+    .animate-drift-medium,
+    .animate-drift-fast,
+    .animate-float-blob {
+      animation: none !important;
+      transform: none !important;
+    }
   }
 }

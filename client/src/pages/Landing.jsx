@@ -9,9 +9,9 @@ import LandingFooter from '../components/landing/LandingFooter.jsx';
 
 export function Landing() {
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-ink-900 font-sans selection:bg-accent/20">
+    <div className="min-h-screen bg-[#FAF8F5] text-ink-900 font-sans selection:bg-accent/20 w-full max-w-full overflow-x-clip">
       <LandingNav />
-      <main>
+      <main className="w-full max-w-full overflow-x-clip">
         <HeroSection />
         <HowItWorksSection />
         <FeatureShowcase />

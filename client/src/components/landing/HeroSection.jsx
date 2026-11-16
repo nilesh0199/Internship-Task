@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext.jsx';
 import MiniEmailCard from './MiniEmailCard.jsx';
-import { Sparkles, ArrowRight, UserCheck, ShieldCheck, Mail } from 'lucide-react';
+import { Sparkles, ArrowRight, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 
 const COLUMN_1_CARDS = [
   {
@@ -16,6 +17,7 @@ const COLUMN_1_CARDS = [
     label: 'CLIENT_TO_REPLY',
     confidence: 0.98,
     isWaiting: false,
+    isSignatureCard: true, // Signature rotating classification animation
   },
   {
     sender: 'Sarah Jenkins',
@@ -147,105 +149,206 @@ const COLUMN_3_CARDS = [
 ];
 
 export default function HeroSection() {
-  const { loginDemo } = useAuth();
+  const { demoLogin } = useAuth();
   const navigate = useNavigate();
   const [loadingRole, setLoadingRole] = useState(null);
+  const containerRef = useRef(null);
+  const shouldReduceMotion = useReducedMotion();
+
+  // Scroll-linked parallax & scale
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end start'],
+  });
+
+  const visualScale = useTransform(scrollYProgress, [0, 1], [1, 0.96]);
+  const visualOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0.4]);
+
+  // Subtle pointer parallax (max ~8px, disabled on touch/reduced motion)
+  const [pointerOffset, setPointerOffset] = useState({ x: 0, y: 0 });
+
+  function handleMouseMove(e) {
+    if (shouldReduceMotion || window.innerWidth < 1024) return;
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    const x = ((clientX / innerWidth) - 0.5) * 16; // -8px to +8px
+    const y = ((clientY / innerHeight) - 0.5) * 16;
+    setPointerOffset({ x, y });
+  }
 
   async function handleDemoLaunch(role) {
     setLoadingRole(role);
     try {
-      await loginDemo(role);
+      await demoLogin(role);
       toast.success(
         role === 'client'
-          ? 'Welcome to Priya Sharma\'s Decision Queue'
-          : 'Welcome to Assistant Maya Lin\'s Workspace'
+          ? "Signed in as Founder Priya Sharma"
+          : "Signed in as Assistant Maya Lin"
       );
       navigate(role === 'client' ? '/client' : '/assistant');
     } catch (err) {
-      toast.error('Demo login failed: ' + err.message);
+      toast.error('Demo login failed: ' + (err.message || 'Error'));
     } finally {
       setLoadingRole(null);
     }
   }
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.05,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.65,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  };
+
   return (
-    <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden text-center">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <section
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      className="relative pt-10 pb-20 md:pt-16 md:pb-28 overflow-hidden text-center w-full max-w-full"
+    >
+      {/* Subtle Warm Radial Glow Background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[400px] bg-gradient-to-b from-amber-100/35 via-teal-100/20 to-transparent rounded-full blur-3xl -z-10"
+      />
+
+      <motion.div
+        variants={containerVariants}
+        initial={shouldReduceMotion ? 'visible' : 'hidden'}
+        animate="visible"
+        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-7"
+      >
         {/* Pill Tag */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-black/[0.08] shadow-xs text-xs font-semibold text-ink-700">
-          <Sparkles className="h-3.5 w-3.5 text-accent" />
-          <span>A daybook for your inbox · Purpose-built for EAs & Founders</span>
-        </div>
+        <motion.div variants={itemVariants} className="inline-flex justify-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-black/[0.08] shadow-xs text-xs font-semibold text-ink-700">
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            <span>AI Inbox Orchestration · For Assistants & Founders</span>
+          </div>
+        </motion.div>
 
-        {/* Editorial Fraunces Headline */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-ink-900 tracking-tight leading-[1.08] max-w-4xl mx-auto">
-          Every morning, know exactly who needs to reply.
-        </h1>
+        {/* H1 Display: Fraunces fluid optical sizing */}
+        <motion.div variants={itemVariants} className="overflow-hidden">
+          <h1
+            className="font-serif font-bold text-ink-900 tracking-[-0.03em] leading-[1.08] [text-wrap:balance] max-w-4xl mx-auto"
+            style={{ fontSize: 'clamp(2.5rem, 6.5vw, 4.75rem)' }}
+          >
+            A daybook for your inbox.
+          </h1>
+        </motion.div>
 
-        {/* Subhead */}
-        <p className="text-base sm:text-lg text-ink-600 max-w-2xl mx-auto font-normal leading-relaxed">
-          Daybook Mail uses risk-aware AI to triage your executive's inbox into four unambiguous streams: Assistant, Client, Quiet, or Review. No unread badges. No paralyzed mornings.
-        </p>
+        {/* Subhead: Strict ~60ch line length */}
+        <motion.p
+          variants={itemVariants}
+          className="text-base sm:text-lg text-ink-600 max-w-[60ch] mx-auto font-normal leading-relaxed"
+        >
+          Daybook Mail uses risk-aware AI to decide each morning who must reply—your assistant, you, or no one at all. No unread badges. No paralyzed mornings.
+        </motion.p>
 
-        {/* CTA Buttons */}
-        <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+        {/* CTA Buttons with 44px min touch target */}
+        <motion.div
+          variants={itemVariants}
+          className="pt-2 flex flex-wrap items-center justify-center gap-3"
+        >
           <button
             onClick={() => handleDemoLaunch('assistant')}
             disabled={!!loadingRole}
-            className="px-6 py-3.5 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-card transition active:scale-95 cursor-pointer disabled:opacity-50"
+            className="min-h-[44px] px-6 py-3 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-card hover:shadow-card-hover transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
-            <span>{loadingRole === 'assistant' ? 'Loading Maya...' : 'Explore the live demo'}</span>
+            <span>{loadingRole === 'assistant' ? 'Booting Maya...' : 'Try Demo as Assistant'}</span>
             <ArrowRight className="h-4 w-4" />
           </button>
 
           <button
             onClick={() => handleDemoLaunch('client')}
             disabled={!!loadingRole}
-            className="px-6 py-3.5 rounded-full bg-white hover:bg-ink-50 border border-black/[0.08] text-ink-800 text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-soft transition active:scale-95 cursor-pointer disabled:opacity-50"
+            className="min-h-[44px] px-5 py-3 rounded-full bg-white hover:bg-ink-50 border border-black/[0.09] text-ink-800 text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-soft hover:shadow-card transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
             <UserCheck className="h-4 w-4 text-label-client" />
-            <span>{loadingRole === 'client' ? 'Loading Priya...' : 'See client view'}</span>
+            <span>{loadingRole === 'client' ? 'Booting Priya...' : 'Try Demo as Client'}</span>
           </button>
 
           <button
             onClick={() => navigate('/login')}
-            className="px-5 py-3.5 rounded-full text-ink-600 hover:text-ink-900 text-xs sm:text-sm font-semibold transition active:scale-95 cursor-pointer"
+            className="min-h-[44px] px-4 py-3 rounded-full text-ink-600 hover:text-ink-900 text-xs sm:text-sm font-semibold transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
             Sign in & Connect
           </button>
-        </div>
+        </motion.div>
 
         {/* Hero Visual: Drifting Cards Collage */}
-        <div className="pt-12 relative max-w-5xl mx-auto">
+        <motion.div
+          variants={itemVariants}
+          style={
+            shouldReduceMotion
+              ? {}
+              : {
+                  scale: visualScale,
+                  opacity: visualOpacity,
+                  transform: `translate3d(${pointerOffset.x}px, ${pointerOffset.y}px, 0)`,
+                }
+          }
+          className="pt-8 relative max-w-5xl mx-auto w-full transition-transform duration-200 ease-out"
+        >
           {/* Top & Bottom Gradient Fade Masks */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#FAF8F5] to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#FAF8F5] to-transparent z-10" />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#FAF8F5] via-[#FAF8F5]/80 to-transparent z-10"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/90 to-transparent z-10"
+          />
 
-          {/* 3 Floating Columns */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-h-[460px] overflow-hidden group">
-            {/* Column 1: Client to Reply */}
-            <div className="space-y-4 hover:pause transition-all">
-              {COLUMN_1_CARDS.map((card, idx) => (
-                <MiniEmailCard key={idx} {...card} />
+          {/* Drifting Card Grid: 1 col mobile, 2 col tablet, 3 col desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[440px] overflow-hidden group pause-hover">
+            {/* Column 1: Client to Reply (Always visible on all screens) */}
+            <div className={`space-y-4 ${shouldReduceMotion ? '' : 'animate-drift-slow'}`}>
+              {[...COLUMN_1_CARDS, ...COLUMN_1_CARDS].map((card, idx) => (
+                <MiniEmailCard key={`col1-${idx}`} {...card} />
               ))}
             </div>
 
-            {/* Column 2: Assistant to Reply */}
-            <div className="space-y-4 pt-8 hover:pause transition-all">
-              {COLUMN_2_CARDS.map((card, idx) => (
-                <MiniEmailCard key={idx} {...card} />
+            {/* Column 2: Assistant to Reply (Visible sm+) */}
+            <div
+              className={`space-y-4 pt-6 hidden sm:block ${
+                shouldReduceMotion ? '' : 'animate-drift-medium'
+              }`}
+            >
+              {[...COLUMN_2_CARDS, ...COLUMN_2_CARDS].map((card, idx) => (
+                <MiniEmailCard key={`col2-${idx}`} {...card} />
               ))}
             </div>
 
-            {/* Column 3: Quiet & Review */}
-            <div className="space-y-4 pt-4 hover:pause transition-all hidden md:block">
-              {COLUMN_3_CARDS.map((card, idx) => (
-                <MiniEmailCard key={idx} {...card} />
+            {/* Column 3: Quiet & Review (Visible lg+) */}
+            <div
+              className={`space-y-4 pt-3 hidden lg:block ${
+                shouldReduceMotion ? '' : 'animate-drift-fast'
+              }`}
+            >
+              {[...COLUMN_3_CARDS, ...COLUMN_3_CARDS].map((card, idx) => (
+                <MiniEmailCard key={`col3-${idx}`} {...card} />
               ))}
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
