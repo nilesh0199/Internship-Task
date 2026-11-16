@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LabelBadge } from './LabelBadge.jsx';
 import { ConfidenceDots } from './ConfidenceDots.jsx';
 import {
@@ -12,6 +12,8 @@ import {
   ArrowRight,
   Plus,
   BookOpen,
+  Bot,
+  RotateCcw,
 } from 'lucide-react';
 import { api } from '../lib/api.js';
 import { toast } from 'sonner';
@@ -23,8 +25,40 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
   const [submitting, setSubmitting] = useState(false);
   const [rerunning, setRerunning] = useState(false);
   const [showRulePrompt, setShowRulePrompt] = useState(false);
+  const [agentRuns, setAgentRuns] = useState([]);
+  const [undoingRunId, setUndoingRunId] = useState(null);
 
   const aiReason = thread.aiReason || {};
+
+  useEffect(() => {
+    if (!thread._id) return;
+    loadAgentRuns();
+  }, [thread._id]);
+
+  async function loadAgentRuns() {
+    try {
+      const res = await api.get(`/agents/runs?threadId=${thread._id}&limit=15`);
+      if (res.ok) setAgentRuns(res.data || []);
+    } catch {
+      // Background load
+    }
+  }
+
+  async function handleUndoRun(runId) {
+    setUndoingRunId(runId);
+    try {
+      const res = await api.post(`/agents/runs/${runId}/undo`, {});
+      if (res.ok) {
+        toast.success('Autonomous action reversed!');
+        await loadAgentRuns();
+        onThreadUpdated?.();
+      }
+    } catch (err) {
+      toast.error('Undo failed: ' + err.message);
+    } finally {
+      setUndoingRunId(null);
+    }
+  }
 
   async function handleRerun() {
     setRerunning(true);
@@ -251,28 +285,90 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
         )}
       </div>
 
-      {/* Reclassification Timeline */}
+      {/* Handled by Agents & Audit Timeline */}
       <div className="pt-3 border-t border-borderMuted/60 space-y-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-400 flex items-center gap-1.5">
-          <History className="h-3.5 w-3.5" />
-          <span>Audit Timeline ({timeline.length})</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-400 flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <History className="h-3.5 w-3.5" />
+            <span>Handled by Agents & Timeline</span>
+          </span>
+          <span className="text-[10px] font-mono text-ink-500">
+            {timeline.length + agentRuns.length} steps
+          </span>
         </span>
 
         <div className="space-y-3 pl-2.5 border-l-2 border-borderMuted/80">
-          {timeline.map((evt) => (
-            <div key={evt._id} className="relative pl-3 text-xs space-y-0.5">
-              <div className="absolute -left-[17px] top-1.5 h-2 w-2 rounded-full bg-ink-400 ring-4 ring-[#FAF8F5]" />
-              <div className="flex items-center gap-1 font-semibold text-ink-900">
-                <span className="capitalize">{evt.actorName || 'Daybook AI'}</span>
-                <span className="text-ink-400 font-normal">changed to</span>
-                <LabelBadge label={evt.newLabel} size="xs" />
-              </div>
-              <p className="text-[11px] text-ink-500 leading-normal">{evt.reason}</p>
-              <span className="text-[10px] text-ink-400 block font-mono">
-                {new Date(evt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-          ))}
+          {[
+            ...agentRuns.map((r) => ({
+              id: r._id,
+              type: 'agent_run',
+              date: new Date(r.createdAt),
+              agentId: r.agentId,
+              outcome: r.outcome,
+              action: r.action,
+              summary: r.summary,
+              canUndo: r.undo && !r.undoneAt,
+              isUndone: !!r.undoneAt,
+            })),
+            ...timeline.map((evt) => ({
+              id: evt._id,
+              type: 'event',
+              date: new Date(evt.createdAt),
+              actorName: evt.actorName || 'Daybook AI',
+              newLabel: evt.newLabel,
+              summary: evt.reason,
+            })),
+          ]
+            .sort((a, b) => b.date - a.date)
+            .map((item) => {
+              if (item.type === 'agent_run') {
+                return (
+                  <div key={item.id} className="relative pl-3 text-xs space-y-1">
+                    <div className="absolute -left-[17px] top-1.5 h-2 w-2 rounded-full bg-accent ring-4 ring-[#FAF8F5]" />
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 font-semibold text-ink-900">
+                        <Bot className="h-3 w-3 text-accent" />
+                        <span className="capitalize">{item.agentId} Agent</span>
+                        <span className="text-[10px] px-1.5 py-0.2 rounded font-mono font-normal uppercase bg-ink-100 text-ink-600">
+                          {item.outcome.replace('_', ' ')}
+                        </span>
+                      </div>
+                      {item.canUndo && (
+                        <button
+                          type="button"
+                          onClick={() => handleUndoRun(item.id)}
+                          disabled={undoingRunId === item.id}
+                          className="px-2 py-0.5 rounded-full border border-black/[0.08] text-[10px] font-semibold text-ink-700 hover:bg-ink-100 transition active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1"
+                          title="Undo this action"
+                        >
+                          <RotateCcw className="h-2.5 w-2.5" />
+                          <span>Undo</span>
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-ink-600 leading-normal">{item.summary}</p>
+                    <span className="text-[10px] text-ink-400 block font-mono">
+                      {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={item.id} className="relative pl-3 text-xs space-y-0.5">
+                  <div className="absolute -left-[17px] top-1.5 h-2 w-2 rounded-full bg-ink-400 ring-4 ring-[#FAF8F5]" />
+                  <div className="flex items-center gap-1 font-semibold text-ink-900">
+                    <span className="capitalize">{item.actorName}</span>
+                    <span className="text-ink-400 font-normal">assigned</span>
+                    <LabelBadge label={item.newLabel} size="xs" />
+                  </div>
+                  <p className="text-[11px] text-ink-500 leading-normal">{item.summary}</p>
+                  <span className="text-[10px] text-ink-400 block font-mono">
+                    {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              );
+            })}
         </div>
       </div>
     </div>

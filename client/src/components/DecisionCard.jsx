@@ -237,6 +237,15 @@ export function DecisionCard({ thread, draft, onAction }) {
           </div>
         )}
       </div>
+
+      {/* Quiet Agent Attribution Footer */}
+      <div className="pt-2 border-t border-borderMuted/40 flex items-center justify-between text-[11px] text-ink-400 font-sans select-none">
+        <span className="flex items-center gap-1.5">
+          <Sparkles className="h-3 w-3 text-accent/80" />
+          <span>Prepared by Daybook agents: summary, draft reply</span>
+        </span>
+        <span className="text-[10px] text-ink-400 font-medium">Requires approval</span>
+      </div>
     </div>
   );
 }

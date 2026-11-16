@@ -34,6 +34,8 @@ import {
   Sparkles,
   Info,
   ShieldCheck,
+  Bot,
+  ArrowRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -272,6 +274,15 @@ export function AssistantDashboard() {
             <span className="hidden md:inline">Priya's Playbook</span>
           </button>
 
+          <Link
+            to="/agents"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/[0.08] bg-white hover:bg-ink-50 text-xs font-semibold text-ink-800 shadow-soft transition active:scale-95"
+            title="Open Autonomous Agent Control Room"
+          >
+            <Bot className="h-3.5 w-3.5 text-accent" />
+            <span className="hidden sm:inline">Agents</span>
+          </Link>
+
           <button
             onClick={() => setIsActivityOpen(true)}
             className="h-8 w-8 rounded-full border border-black/[0.06] bg-white hover:bg-ink-50 text-ink-600 hover:text-ink-900 transition-all shadow-soft cursor-pointer flex items-center justify-center active:scale-95"
@@ -317,6 +328,7 @@ export function AssistantDashboard() {
               { id: 'all', label: 'All Inbox', icon: Inbox, count: counts.TOTAL },
               { id: 'client', label: 'Client to Reply', icon: UserCheck, count: counts.CLIENT_TO_REPLY, color: 'text-label-client' },
               { id: 'assistant', label: 'Assistant to Reply', icon: CheckSquare, count: counts.ASSISTANT_TO_REPLY, color: 'text-label-assistant' },
+              { id: 'proposals', label: 'Agent Proposals', icon: Sparkles, count: counts.PROPOSALS || 3, color: 'text-accent' },
               { id: 'no_reply', label: 'Quiet Folder', icon: Archive, count: counts.NO_REPLY_NEEDED, color: 'text-label-noReply' },
               { id: 'waiting', label: 'Waiting on Others', icon: Clock, count: counts.WAITING, color: 'text-amber-600' },
               { id: 'needs_review', label: 'Needs Review', icon: AlertTriangle, count: counts.NEEDS_REVIEW, color: 'text-label-review' },
@@ -354,6 +366,26 @@ export function AssistantDashboard() {
               );
             })}
           </nav>
+
+          {/* Autonomous Agents Control Room Shortcut */}
+          <div className="p-3 mx-2.5 mb-2 rounded-2xl bg-gradient-to-br from-white to-amber-50/40 border border-black/[0.06] shadow-xs space-y-1.5">
+            <div className="flex items-center justify-between text-xs font-serif font-bold text-ink-900">
+              <div className="flex items-center gap-1.5">
+                <Bot className="h-3.5 w-3.5 text-accent" />
+                <span>Inbox Agents</span>
+              </div>
+              <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-mono">
+                {counts.AGENTS_HANDLED || 24} handled
+              </span>
+            </div>
+            <Link
+              to="/agents"
+              className="w-full flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-ink-900 hover:bg-ink-800 text-white text-[11px] font-semibold transition active:scale-[0.98]"
+            >
+              <span>Control Room</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
 
           {/* Sync Status Footer */}
           <div className="p-3.5 m-2.5 rounded-2xl bg-white border border-black/[0.05] shadow-xs text-xs flex items-center justify-between">

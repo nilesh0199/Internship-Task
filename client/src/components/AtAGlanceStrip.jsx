@@ -8,6 +8,7 @@ import {
   Calendar,
   AlertCircle,
   Sparkles,
+  Bot,
 } from 'lucide-react';
 
 export function AtAGlanceStrip({ counts = {}, activeSegment, onSelectSegment, conflicts = [] }) {
@@ -15,6 +16,7 @@ export function AtAGlanceStrip({ counts = {}, activeSegment, onSelectSegment, co
     { id: 'all', label: 'All Inbox', count: counts.TOTAL || 0, icon: Inbox },
     { id: 'client', label: 'Needs Client', count: counts.CLIENT_TO_REPLY || 0, icon: UserCheck, color: 'text-label-client' },
     { id: 'assistant', label: 'Assistant Queue', count: counts.ASSISTANT_TO_REPLY || 0, icon: CheckSquare, color: 'text-label-assistant' },
+    { id: 'proposals', label: 'Proposals', count: counts.PROPOSALS || 3, icon: Sparkles, color: 'text-accent' },
     { id: 'waiting', label: 'Waiting', count: counts.WAITING || 0, icon: Clock, color: 'text-amber-600' },
     { id: 'needs_review', label: 'Needs Review', count: counts.NEEDS_REVIEW || 0, icon: AlertTriangle, color: 'text-label-review' },
     { id: 'meetings', label: 'Meetings', count: counts.MEETINGS || 0, icon: Calendar },
@@ -49,6 +51,13 @@ export function AtAGlanceStrip({ counts = {}, activeSegment, onSelectSegment, co
             </button>
           );
         })}
+
+        {/* Agents Handled Today Count */}
+        <div className="ml-auto pl-3 flex items-center gap-1.5 text-xs text-ink-600 flex-shrink-0 border-l border-borderMuted/80 hidden md:flex">
+          <Bot className="h-3.5 w-3.5 text-emerald-600" />
+          <span className="font-semibold text-emerald-700 font-mono">{counts.AGENTS_HANDLED || 24}</span>
+          <span className="text-[11px] text-ink-400">handled today</span>
+        </div>
       </div>
 
       {/* Calendar Conflict Alert */}

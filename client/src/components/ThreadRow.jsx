@@ -2,7 +2,7 @@ import React from 'react';
 import { LabelBadge } from './LabelBadge.jsx';
 import { ConfidenceDots } from './ConfidenceDots.jsx';
 import Avatar from './Avatar.jsx';
-import { Star, Clock, Calendar, CheckCheck, Paperclip } from 'lucide-react';
+import { Star, Clock, Calendar, CheckCheck, Paperclip, Bot } from 'lucide-react';
 
 export function ThreadRow({ thread, isSelected, onClick }) {
   const isVip = thread.participants?.some((p) => p.isVip);
@@ -122,6 +122,16 @@ export function ThreadRow({ thread, isSelected, onClick }) {
             <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium">
               <CheckCheck className="h-2.5 w-2.5" />
               <span>Approved</span>
+            </span>
+          )}
+
+          {thread.agentSummary && (
+            <span
+              className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20 font-medium"
+              title={`Handled by Agent: ${thread.agentSummary}`}
+            >
+              <Bot className="h-2.5 w-2.5" />
+              <span>{thread.agentSummary}</span>
             </span>
           )}
         </div>

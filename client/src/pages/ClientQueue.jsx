@@ -20,6 +20,7 @@ export function ClientQueue() {
   const { user } = useAuth();
   const [threads, setThreads] = useState([]);
   const [drafts, setDrafts] = useState([]);
+  const [digest, setDigest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showHandled, setShowHandled] = useState(false);
 
@@ -32,9 +33,15 @@ export function ClientQueue() {
 
   async function loadClientQueue() {
     try {
-      const res = await api.get('/threads?segment=client');
-      if (res.ok) {
-        setThreads(res.data || []);
+      const [threadsRes, digestRes] = await Promise.all([
+        api.get('/threads?segment=client'),
+        api.get('/agents/digest').catch(() => null),
+      ]);
+      if (threadsRes.ok) {
+        setThreads(threadsRes.data || []);
+      }
+      if (digestRes?.ok) {
+        setDigest(digestRes.data || null);
       }
     } catch (err) {
       console.error('Failed to load client decision queue:', err);
@@ -123,11 +130,12 @@ export function ClientQueue() {
           </div>
 
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-ink-900 tracking-tight leading-tight">
-            Good morning, Priya.
+            {digest?.headline || 'Good morning, Priya.'}
           </h2>
 
           <p className="text-xs text-ink-600 leading-relaxed max-w-xl">
-            Maya Lin and the AI safety engine triaged incoming traffic according to your delegation playbook. Here is your distilled daily decision stack:
+            {digest?.body ||
+              'Daybook autonomous agents and Maya Lin triaged incoming traffic according to your delegation playbook. Here is your distilled daily decision stack:'}
           </p>
 
           {/* Stat Pill Chips */}
@@ -138,12 +146,12 @@ export function ClientQueue() {
             </div>
 
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F0FDFA] text-[#0F766E] border border-[#0F766E]/20 text-xs font-semibold shadow-2xs">
-              <span className="font-bold">14</span>
-              <span>Resolved Autonomously by Maya</span>
+              <span className="font-bold">{digest?.counts?.agentHandledCount || 24}</span>
+              <span>Handled Autonomously by Agents</span>
             </div>
 
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60 text-xs font-semibold shadow-2xs">
-              <span className="font-bold">5</span>
+              <span className="font-bold">{digest?.counts?.waitingCount || 5}</span>
               <span>Waiting on Partners</span>
             </div>
           </div>

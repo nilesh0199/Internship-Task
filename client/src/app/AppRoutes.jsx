@@ -10,6 +10,7 @@ import { ClientQueue } from '../pages/ClientQueue.jsx';
 import { AccountsPage } from '../pages/AccountsPage.jsx';
 import { PrototypeHelpPopover } from '../components/PrototypeHelpPopover.jsx';
 import { Landing } from '../pages/Landing.jsx';
+import { AgentControlRoom } from '../pages/AgentControlRoom.jsx';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -96,6 +97,22 @@ export function AppRoutes() {
             element={
               <ProtectedRoute allowedRoles={['client']}>
                 <ClientQueue />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agents"
+            element={
+              <ProtectedRoute allowedRoles={['assistant']}>
+                <AgentControlRoom />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assistant/agents"
+            element={
+              <ProtectedRoute allowedRoles={['assistant']}>
+                <AgentControlRoom />
               </ProtectedRoute>
             }
           />

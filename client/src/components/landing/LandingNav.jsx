@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 const NAV_LINKS = [
   { href: '#how-it-works', label: 'How it works' },
+  { href: '#agents', label: 'Agents' },
   { href: '#features', label: 'Features' },
   { href: '#interactive-ai', label: 'Interactive AI' },
   { href: '#security', label: 'Security & Safety' },
