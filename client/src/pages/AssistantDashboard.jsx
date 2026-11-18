@@ -578,7 +578,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
             setIsSidebarOpen(false);
             setIsClientProfileOpen(true);
           }}
-          className="m-3 mb-2 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card hover:border-black/15 transition-all text-left group cursor-pointer active:scale-98 flex-shrink-0"
+          className="m-3 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card hover:border-black/15 transition-all text-left group cursor-pointer active:scale-98 flex-shrink-0"
           title={`Manage ${activeClient.name}'s Profile & Invitation`}
         >
           <div className="flex items-center gap-2.5">
@@ -594,21 +594,6 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
             </div>
           </div>
         </button>
-
-        {/* Compose New Email CTA in Sidebar */}
-        <div className="px-3 pb-2 flex-shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              setIsSidebarOpen(false);
-              setIsComposeOpen(true);
-            }}
-            className="w-full py-2 px-3 rounded-xl bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-soft transition active:scale-[0.98] cursor-pointer"
-          >
-            <PenSquare className="h-3.5 w-3.5" />
-            <span>Compose Email</span>
-          </button>
-        </div>
 
         {/* Segments Navigation List */}
         <nav className="flex-1 overflow-y-auto app-pane-scroll px-2.5 py-1 space-y-1 text-xs">
@@ -685,7 +670,6 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
             onJumpToThread={(cId, tId) => {
               navigate(`/assistant/c/${cId}/inbox?threadId=${tId}`);
             }}
-            onCompose={() => setIsComposeOpen(true)}
           />
         </div>
       ) : (
@@ -1263,11 +1247,11 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
 
             <button
               type="button"
-              onClick={() => setIsComposeOpen(true)}
-              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-accent hover:bg-amber-50 font-semibold cursor-pointer"
+              onClick={() => navigate('/accounts')}
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-ink-600 hover:text-ink-900 hover:bg-ink-50 font-medium cursor-pointer"
             >
-              <PenSquare className="h-4 w-4" />
-              <span className="text-[10px] leading-tight">Compose</span>
+              <Mail className="h-4 w-4" />
+              <span className="text-[10px] leading-tight">Accounts</span>
             </button>
 
             <button

@@ -666,16 +666,6 @@ export function ClientQueue() {
               </p>
             </div>
 
-            {/* Compose New Email CTA */}
-            <button
-              type="button"
-              onClick={() => setIsComposeOpen(true)}
-              className="w-full py-2.5 px-4 rounded-2xl bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-soft transition active:scale-[0.98] cursor-pointer"
-            >
-              <PenSquare className="h-3.5 w-3.5" />
-              <span>Compose New Email</span>
-            </button>
-
             {/* Vertical Navigator with Counts */}
             <nav className="space-y-1 select-none" aria-label="Executive Queue Navigation">
               {navItems.map((item) => {
