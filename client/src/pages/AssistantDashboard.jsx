@@ -9,6 +9,8 @@ import { CommandPaletteModal } from '../components/CommandPaletteModal.jsx';
 import { PlaybookModal } from '../components/PlaybookModal.jsx';
 import { ClientProfileModal } from '../components/ClientProfileModal.jsx';
 import { ActivityLogDrawer } from '../components/ActivityLogDrawer.jsx';
+import { ComposeEmailModal } from '../components/ComposeEmailModal.jsx';
+import { SettingsModal } from '../components/SettingsModal.jsx';
 import { LabelBadge } from '../components/LabelBadge.jsx';
 import Avatar from '../components/Avatar.jsx';
 import { DemoWorkspaceBanner } from '../components/DemoWorkspaceBanner.jsx';
@@ -38,6 +40,10 @@ import {
   ArrowRight,
   ArrowLeft,
   PanelLeft,
+  PenSquare,
+  Settings,
+  RotateCcw,
+  CheckCircle2,
   Layers,
   X,
 } from 'lucide-react';
@@ -119,8 +125,11 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
   const [isPlaybookOpen, setIsPlaybookOpen] = useState(initialOpenPlaybook);
   const [isClientProfileOpen, setIsClientProfileOpen] = useState(false);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
+  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
+  const [lastCompletedAction, setLastCompletedAction] = useState(null); // { threadId, subject, summary, destination, previousState }
   const [collapsedMessages, setCollapsedMessages] = useState({});
 
   const segments = useMemo(
@@ -287,6 +296,89 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
     setIsAiPanelOpen(false);
   }
 
+  function getAdjacentThreadId(currentId, direction = 1) {
+    if (!threads || threads.length === 0) return null;
+    const idx = threads.findIndex((t) => t._id === currentId);
+    if (idx === -1) return threads[0]?._id || null;
+    if (direction > 0) {
+      if (idx + 1 < threads.length) return threads[idx + 1]._id;
+      if (idx - 1 >= 0) return threads[idx - 1]._id;
+      return null;
+    }
+    if (idx - 1 >= 0) return threads[idx - 1]._id;
+    return null;
+  }
+
+  function handleStepThread(delta) {
+    if (!threads || threads.length === 0) return;
+    const idx = threads.findIndex((t) => t._id === selectedThreadId);
+    if (idx === -1) {
+      handleSelectThread(threads[0]._id);
+      return;
+    }
+    const nextIdx = idx + delta;
+    if (nextIdx >= 0 && nextIdx < threads.length) {
+      handleSelectThread(threads[nextIdx]._id);
+    }
+  }
+
+  async function handleUndoLastAction(actionRecord = lastCompletedAction) {
+    if (!actionRecord?.threadId || !actionRecord?.previousState) return;
+    try {
+      await api.patch(`/threads/${actionRecord.threadId}`, actionRecord.previousState);
+      setLastCompletedAction(null);
+      await loadThreads(true);
+      await loadClients();
+      handleSelectThread(actionRecord.threadId);
+      toast.info(`Undone: "${actionRecord.subject}" restored.`);
+    } catch (err) {
+      toast.error('Failed to undo action: ' + err.message);
+    }
+  }
+
+  async function handleDraftActionComplete({ action, thread, previousState, simulated }) {
+    const targetSubject = thread?.subject || selectedThreadData?.thread?.subject || 'Email';
+    const completedId = thread?._id || selectedThreadId;
+    const nextId = getAdjacentThreadId(completedId, 1);
+    const clientFirst = activeClient.name.split(' ')[0];
+
+    const summary =
+      action === 'request_approval'
+        ? `Sent "${targetSubject}" to ${clientFirst}'s Decision Desk`
+        : simulated
+        ? `Sent reply & moved to Waiting on Others (simulated)`
+        : `Sent reply & moved to Waiting on Others`;
+
+    const record = {
+      threadId: completedId,
+      subject: targetSubject,
+      summary,
+      destination: action === 'request_approval' ? `${clientFirst} to Reply` : 'Waiting on Others',
+      previousState,
+    };
+    setLastCompletedAction(record);
+
+    // Refresh list & badge counts cleanly
+    await Promise.all([loadThreads(true), loadClients()]);
+
+    // Auto-advance to the next email in queue (or clear if queue is done)
+    if (nextId && nextId !== completedId) {
+      handleSelectThread(nextId);
+    } else {
+      handleClearThread();
+    }
+
+    toast.success(summary, {
+      duration: 6000,
+      action: previousState
+        ? {
+            label: 'Undo',
+            onClick: () => handleUndoLastAction(record),
+          }
+        : undefined,
+    });
+  }
+
   async function handleToggleRead(thread) {
     try {
       await api.patch(`/threads/${thread._id}`, { isRead: !thread.isRead });
@@ -305,12 +397,36 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
   async function handleToggleArchive(thread) {
     try {
       const nextArchived = !thread.isArchived;
+      const previousState = { isArchived: Boolean(thread.isArchived) };
+      const nextId = selectedThreadId === thread._id ? getAdjacentThreadId(thread._id, 1) : null;
+
       await api.patch(`/threads/${thread._id}`, { isArchived: nextArchived });
-      toast.success(nextArchived ? 'Thread moved to archive' : 'Thread unarchived');
-      loadThreads();
-      if (selectedThreadData?.thread?._id === thread._id) {
-        setSelectedThreadData(null);
+
+      const record = {
+        threadId: thread._id,
+        subject: thread.subject,
+        summary: nextArchived ? `Archived "${thread.subject}"` : `Restored "${thread.subject}" to inbox`,
+        destination: nextArchived ? 'Archived' : 'All Inbox',
+        previousState,
+      };
+      setLastCompletedAction(record);
+
+      await Promise.all([loadThreads(true), loadClients()]);
+      if (selectedThreadId === thread._id) {
+        if (nextId && nextId !== thread._id) {
+          handleSelectThread(nextId);
+        } else {
+          handleClearThread();
+        }
       }
+
+      toast.success(nextArchived ? 'Thread moved to Archived' : 'Thread unarchived', {
+        duration: 6000,
+        action: {
+          label: 'Undo',
+          onClick: () => handleUndoLastAction(record),
+        },
+      });
     } catch (err) {
       toast.error('Failed to archive thread: ' + err.message);
     }
@@ -462,7 +578,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
             setIsSidebarOpen(false);
             setIsClientProfileOpen(true);
           }}
-          className="m-3 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card hover:border-black/15 transition-all text-left group cursor-pointer active:scale-98 flex-shrink-0"
+          className="m-3 mb-2 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card hover:border-black/15 transition-all text-left group cursor-pointer active:scale-98 flex-shrink-0"
           title={`Manage ${activeClient.name}'s Profile & Invitation`}
         >
           <div className="flex items-center gap-2.5">
@@ -478,6 +594,21 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
             </div>
           </div>
         </button>
+
+        {/* Compose New Email CTA in Sidebar */}
+        <div className="px-3 pb-2 flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              setIsSidebarOpen(false);
+              setIsComposeOpen(true);
+            }}
+            className="w-full py-2 px-3 rounded-xl bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-soft transition active:scale-[0.98] cursor-pointer"
+          >
+            <PenSquare className="h-3.5 w-3.5" />
+            <span>Compose Email</span>
+          </button>
+        </div>
 
         {/* Segments Navigation List */}
         <nav className="flex-1 overflow-y-auto app-pane-scroll px-2.5 py-1 space-y-1 text-xs">
@@ -549,11 +680,12 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
 
       {/* TODAY COMMAND CENTER VIEW */}
       {isTodayView ? (
-        <div className="flex-1 overflow-y-auto app-pane-scroll">
+        <div className="flex-1 overflow-y-auto app-pane-scroll min-h-0">
           <AssistantTodayView
             onJumpToThread={(cId, tId) => {
               navigate(`/assistant/c/${cId}/inbox?threadId=${tId}`);
             }}
+            onCompose={() => setIsComposeOpen(true)}
           />
         </div>
       ) : (
@@ -561,9 +693,9 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           {/* Client Sub-Navigation Bar */}
           <div className="h-11 bg-white border-b border-black/[0.06] px-2.5 sm:px-5 flex items-center justify-between gap-2 flex-shrink-0 z-10 select-none">
-            {/* Left: Side-Options Toggle Tag (< lg) + Sub-nav Links (horizontally scrollable on small phones) */}
-            <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar min-w-0 flex-1 py-1">
-              {subSection === 'inbox' && (
+            {/* Left: Side-Options Toggle Tag (< lg, always visible & fixed) + Desktop/Tablet Sub-nav Links (hidden on mobile < md where fixed bottom bar lives) */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              {subSection === 'inbox' ? (
                 <button
                   type="button"
                   onClick={() => setIsSidebarOpen((v) => !v)}
@@ -580,51 +712,67 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                     </span>
                   )}
                 </button>
+              ) : (
+                <span className="md:hidden text-xs font-serif font-bold text-ink-900 truncate">
+                  {activeClient.name.split(' ')[0]}'s Agents
+                </span>
               )}
 
-              <button
-                onClick={() => navigate(`/assistant/c/${activeClientId}/inbox`)}
-                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 transition cursor-pointer ${
-                  subSection === 'inbox'
-                    ? 'bg-ink-900 text-white shadow-xs'
-                    : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50'
-                }`}
-              >
-                <Inbox className="h-3.5 w-3.5 flex-shrink-0" />
-                <span>Inbox</span>
-              </button>
+              <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
+                <button
+                  onClick={() => navigate(`/assistant/c/${activeClientId}/inbox`)}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 transition cursor-pointer ${
+                    subSection === 'inbox'
+                      ? 'bg-ink-900 text-white shadow-xs'
+                      : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50'
+                  }`}
+                >
+                  <Inbox className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span>Inbox</span>
+                </button>
 
-              <button
-                onClick={() => navigate(`/assistant/c/${activeClientId}/agents`)}
-                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 transition cursor-pointer ${
-                  subSection === 'agents'
-                    ? 'bg-ink-900 text-white shadow-xs'
-                    : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50'
-                }`}
-              >
-                <Bot className="h-3.5 w-3.5 flex-shrink-0" />
-                <span>Agents</span>
-              </button>
+                <button
+                  onClick={() => navigate(`/assistant/c/${activeClientId}/agents`)}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 transition cursor-pointer ${
+                    subSection === 'agents'
+                      ? 'bg-ink-900 text-white shadow-xs'
+                      : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50'
+                  }`}
+                >
+                  <Bot className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span>Agents</span>
+                </button>
 
-              <button
-                onClick={() => setIsPlaybookOpen(true)}
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap flex-shrink-0 transition cursor-pointer"
-              >
-                <Sliders className="h-3.5 w-3.5 text-accent flex-shrink-0" />
-                <span>Playbook</span>
-              </button>
+                <button
+                  onClick={() => setIsPlaybookOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap flex-shrink-0 transition cursor-pointer"
+                >
+                  <Sliders className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                  <span>Playbook</span>
+                </button>
 
-              <button
-                onClick={() => setIsActivityOpen(true)}
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap flex-shrink-0 transition cursor-pointer"
-              >
-                <History className="h-3.5 w-3.5 flex-shrink-0" />
-                <span>Activity</span>
-              </button>
+                <button
+                  onClick={() => setIsActivityOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap flex-shrink-0 transition cursor-pointer"
+                >
+                  <History className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span>Activity</span>
+                </button>
+              </div>
             </div>
 
-            {/* Client Context Pill & Ask AI Trigger */}
-            <div className="flex items-center gap-1.5 sm:gap-3 text-xs flex-shrink-0">
+            {/* Right: Compose Email + Ask AI Trigger + Client Context Pill */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5 text-xs flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsComposeOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-ink-900 hover:bg-ink-800 text-white font-semibold whitespace-nowrap flex-shrink-0 transition shadow-2xs cursor-pointer active:scale-95"
+                title={`Compose a new email for ${activeClient.name}`}
+              >
+                <PenSquare className="h-3.5 w-3.5 flex-shrink-0" />
+                <span>Compose</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setIsCommandPaletteOpen(true)}
@@ -634,7 +782,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
               >
                 <Sparkles className="h-3.5 w-3.5 text-accent flex-shrink-0" />
                 <span className="hidden sm:inline">Ask AI</span>
-                <kbd className="hidden sm:inline text-[10px] font-mono text-ink-500 bg-white px-1.5 py-0.2 rounded border border-black/[0.08]">
+                <kbd className="hidden lg:inline text-[10px] font-mono text-ink-500 bg-white px-1.5 py-0.2 rounded border border-black/[0.08]">
                   Ctrl+K
                 </kbd>
               </button>
@@ -736,16 +884,48 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                   selectedThreadId ? 'flex' : 'hidden md:flex'
                 } flex-1 min-w-0 bg-[#FAF8F5] flex-col overflow-hidden min-h-0`}
               >
+                {/* Inline Undo / Action Completed Strip */}
+                {lastCompletedAction && (
+                  <div className="px-3 sm:px-5 py-2 bg-emerald-50/95 border-b border-emerald-200/80 flex items-center justify-between gap-2 text-xs text-emerald-950 flex-shrink-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                      <span className="truncate font-medium">{lastCompletedAction.summary}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {lastCompletedAction.previousState && (
+                        <button
+                          type="button"
+                          onClick={() => handleUndoLastAction()}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-emerald-100 border border-emerald-300 text-emerald-900 font-semibold text-[11px] transition cursor-pointer active:scale-95"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          <span>Undo</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setLastCompletedAction(null)}
+                        className="p-1 rounded-full text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+                        aria-label="Dismiss notification"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {!selectedThreadId ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center p-8 select-none">
                     <div className="h-12 w-12 rounded-2xl bg-white shadow-soft border border-borderMuted/80 flex items-center justify-center text-ink-400 mb-3">
                       <Mail className="h-6 w-6 stroke-[1.5]" />
                     </div>
                     <h3 className="text-base font-serif font-bold text-ink-800">
-                      Select a conversation
+                      {threads.length === 0 ? 'Queue Clear!' : 'Select a conversation'}
                     </h3>
                     <p className="text-xs text-ink-500 max-w-sm mt-1">
-                      Choose any thread from {activeClient.name}'s queue or use keyboard shortcuts (j/k) to navigate.
+                      {threads.length === 0
+                        ? `All conversations in this view for ${activeClient.name} are handled.`
+                        : `Choose any thread from ${activeClient.name}'s queue or use keyboard shortcuts (j/k) to navigate.`}
                     </p>
                   </div>
                 ) : loadingDetail || !selectedThreadData ? (
@@ -769,9 +949,9 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                   </div>
                 ) : (
                   <div className="flex-1 flex flex-col xl:flex-row overflow-hidden min-h-0">
-                    {/* Mobile & Tablet (< xl) Thread Toolbar: Back to List + AI Analysis Drawer Toggle */}
+                    {/* Mobile & Tablet (< xl) Thread Toolbar: Back + Prev/Next + AI Analysis Drawer Toggle */}
                     <div className="xl:hidden px-3 py-2 bg-white border-b border-black/[0.06] flex items-center justify-between gap-2 flex-shrink-0">
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
                         <button
                           type="button"
                           onClick={handleClearThread}
@@ -780,9 +960,33 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                           <ArrowLeft className="h-3.5 w-3.5" />
                           <span>Back</span>
                         </button>
-                        <span className="text-xs text-ink-500 truncate hidden sm:inline">
-                          {selectedThreadData.thread.subject}
-                        </span>
+                        {threads.length > 1 && (() => {
+                          const curIdx = threads.findIndex((t) => t._id === selectedThreadId);
+                          return (
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <button
+                                type="button"
+                                disabled={curIdx <= 0}
+                                onClick={() => handleStepThread(-1)}
+                                className="p-1 rounded-full border border-black/[0.08] bg-[#FAF8F5] hover:bg-ink-100 text-ink-700 disabled:opacity-35 cursor-pointer"
+                                title="Previous email (k)"
+                                aria-label="Previous email"
+                              >
+                                <ArrowLeft className="h-3 w-3" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={curIdx === -1 || curIdx >= threads.length - 1}
+                                onClick={() => handleStepThread(1)}
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-black/[0.08] bg-[#FAF8F5] hover:bg-ink-100 text-[11px] font-semibold text-ink-800 disabled:opacity-35 cursor-pointer"
+                                title="Next email (j)"
+                              >
+                                <span>Next</span>
+                                <ArrowRight className="h-3 w-3" />
+                              </button>
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       <button
@@ -791,12 +995,46 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                         className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold whitespace-nowrap flex-shrink-0 transition cursor-pointer active:scale-95"
                       >
                         <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                        <span>AI Analysis & Override</span>
+                        <span className="hidden sm:inline">AI Analysis &amp; Override</span>
+                        <span className="sm:hidden">AI Info</span>
                       </button>
                     </div>
 
                     {/* Thread Reading & Action Pane */}
                     <div className="flex-1 min-w-0 overflow-y-auto app-pane-scroll p-3 sm:p-5 lg:p-6 space-y-4 sm:space-y-5">
+                      {/* Desktop Queue Stepper (Prev / Next Email) */}
+                      {threads.length > 1 && (() => {
+                        const curIdx = threads.findIndex((t) => t._id === selectedThreadId);
+                        if (curIdx === -1) return null;
+                        return (
+                          <div className="hidden xl:flex items-center justify-between text-xs text-ink-500">
+                            <span className="font-mono text-[11px]">
+                              Email {curIdx + 1} of {threads.length} in {activeSegmentObj.label}
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                disabled={curIdx <= 0}
+                                onClick={() => handleStepThread(-1)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-ink-50 border border-black/[0.08] text-ink-700 font-semibold text-[11px] transition cursor-pointer disabled:opacity-35"
+                              >
+                                <ArrowLeft className="h-3 w-3" />
+                                <span>Prev</span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={curIdx >= threads.length - 1}
+                                onClick={() => handleStepThread(1)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-ink-50 border border-black/[0.08] text-ink-900 font-semibold text-[11px] transition cursor-pointer disabled:opacity-35"
+                              >
+                                <span>Next Email</span>
+                                <ArrowRight className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
                       {/* Thread Header */}
                       <div className="bg-white rounded-2xl border border-borderMuted/70 p-3.5 sm:p-5 shadow-card space-y-3">
                         <div className="flex items-start justify-between gap-2.5 flex-wrap">
@@ -913,6 +1151,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                               drafts: [updated],
                             }));
                           }}
+                          onActionComplete={handleDraftActionComplete}
                         />
                       </div>
                     </div>
@@ -997,7 +1236,140 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
         </div>
       )}
 
+      {/* MOBILE-ONLY FIXED BOTTOM NAVIGATION BAR (Zero horizontal scroll, fixed 5-slot grid) */}
+      <nav
+        aria-label="Mobile workspace navigation"
+        className="md:hidden flex-shrink-0 bg-white border-t border-black/[0.08] shadow-[0_-2px_10px_rgba(0,0,0,0.03)] px-1.5 pt-1.5 pb-[max(0.45rem,env(safe-area-inset-bottom))] select-none z-30"
+      >
+        {isTodayView ? (
+          <div className="grid grid-cols-5 gap-0.5">
+            <button
+              type="button"
+              onClick={() => navigate('/assistant/today')}
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-ink-900 bg-ink-900/[0.06] font-semibold cursor-pointer"
+            >
+              <Calendar className="h-4 w-4 text-ink-900" />
+              <span className="text-[10px] leading-tight">Today</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate(`/assistant/c/${activeClientId}/inbox`)}
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-ink-600 hover:text-ink-900 hover:bg-ink-50 font-medium cursor-pointer"
+            >
+              <Inbox className="h-4 w-4" />
+              <span className="text-[10px] leading-tight">Inbox</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsComposeOpen(true)}
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-accent hover:bg-amber-50 font-semibold cursor-pointer"
+            >
+              <PenSquare className="h-4 w-4" />
+              <span className="text-[10px] leading-tight">Compose</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/agents')}
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-ink-600 hover:text-ink-900 hover:bg-ink-50 font-medium cursor-pointer"
+            >
+              <Bot className="h-4 w-4 text-accent" />
+              <span className="text-[10px] leading-tight">Agents</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsMobileSettingsOpen(true)}
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-ink-600 hover:text-ink-900 hover:bg-ink-50 font-medium cursor-pointer"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="text-[10px] leading-tight">Settings</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-5 gap-0.5">
+            <button
+              type="button"
+              onClick={() => navigate(`/assistant/c/${activeClientId}/inbox`)}
+              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition cursor-pointer ${
+                subSection === 'inbox'
+                  ? 'text-ink-900 bg-ink-900/[0.07] font-semibold'
+                  : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50 font-medium'
+              }`}
+            >
+              <Inbox className="h-4 w-4" />
+              <span className="text-[10px] leading-tight">Inbox</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate(`/assistant/c/${activeClientId}/agents`)}
+              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition cursor-pointer ${
+                subSection === 'agents'
+                  ? 'text-ink-900 bg-ink-900/[0.07] font-semibold'
+                  : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50 font-medium'
+              }`}
+            >
+              <Bot className={`h-4 w-4 ${subSection === 'agents' ? 'text-ink-900' : 'text-accent'}`} />
+              <span className="text-[10px] leading-tight">Agents</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsPlaybookOpen(true)}
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-ink-600 hover:text-ink-900 hover:bg-ink-50 font-medium transition cursor-pointer"
+            >
+              <Sliders className="h-4 w-4 text-accent" />
+              <span className="text-[10px] leading-tight">Playbook</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsActivityOpen(true)}
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-ink-600 hover:text-ink-900 hover:bg-ink-50 font-medium transition cursor-pointer"
+            >
+              <History className="h-4 w-4" />
+              <span className="text-[10px] leading-tight">Activity</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsMobileSettingsOpen(true)}
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-ink-600 hover:text-ink-900 hover:bg-ink-50 font-medium transition cursor-pointer"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="text-[10px] leading-tight">Settings</span>
+            </button>
+          </div>
+        )}
+      </nav>
+
       {/* Modals & Dialogs */}
+      <ComposeEmailModal
+        isOpen={isComposeOpen}
+        onClose={() => setIsComposeOpen(false)}
+        mode="assistant"
+        clientId={activeClientId}
+        clientName={activeClient.name}
+        clientEmail={activeClient.email}
+        onComposed={(createdThread) => {
+          loadThreads(true);
+          loadClients();
+          if (createdThread?._id && !isTodayView) {
+            handleSelectThread(createdThread._id);
+          }
+        }}
+      />
+
+      <SettingsModal
+        isOpen={isMobileSettingsOpen}
+        onClose={() => setIsMobileSettingsOpen(false)}
+        mode="assistant"
+        activeClient={activeClient}
+      />
+
       <CommandPaletteModal
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}

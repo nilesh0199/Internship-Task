@@ -417,4 +417,124 @@ describe('Multi-Client PA Architecture & Agent Notes Test Suite', () => {
     });
     assert.equal(res.status, 403);
   });
+
+  it('14. Both Assistant and Client can compose new emails with SEND_ENABLED safety gate and role isolation', async () => {
+    // Assistant composes an outbound email for approval in Priya's queue
+    const asstRes = await fetch(`${baseUrl}/api/threads/compose`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${mayaToken}`,
+      },
+      body: JSON.stringify({
+        to: 'partner@sequoia.com',
+        toName: 'Partner Lead',
+        subject: 'Q4 Strategic Update',
+        bodyText: 'Sharing our Q4 metrics and hiring roadmap ahead of next week.',
+        clientId: 'client_priya_001',
+        mode: 'request_approval',
+      }),
+    });
+    assert.equal(asstRes.status, 201);
+    const asstData = await asstRes.json();
+    assert.equal(asstData.ok, true);
+    assert.equal(asstData.data.thread.clientId, 'client_priya_001');
+    assert.equal(asstData.data.thread.clientVisible, true);
+    assert.equal(asstData.data.draft.status, 'pending_client');
+
+    // Client composes a direct email (even if clientId is spoofed to Rohan, must strictly stay Priya!)
+    const clientRes = await fetch(`${baseUrl}/api/threads/compose`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${priyaToken}`,
+      },
+      body: JSON.stringify({
+        to: 'counsel@fenwick.com',
+        subject: 'Quick Legal Question',
+        bodyText: 'Can we review the advisor agreement tomorrow morning?',
+        clientId: 'client_rohan_002',
+        mode: 'send',
+      }),
+    });
+    assert.equal(clientRes.status, 201);
+    const clientData = await clientRes.json();
+    assert.equal(clientData.ok, true);
+    assert.equal(clientData.data.thread.clientId, 'client_priya_001', 'Client compose must enforce own clientId');
+    assert.equal(clientData.data.simulated, true, 'SEND_ENABLED=false must simulate dispatch');
+    assert.equal(clientData.data.draft.status, 'sent');
+  });
+
+  it('15. Send, Submit for Approval, Client Approve, and Undo move threads to proper queues and restore cleanly', async () => {
+    // 1. Assistant sends reply on an Assistant Queue thread -> moves to Waiting on Others / NO_REPLY_NEEDED
+    const sendRes = await fetch(`${baseUrl}/api/threads/th_06/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${mayaToken}`,
+      },
+      body: JSON.stringify({
+        subject: 'RE: Reply Test',
+        bodyText: 'Confirmed — sending this update now.',
+      }),
+    });
+    assert.equal(sendRes.status, 200);
+    const sendData = await sendRes.json();
+    assert.equal(sendData.data.thread.currentLabel, 'NO_REPLY_NEEDED');
+    assert.equal(sendData.data.thread.isWaiting, true);
+    assert.equal(sendData.data.simulated, true);
+    assert.ok(sendData.data.message, 'Outbound message must be appended to thread');
+    assert.ok(sendData.data.previousState, 'previousState must be returned for 1-click Undo');
+
+    // Undo assistant send via PATCH
+    const undoAsstRes = await fetch(`${baseUrl}/api/threads/th_06`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${mayaToken}`,
+      },
+      body: JSON.stringify(sendData.data.previousState),
+    });
+    assert.equal(undoAsstRes.status, 200);
+    const undoAsstData = await undoAsstRes.json();
+    assert.equal(undoAsstData.data.currentLabel, sendData.data.previousState.currentLabel);
+
+    // 2. Client approves a CLIENT_TO_REPLY thread -> moves to NO_REPLY_NEEDED + isWaiting + handled
+    const approveRes = await fetch(`${baseUrl}/api/threads/th_01/client-decision`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${priyaToken}`,
+      },
+      body: JSON.stringify({ action: 'approve' }),
+    });
+    assert.equal(approveRes.status, 200);
+    const approveData = await approveRes.json();
+    assert.equal(approveData.data.currentLabel, 'NO_REPLY_NEEDED');
+    assert.equal(approveData.data.isWaiting, true);
+    assert.equal(approveData.data.clientStatus, 'handled');
+
+    // 3. Client Undo restores thread back to CLIENT_TO_REPLY + pending
+    const undoClientRes = await fetch(`${baseUrl}/api/threads/th_01/client-decision`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${priyaToken}`,
+      },
+      body: JSON.stringify({
+        action: 'undo',
+        previousState: {
+          currentLabel: 'CLIENT_TO_REPLY',
+          clientStatus: 'pending',
+          isCompleted: false,
+          isWaiting: false,
+          isActionRequired: true,
+        },
+      }),
+    });
+    assert.equal(undoClientRes.status, 200);
+    const undoClientData = await undoClientRes.json();
+    assert.equal(undoClientData.data.currentLabel, 'CLIENT_TO_REPLY');
+    assert.equal(undoClientData.data.clientStatus, 'pending');
+  });
 });

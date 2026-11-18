@@ -291,25 +291,51 @@ export async function clientDecision(req, res, next) {
       return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
     }
 
+    const now = new Date();
     let updates = {};
     if (action === 'approve') {
+      const existingDrafts = await store.getDraftsByThreadId(thread._id);
+      const targetDraft = existingDrafts.find((d) => d._id === draftId) || existingDrafts[0];
+      const sentBody = (customText && customText.trim()) || targetDraft?.bodyText || 'Approved and sent by executive.';
+      const recipient = thread.participants?.find((p) => !p.isClient) || thread.participants?.[0] || { email: 'recipient@example.com' };
+
       updates = {
+        currentLabel: 'NO_REPLY_NEEDED',
+        lastDirection: 'OUTBOUND',
+        lastMessageAt: now,
+        isWaiting: true,
+        isActionRequired: false,
         clientStatus: 'handled',
         isCompleted: true,
-        clientDecisionNote: customText ? 'Approved edited draft' : 'Approved prepared draft',
+        clientDecisionNote: customText ? 'Approved edited draft & sent (simulated)' : 'Approved prepared draft & sent (simulated)',
       };
-      if (draftId) {
+      if (draftId || targetDraft?._id) {
         await store.saveDraft({
-          _id: draftId,
+          _id: draftId || targetDraft._id,
           ...(customText ? { bodyText: customText } : {}),
-          status: 'approved',
+          status: 'sent',
+          sentAt: now,
+          isSimulatedSend: !env.SEND_ENABLED,
           clientApproval: {
-            approvedAt: new Date(),
+            approvedAt: now,
             approvedBy: req.user._id,
             clientFeedback: note,
           },
         });
       }
+      await store.addMessage({
+        orgId: req.user.orgId,
+        threadId: thread._id,
+        clientId: thread.clientId,
+        from: { name: req.user.name || 'Executive', email: req.user.email },
+        to: [{ name: recipient.name || recipient.email, email: recipient.email }],
+        subject: `RE: ${thread.subject}`,
+        snippet: sentBody.slice(0, 140),
+        bodyText: sentBody,
+        direction: 'OUTBOUND',
+        date: now,
+        receivedAt: now,
+      });
       await store.addActivityLog({
         orgId: req.user.orgId,
         actorId: req.user._id,
@@ -317,14 +343,35 @@ export async function clientDecision(req, res, next) {
         actorRole: 'client',
         action: 'DRAFT_APPROVED',
         threadId: thread._id,
-        details: { draftId: draftId || null, editedByClient: Boolean(customText), simulated: true },
+        details: { draftId: draftId || null, editedByClient: Boolean(customText), simulated: !env.SEND_ENABLED },
       });
     } else if (action === 'reply_direct') {
+      const replyBody = (note && note.trim()) || 'Replied directly by executive.';
+      const recipient = thread.participants?.find((p) => !p.isClient) || thread.participants?.[0] || { email: 'recipient@example.com' };
+
       updates = {
+        currentLabel: 'NO_REPLY_NEEDED',
+        lastDirection: 'OUTBOUND',
+        lastMessageAt: now,
+        isWaiting: true,
+        isActionRequired: false,
         clientStatus: 'handled',
         isCompleted: true,
         clientDecisionNote: 'Direct executive reply sent (simulated)',
       };
+      await store.addMessage({
+        orgId: req.user.orgId,
+        threadId: thread._id,
+        clientId: thread.clientId,
+        from: { name: req.user.name || 'Executive', email: req.user.email },
+        to: [{ name: recipient.name || recipient.email, email: recipient.email }],
+        subject: `RE: ${thread.subject}`,
+        snippet: replyBody.slice(0, 140),
+        bodyText: replyBody,
+        direction: 'OUTBOUND',
+        date: now,
+        receivedAt: now,
+      });
       await store.addActivityLog({
         orgId: req.user.orgId,
         actorId: req.user._id,
@@ -332,7 +379,27 @@ export async function clientDecision(req, res, next) {
         actorRole: 'client',
         action: 'CLIENT_DIRECT_REPLY',
         threadId: thread._id,
-        details: { simulated: true, hasReplyContent: Boolean(note && note.trim()) },
+        details: { simulated: !env.SEND_ENABLED, hasReplyContent: Boolean(note && note.trim()) },
+      });
+    } else if (action === 'undo') {
+      const prev = req.body.previousState || {};
+      updates = {
+        currentLabel: prev.currentLabel || 'CLIENT_TO_REPLY',
+        clientStatus: prev.clientStatus || 'pending',
+        isCompleted: Boolean(prev.isCompleted),
+        isWaiting: Boolean(prev.isWaiting),
+        isActionRequired: prev.isActionRequired !== undefined ? Boolean(prev.isActionRequired) : true,
+        snoozedUntil: prev.snoozedUntil || null,
+        clientDecisionNote: '',
+      };
+      await store.addActivityLog({
+        orgId: req.user.orgId,
+        actorId: req.user._id,
+        actorName: req.user.name || 'Priya Sharma',
+        actorRole: 'client',
+        action: 'CLIENT_DECISION_UNDONE',
+        threadId: thread._id,
+        details: { restoredLabel: updates.currentLabel, restoredStatus: updates.clientStatus },
       });
     } else if (action === 'hand_to_assistant') {
       updates = {
@@ -415,6 +482,371 @@ export async function getTodaySummary(req, res, next) {
     return res.status(200).json({
       ok: true,
       data: summary,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/threads/compose
+ * Composes a brand-new outbound email thread (send, draft, or submit for executive approval).
+ * Respects SEND_ENABLED safety gate and strictly avoids logging raw email bodies.
+ */
+export async function composeEmail(req, res, next) {
+  try {
+    const {
+      to,
+      toName,
+      cc,
+      subject,
+      bodyText,
+      clientId: requestedClientId,
+      mode: requestedMode = 'send',
+    } = req.body;
+
+    const orgId = req.user.orgId || 'org_vortex_001';
+    const isClient = req.user.role === 'client';
+    const mode = isClient && requestedMode === 'request_approval' ? 'send' : requestedMode;
+
+    // Resolve target executive client strictly within caller's org & role boundary
+    let targetClient = null;
+    if (isClient) {
+      targetClient = req.user.clientId
+        ? await store.getClientByOrgAndId(orgId, req.user.clientId)
+        : await store.getClientByOrgId(orgId);
+    } else if (requestedClientId) {
+      targetClient = await store.getClientByOrgAndId(orgId, requestedClientId);
+    } else {
+      targetClient = await store.getClientByOrgId(orgId);
+    }
+
+    const resolvedClientId = targetClient?._id || req.user.clientId || 'client_priya_001';
+    const now = new Date();
+    const cleanTo = to.trim().toLowerCase();
+    const recipientName = (toName && toName.trim()) || cleanTo.split('@')[0];
+    const ccList = cc
+      ? cc
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+
+    const fromIdentity = isClient
+      ? { name: req.user.name || targetClient?.name || 'Executive', email: req.user.email }
+      : {
+          name: `${req.user.name || 'Assistant'} (for ${targetClient?.name || 'Executive'})`,
+          email: req.user.email,
+        };
+
+    const isApprovalFlow = mode === 'request_approval';
+    const isSendFlow = mode === 'send';
+    const simulated = isSendFlow ? !env.SEND_ENABLED : false;
+
+    const newThread = await store.createThread({
+      orgId,
+      clientId: resolvedClientId,
+      subject: subject.trim(),
+      snippet: bodyText.trim().slice(0, 140),
+      participants: [
+        { name: recipientName, email: cleanTo },
+        {
+          name: targetClient?.name || req.user.name || 'Executive',
+          email: targetClient?.email || req.user.email,
+          isClient: true,
+        },
+      ],
+      lastMessageAt: now,
+      lastDirection: 'OUTBOUND',
+      currentLabel: isApprovalFlow
+        ? 'CLIENT_TO_REPLY'
+        : isSendFlow
+        ? 'NO_REPLY_NEEDED'
+        : isClient
+        ? 'CLIENT_TO_REPLY'
+        : 'ASSISTANT_TO_REPLY',
+      aiLabel: isApprovalFlow ? 'CLIENT_TO_REPLY' : 'NO_REPLY_NEEDED',
+      manualOverride: true,
+      confidence: 1,
+      isActionRequired: isApprovalFlow,
+      isWaiting: isSendFlow,
+      isArchived: false,
+      isRead: true,
+      clientVisible: isClient || isApprovalFlow,
+      clientStatus: isSendFlow ? 'handled' : 'pending',
+      aiReason: isApprovalFlow
+        ? {
+            provider: 'human',
+            model: 'assistant-compose',
+            reason: `New outbound email drafted by ${req.user.name || 'Assistant'} to ${recipientName} awaiting executive approval.`,
+            summary: `Approve outbound email to ${cleanTo}: "${subject.trim()}"`,
+            decision: {
+              question: `Approve and send this new email to ${recipientName} (${cleanTo})?`,
+              options: ['Approve & Send Draft', 'Edit & Reply Myself', 'Hand back to Assistant'],
+            },
+          }
+        : undefined,
+    });
+
+    let createdMessage = null;
+    if (isSendFlow) {
+      createdMessage = await store.addMessage({
+        orgId,
+        threadId: newThread._id,
+        clientId: resolvedClientId,
+        from: fromIdentity,
+        to: [{ name: recipientName, email: cleanTo }],
+        cc: ccList.map((email) => ({ email })),
+        subject: subject.trim(),
+        snippet: bodyText.trim().slice(0, 140),
+        bodyText: bodyText.trim(),
+        direction: 'OUTBOUND',
+        date: now,
+        receivedAt: now,
+      });
+    }
+
+    const draft = await store.saveDraft({
+      orgId,
+      threadId: newThread._id,
+      clientId: resolvedClientId,
+      to: [cleanTo],
+      cc: ccList,
+      subject: subject.trim(),
+      bodyText: bodyText.trim(),
+      status: isSendFlow ? 'sent' : isApprovalFlow ? 'pending_client' : 'draft',
+      createdBy: req.user._id,
+      sentAt: isSendFlow ? now : undefined,
+      simulated,
+    });
+
+    await store.addActivityLog({
+      orgId,
+      actorId: req.user._id,
+      actorName: req.user.name || 'User',
+      actorRole: req.user.role,
+      action: isSendFlow
+        ? simulated
+          ? 'EMAIL_COMPOSED_SIMULATED_SEND'
+          : 'EMAIL_COMPOSED_SENT'
+        : isApprovalFlow
+        ? 'EMAIL_COMPOSED_PENDING_APPROVAL'
+        : 'EMAIL_COMPOSED_DRAFT',
+      threadId: newThread._id,
+      details: {
+        clientId: resolvedClientId,
+        recipientDomain: cleanTo.split('@')[1] || 'unknown',
+        mode,
+        simulated,
+      },
+    });
+
+    logger.info(
+      {
+        threadId: newThread._id,
+        messageId: createdMessage?._id || null,
+        role: req.user.role,
+        mode,
+        simulated,
+      },
+      '[Threads] New outbound email composed'
+    );
+
+    return res.status(201).json({
+      ok: true,
+      data: {
+        thread: newThread,
+        draft,
+        message: createdMessage,
+        simulated,
+        mode,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/threads/:id/draft
+ * Save a thread reply draft or submit it for Executive Client approval.
+ */
+export async function saveThreadDraft(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { subject, bodyText, status = 'draft' } = req.body;
+
+    const thread = await store.getThreadById(id);
+    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
+      return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
+    }
+
+    const previousState = {
+      currentLabel: thread.currentLabel,
+      clientVisible: Boolean(thread.clientVisible),
+      clientStatus: thread.clientStatus || 'pending',
+      isActionRequired: Boolean(thread.isActionRequired),
+      isWaiting: Boolean(thread.isWaiting),
+      isArchived: Boolean(thread.isArchived),
+      isCompleted: Boolean(thread.isCompleted),
+    };
+
+    const existingDrafts = await store.getDraftsByThreadId(thread._id);
+    const existing = existingDrafts?.[0];
+    const recipient = thread.participants?.find((p) => !p.isClient) || thread.participants?.[0];
+
+    const draft = await store.saveDraft({
+      ...(existing?._id ? { _id: existing._id } : {}),
+      orgId: req.user.orgId,
+      threadId: thread._id,
+      clientId: thread.clientId,
+      to: recipient?.email ? [recipient.email] : [],
+      subject: subject || `RE: ${thread.subject}`,
+      bodyText: bodyText || '',
+      status,
+      authorId: req.user._id,
+    });
+
+    let updatedThread = thread;
+    if (status === 'pending_client') {
+      updatedThread = await store.updateThread(thread._id, {
+        currentLabel: 'CLIENT_TO_REPLY',
+        clientVisible: true,
+        clientStatus: 'pending',
+        isActionRequired: true,
+        isCompleted: false,
+      });
+
+      await store.addActivityLog({
+        orgId: req.user.orgId,
+        actorId: req.user._id,
+        actorName: req.user.name || 'Assistant',
+        actorRole: 'assistant',
+        action: 'DRAFT_SUBMITTED_FOR_APPROVAL',
+        threadId: thread._id,
+        details: { draftId: draft._id, clientId: thread.clientId },
+      });
+    }
+
+    logger.info(
+      { threadId: thread._id, draftId: draft._id, status },
+      '[Threads] Thread draft saved'
+    );
+
+    return res.status(200).json({
+      ok: true,
+      data: {
+        draft,
+        thread: updatedThread,
+        previousState,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/threads/:id/send
+ * Dispatches an assistant-authorized reply (simulated when SEND_ENABLED=false),
+ * appends the outbound message, and moves the thread to Waiting on Others / Quiet Folder.
+ */
+export async function sendThreadReply(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { subject, bodyText } = req.body;
+
+    const thread = await store.getThreadById(id);
+    if (!thread || (thread.orgId && req.user?.orgId && thread.orgId !== req.user.orgId)) {
+      return res.status(404).json({ ok: false, error: { message: 'Thread not found', code: 'NOT_FOUND' } });
+    }
+
+    const previousState = {
+      currentLabel: thread.currentLabel,
+      clientVisible: Boolean(thread.clientVisible),
+      clientStatus: thread.clientStatus || 'pending',
+      isActionRequired: Boolean(thread.isActionRequired),
+      isWaiting: Boolean(thread.isWaiting),
+      isArchived: Boolean(thread.isArchived),
+      isCompleted: Boolean(thread.isCompleted),
+    };
+
+    const now = new Date();
+    const simulated = !env.SEND_ENABLED;
+    const cleanBody = (bodyText || '').trim();
+    const cleanSubject = (subject || `RE: ${thread.subject}`).trim();
+    const recipient = thread.participants?.find((p) => !p.isClient) || thread.participants?.[0] || {
+      name: 'Recipient',
+      email: 'recipient@example.com',
+    };
+
+    const existingDrafts = await store.getDraftsByThreadId(thread._id);
+    const existing = existingDrafts?.[0];
+
+    const draft = await store.saveDraft({
+      ...(existing?._id ? { _id: existing._id } : {}),
+      orgId: req.user.orgId,
+      threadId: thread._id,
+      clientId: thread.clientId,
+      to: [recipient.email],
+      subject: cleanSubject,
+      bodyText: cleanBody,
+      status: 'sent',
+      sentAt: now,
+      isSimulatedSend: simulated,
+      authorId: req.user._id,
+    });
+
+    const message = await store.addMessage({
+      orgId: req.user.orgId,
+      threadId: thread._id,
+      clientId: thread.clientId,
+      from: { name: req.user.name || 'Assistant', email: req.user.email },
+      to: [{ name: recipient.name || recipient.email, email: recipient.email }],
+      subject: cleanSubject,
+      snippet: cleanBody.slice(0, 140),
+      bodyText: cleanBody,
+      direction: 'OUTBOUND',
+      date: now,
+      receivedAt: now,
+    });
+
+    const updatedThread = await store.updateThread(thread._id, {
+      currentLabel: 'NO_REPLY_NEEDED',
+      lastDirection: 'OUTBOUND',
+      lastMessageAt: now,
+      lastMessageId: message._id,
+      isWaiting: true,
+      isActionRequired: false,
+      isCompleted: true,
+      clientStatus: 'handled',
+      snippet: cleanBody.slice(0, 140),
+    });
+
+    await store.addActivityLog({
+      orgId: req.user.orgId,
+      actorId: req.user._id,
+      actorName: req.user.name || 'Assistant',
+      actorRole: 'assistant',
+      action: simulated ? 'EMAIL_SENT_SIMULATED' : 'EMAIL_SENT',
+      threadId: thread._id,
+      details: { draftId: draft._id, messageId: message._id, simulated },
+    });
+
+    logger.info(
+      { threadId: thread._id, messageId: message._id, simulated },
+      '[Threads] Thread reply dispatched'
+    );
+
+    return res.status(200).json({
+      ok: true,
+      data: {
+        thread: updatedThread,
+        draft,
+        message,
+        simulated,
+        previousState,
+      },
     });
   } catch (err) {
     next(err);

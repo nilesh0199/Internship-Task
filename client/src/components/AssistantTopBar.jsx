@@ -222,10 +222,10 @@ export function AssistantTopBar({
             </span>
           </div>
 
-          {/* Control Room Link */}
+          {/* Control Room Link (hidden on mobile < md since mobile uses fixed bottom nav) */}
           <Link
             to="/agents"
-            className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${
+            className={`hidden md:flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${
               isControlRoom
                 ? 'bg-ink-900 text-white font-semibold'
                 : 'text-ink-700 hover:text-ink-900 hover:bg-ink-50'
@@ -245,10 +245,10 @@ export function AssistantTopBar({
             <span>Accounts</span>
           </Link>
 
-          {/* Settings Button */}
+          {/* Settings Button (hidden on mobile < md since mobile uses fixed bottom nav) */}
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-medium text-ink-700 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition cursor-pointer"
+            className="hidden md:flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-medium text-ink-700 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition cursor-pointer"
             title="Workspace Settings, AI API Keys, Playbooks & Demo Controls"
           >
             <Settings className="h-3.5 w-3.5 flex-shrink-0" />

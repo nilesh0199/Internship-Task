@@ -6,6 +6,7 @@ import Avatar from '../components/Avatar.jsx';
 import AccountMenu from '../components/AccountMenu.jsx';
 import { DemoWorkspaceBanner } from '../components/DemoWorkspaceBanner.jsx';
 import { SettingsModal } from '../components/SettingsModal.jsx';
+import { ComposeEmailModal } from '../components/ComposeEmailModal.jsx';
 import {
   Sparkles,
   CheckCircle2,
@@ -32,6 +33,7 @@ import {
   FileText,
   SlidersHorizontal,
   Settings,
+  PenSquare,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -43,6 +45,8 @@ export function ClientQueue() {
   const [selectedThreadId, setSelectedThreadId] = useState(null);
   const [activeNav, setActiveNav] = useState('today'); // 'today' | 'week' | 'later' | 'waiting' | 'handled'
   const [showMobileSheet, setShowMobileSheet] = useState(false);
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
+  const [lastClientAction, setLastClientAction] = useState(null); // { threadId, subject, summary, previousState }
   const [threadDetails, setThreadDetails] = useState({}); // cached threadId -> { messages, timeline, drafts }
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [isHandingOver, setIsHandingOver] = useState(false);
@@ -299,63 +303,101 @@ export function ClientQueue() {
     draftEdits,
   ]);
 
-  // Execute decision action with Optimistic Updates & Undo capability
+  // Execute decision action with Optimistic Updates, Next-Email Advance & Server-Persisted Undo
   async function handleExecuteDecision(threadId, action, extra = {}) {
     const threadToUpdate = threads.find((t) => (t._id || t.id) === threadId);
     if (!threadToUpdate) return;
 
-    // Save previous state for Undo
+    // Save previous state for persistent Undo
     const previousState = { ...threadToUpdate };
-    lastActionRef.current = { threadId, previousState, action };
+    const prevSnapshot = {
+      currentLabel: threadToUpdate.currentLabel,
+      clientStatus: threadToUpdate.clientStatus || 'pending',
+      isCompleted: Boolean(threadToUpdate.isCompleted),
+      isWaiting: Boolean(threadToUpdate.isWaiting),
+      isActionRequired: threadToUpdate.isActionRequired !== undefined ? Boolean(threadToUpdate.isActionRequired) : true,
+      snoozedUntil: threadToUpdate.snoozedUntil || null,
+    };
 
-    // Optimistically update local thread state
+    // Determine sequential next email in the current visible list
+    const currentList = visibleList.length > 0 ? visibleList : activeDecisions;
+    const currentIdx = currentList.findIndex((t) => (t._id || t.id) === threadId);
+    const remaining = currentList.filter((t) => (t._id || t.id) !== threadId);
+    let nextThreadId = null;
+    if (remaining.length > 0) {
+      const nextItem =
+        currentIdx !== -1 && currentIdx < remaining.length
+          ? remaining[currentIdx]
+          : remaining[remaining.length - 1];
+      nextThreadId = nextItem?._id || nextItem?.id || null;
+    }
+
+    // Trigger toast + inline Undo bar message
+    let successMsg = 'Marked as handled.';
+    if (action === 'approve') successMsg = 'Draft approved & sent (simulated) · Moved to Handled & Waiting.';
+    if (action === 'reply_direct') successMsg = 'Direct reply sent (simulated) · Moved to Handled & Waiting.';
+    if (action === 'hand_to_assistant') successMsg = 'Handed to Maya · Moved to Assistant Queue.';
+    if (action === 'snooze') {
+      successMsg =
+        extra.duration === '4h'
+          ? 'Snoozed for 4 hours · Moved to Later.'
+          : extra.duration === 'next_week'
+          ? 'Snoozed until next week · Moved to Later.'
+          : 'Snoozed until tomorrow 9 AM · Moved to Later.';
+    }
+
+    const actionRecord = {
+      threadId,
+      subject: threadToUpdate.subject,
+      summary: successMsg,
+      previousState,
+      prevSnapshot,
+      action,
+    };
+    lastActionRef.current = actionRecord;
+    setLastClientAction(actionRecord);
+
+    // Optimistically update local thread state so it moves to the proper bucket immediately
+    const isSentOrDone = action === 'approve' || action === 'reply_direct';
     setThreads((prev) =>
       prev.map((t) => {
         if ((t._id || t.id) === threadId) {
           return {
             ...t,
             clientStatus:
-              action === 'approve' || action === 'handled' || action === 'reply_direct'
+              isSentOrDone || action === 'handled'
                 ? 'handled'
+                : action === 'hand_to_assistant'
+                ? 'delegated'
                 : action,
-            currentLabel: action === 'hand_to_assistant' ? 'ASSISTANT_TO_REPLY' : t.currentLabel,
+            isCompleted: isSentOrDone || action === 'handled',
+            isWaiting: isSentOrDone ? true : t.isWaiting,
+            currentLabel: isSentOrDone
+              ? 'NO_REPLY_NEEDED'
+              : action === 'hand_to_assistant'
+              ? 'ASSISTANT_TO_REPLY'
+              : t.currentLabel,
           };
         }
         return t;
       })
     );
 
-    // Pick next thread to select
-    const remaining = activeDecisions.filter((t) => (t._id || t.id) !== threadId);
-    if (remaining.length > 0) {
-      setSelectedThreadId(remaining[0]._id || remaining[0].id);
+    // Advance smoothly to the next email (or clear when queue is empty)
+    if (nextThreadId) {
+      setSelectedThreadId(nextThreadId);
     } else {
       setSelectedThreadId(null);
-    }
-
-    if (showMobileSheet) {
-      setShowMobileSheet(false);
-    }
-
-    // Trigger toast with 5-second Undo action
-    let successMsg = 'Marked as handled.';
-    if (action === 'approve') successMsg = 'Draft approved & queued (simulated send). Maya notified.';
-    if (action === 'reply_direct') successMsg = 'Direct reply recorded (simulated send).';
-    if (action === 'hand_to_assistant') successMsg = 'Handed to Maya with your instructions.';
-    if (action === 'snooze') {
-      successMsg =
-        extra.duration === '4h'
-          ? 'Snoozed for 4 hours.'
-          : extra.duration === 'next_week'
-          ? 'Snoozed until next week.'
-          : 'Snoozed until tomorrow 9 AM.';
+      if (showMobileSheet) {
+        setShowMobileSheet(false);
+      }
     }
 
     toast.success(successMsg, {
-      duration: 5000,
+      duration: 6000,
       action: {
         label: 'Undo',
-        onClick: () => handleUndoLastAction(),
+        onClick: () => handleUndoLastAction(actionRecord),
       },
     });
 
@@ -370,20 +412,41 @@ export function ClientQueue() {
       setThreads((prev) =>
         prev.map((t) => ((t._id || t.id) === threadId ? previousState : t))
       );
+      setSelectedThreadId(threadId);
+      setLastClientAction(null);
       toast.error('Action failed: ' + err.message);
     }
   }
 
-  // Reverse last optimistic action
-  function handleUndoLastAction() {
-    if (!lastActionRef.current) return;
-    const { threadId, previousState } = lastActionRef.current;
+  // Reverse last action both optimistically AND on the server
+  async function handleUndoLastAction(record = lastActionRef.current) {
+    if (!record) return;
+    const { threadId, previousState, prevSnapshot } = record;
     setThreads((prev) =>
       prev.map((t) => ((t._id || t.id) === threadId ? previousState : t))
     );
     setSelectedThreadId(threadId);
-    toast.info('Action reversed.');
+    setLastClientAction(null);
     lastActionRef.current = null;
+    toast.info('Action undone — email restored.');
+
+    try {
+      await api.post(`/threads/${threadId}/client-decision`, {
+        action: 'undo',
+        previousState: prevSnapshot,
+      });
+    } catch {
+      // Keep UI restored and reload on next sync
+    }
+  }
+
+  function handleStepDecision(delta) {
+    if (!visibleList.length) return;
+    const idx = visibleList.findIndex((t) => (t._id || t.id) === selectedThreadId);
+    const nextIdx = idx === -1 ? 0 : idx + delta;
+    if (nextIdx >= 0 && nextIdx < visibleList.length) {
+      setSelectedThreadId(visibleList[nextIdx]._id || visibleList[nextIdx].id);
+    }
   }
 
   // Greeting based on live client time of day (auto-updates across morning/afternoon/evening)
@@ -478,29 +541,39 @@ export function ClientQueue() {
             <div className="h-7 w-7 rounded-lg bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-xs shadow-soft group-hover:scale-105 transition-transform">
               D
             </div>
-            <span className="font-serif font-bold text-sm text-ink-900 tracking-tight hidden sm:inline">
+            <span className="font-serif font-bold text-sm text-ink-900 tracking-tight hidden lg:inline whitespace-nowrap">
               Daybook Mail
             </span>
           </Link>
 
-          <div className="h-3.5 w-px bg-black/[0.1] hidden sm:block" />
+          <div className="h-3.5 w-px bg-black/[0.1] hidden sm:block flex-shrink-0" />
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-serif font-bold text-ink-900">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xs font-serif font-bold text-ink-900 whitespace-nowrap truncate">
               {user?.name || 'Priya Sharma'}
             </span>
-            <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-accent border border-amber-200/60">
+            <span className="hidden sm:inline-flex text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-accent border border-amber-200/60 whitespace-nowrap flex-shrink-0">
               Decision Desk
             </span>
           </div>
         </div>
 
-        {/* Right: Live Sync Pill + Refresh + Account Menu */}
-        <div className="flex items-center gap-2.5">
-          <div className="hidden md:flex items-center gap-1.5 text-[11px] text-ink-500 font-mono">
+        {/* Right: Live Sync Pill + Compose + Refresh + Settings + Account Menu */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="hidden xl:flex items-center gap-1.5 text-[11px] text-ink-500 font-mono whitespace-nowrap">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>Synced {Math.max(0, Math.floor((Date.now() - lastSyncedAt.getTime()) / 60000))}m ago</span>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsComposeOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold shadow-2xs transition cursor-pointer active:scale-95 whitespace-nowrap"
+            title="Compose a new email"
+          >
+            <PenSquare className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Compose</span>
+          </button>
 
           <button
             onClick={() => loadThreads(false)}
@@ -528,6 +601,17 @@ export function ClientQueue() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         mode="client"
+      />
+
+      {/* Compose New Email Modal */}
+      <ComposeEmailModal
+        isOpen={isComposeOpen}
+        onClose={() => setIsComposeOpen(false)}
+        mode="client"
+        clientId={user?.clientId}
+        clientName={user?.name}
+        clientEmail={user?.email}
+        onComposed={() => loadThreads(true)}
       />
 
       {/* Tablet / Mobile Compact Segment Strip (visible below xl so 2-pane split works cleanly on 768px-1279px) */}
@@ -581,6 +665,16 @@ export function ClientQueue() {
                 {summarySentence}
               </p>
             </div>
+
+            {/* Compose New Email CTA */}
+            <button
+              type="button"
+              onClick={() => setIsComposeOpen(true)}
+              className="w-full py-2.5 px-4 rounded-2xl bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-soft transition active:scale-[0.98] cursor-pointer"
+            >
+              <PenSquare className="h-3.5 w-3.5" />
+              <span>Compose New Email</span>
+            </button>
 
             {/* Vertical Navigator with Counts */}
             <nav className="space-y-1 select-none" aria-label="Executive Queue Navigation">
@@ -873,21 +967,109 @@ export function ClientQueue() {
             showMobileSheet ? 'fixed inset-0 z-40 bg-white md:static' : 'hidden md:flex'
           }`}
         >
-          {/* Mobile Sheet Close Bar */}
-          <div className="md:hidden flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-black/[0.08] bg-white">
+          {/* Mobile Sheet Close Bar + Prev/Next */}
+          <div className="md:hidden flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-black/[0.08] bg-white gap-2">
             <button
               type="button"
               onClick={() => setShowMobileSheet(false)}
               className="flex items-center gap-1 text-xs font-semibold text-ink-700 hover:text-ink-900 cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4" />
-              <span>Back to Decisions</span>
+              <span>Back</span>
             </button>
-            <span className="text-xs font-mono font-bold uppercase text-accent">Decision Sheet</span>
+            {visibleList.length > 1 && (() => {
+              const curIdx = visibleList.findIndex((t) => (t._id || t.id) === selectedThreadId);
+              return (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={curIdx <= 0}
+                    onClick={() => handleStepDecision(-1)}
+                    className="p-1 rounded-full border border-black/[0.08] bg-[#FAF8F5] text-ink-700 disabled:opacity-35 cursor-pointer"
+                    aria-label="Previous decision"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="text-[11px] font-mono text-ink-500">
+                    {curIdx >= 0 ? `${curIdx + 1}/${visibleList.length}` : ''}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={curIdx === -1 || curIdx >= visibleList.length - 1}
+                    onClick={() => handleStepDecision(1)}
+                    className="inline-flex items-center gap-0.5 px-2 py-1 rounded-full border border-black/[0.08] bg-[#FAF8F5] text-[11px] font-semibold text-ink-900 disabled:opacity-35 cursor-pointer"
+                  >
+                    <span>Next</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              );
+            })()}
           </div>
+
+          {/* Inline Action Completed + Undo Bar */}
+          {lastClientAction && (
+            <div className="px-4 sm:px-6 py-2 bg-emerald-50/95 border-b border-emerald-200/80 flex items-center justify-between gap-2 text-xs text-emerald-950 flex-shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                <span className="truncate font-medium">{lastClientAction.summary}</span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => handleUndoLastAction(lastClientAction)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-emerald-100 border border-emerald-300 text-emerald-900 font-semibold text-[11px] transition cursor-pointer active:scale-95"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  <span>Undo</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLastClientAction(null)}
+                  className="p-1 rounded-full text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+                  aria-label="Dismiss"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
 
           {selectedThread ? (
             <>
+              {/* Desktop Queue Position + Prev / Next Strip */}
+              {visibleList.length > 1 && (() => {
+                const curIdx = visibleList.findIndex((t) => (t._id || t.id) === selectedThreadId);
+                if (curIdx === -1) return null;
+                return (
+                  <div className="hidden md:flex items-center justify-between px-8 py-2.5 bg-white/80 border-b border-black/[0.06] text-xs text-ink-500 flex-shrink-0">
+                    <span className="font-mono text-[11px]">
+                      Decision {curIdx + 1} of {visibleList.length}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={curIdx <= 0}
+                        onClick={() => handleStepDecision(-1)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAF8F5] hover:bg-ink-100 border border-black/[0.08] text-ink-700 font-semibold text-[11px] transition cursor-pointer disabled:opacity-35"
+                      >
+                        <ChevronLeft className="h-3 w-3" />
+                        <span>Prev</span>
+                      </button>
+                      <button
+                        type="button"
+                        disabled={curIdx >= visibleList.length - 1}
+                        onClick={() => handleStepDecision(1)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAF8F5] hover:bg-ink-100 border border-black/[0.08] text-ink-900 font-semibold text-[11px] transition cursor-pointer disabled:opacity-35"
+                      >
+                        <span>Next</span>
+                        <ChevronRight className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Independently Scrollable Decision Body */}
               <div
                 ref={sheetScrollRef}

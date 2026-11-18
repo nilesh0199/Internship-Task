@@ -22,10 +22,11 @@ import {
   ChevronRight,
   ExternalLink,
   Flame,
+  PenSquare,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function AssistantTodayView({ onJumpToThread }) {
+export function AssistantTodayView({ onJumpToThread, onCompose }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [data, setData] = useState(null);
@@ -116,17 +117,30 @@ export function AssistantTodayView({ onJumpToThread }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-8">
       {/* 1. Calm Header & Daily Summary */}
-      <div className="space-y-1.5 border-b border-black/[0.06] pb-5">
-        <div className="flex items-center gap-2 text-xs font-mono font-bold text-accent uppercase tracking-wider">
-          <Calendar className="h-3.5 w-3.5" />
-          <span>Cross-Client Command Center</span>
+      <div className="border-b border-black/[0.06] pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-accent uppercase tracking-wider">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>Cross-Client Command Center</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ink-900 tracking-tight">
+            {greeting}
+          </h1>
+          <p className="text-sm text-ink-600 font-medium">
+            {data?.summarySentence || 'All client operations are synced and running.'}
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ink-900 tracking-tight">
-          {greeting}
-        </h1>
-        <p className="text-sm text-ink-600 font-medium">
-          {data?.summarySentence || 'All client operations are synced and running.'}
-        </p>
+
+        {onCompose && (
+          <button
+            type="button"
+            onClick={onCompose}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold shadow-soft transition active:scale-95 cursor-pointer self-start sm:self-auto whitespace-nowrap"
+          >
+            <PenSquare className="h-3.5 w-3.5" />
+            <span>Compose Email</span>
+          </button>
+        )}
       </div>
 
       {/* 2. Executive Client Summary Cards */}

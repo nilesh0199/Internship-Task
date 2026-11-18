@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { api } from '../lib/api.js';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock.js';
 import { Sparkles, Send, CheckCircle2, AlertCircle, Clock, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function DraftEditor({ thread, existingDraft, onDraftUpdated, clientName = 'Client' }) {
+export function DraftEditor({
+  thread,
+  existingDraft,
+  onDraftUpdated,
+  onActionComplete,
+  clientName = 'Client',
+}) {
   const clientFirstName = (clientName || 'Client').split(' ')[0];
   const [subject, setSubject] = useState(existingDraft?.subject || `RE: ${thread.subject}`);
   const [bodyText, setBodyText] = useState(existingDraft?.bodyText || '');
@@ -28,12 +35,10 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated, clientName 
   }, [showConfirmSend]);
 
   useEffect(() => {
-    if (existingDraft) {
-      setSubject(existingDraft.subject);
-      setBodyText(existingDraft.bodyText);
-      setStatus(existingDraft.status);
-    }
-  }, [existingDraft]);
+    setSubject(existingDraft?.subject || `RE: ${thread.subject}`);
+    setBodyText(existingDraft?.bodyText || '');
+    setStatus(existingDraft?.status || 'draft');
+  }, [thread._id, thread.subject, existingDraft]);
 
   async function handleGenerateAIDraft(tone = 'direct') {
     setLoadingAI(true);
@@ -72,7 +77,7 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated, clientName 
       });
       if (res.ok) {
         toast.success('Draft saved successfully');
-        onDraftUpdated?.(res.data);
+        onDraftUpdated?.(res.data?.draft || res.data);
       }
     } catch (err) {
       toast.error('Failed to save draft: ' + err.message);
@@ -82,6 +87,10 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated, clientName 
   }
 
   async function handleRequestApproval() {
+    if (!bodyText.trim()) {
+      toast.error('Write a reply or click "AI Draft" before submitting for approval.');
+      return;
+    }
     setSaving(true);
     try {
       const res = await api.post(`/threads/${thread._id}/draft`, {
@@ -90,9 +99,18 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated, clientName 
         status: 'pending_client',
       });
       if (res.ok) {
-        toast.success(`Draft submitted! ${clientFirstName} will see this in their Decision Queue.`);
         setStatus('pending_client');
-        onDraftUpdated?.(res.data);
+        onDraftUpdated?.(res.data?.draft || res.data);
+        if (onActionComplete) {
+          onActionComplete({
+            action: 'request_approval',
+            thread: res.data?.thread || thread,
+            draft: res.data?.draft || res.data,
+            previousState: res.data?.previousState,
+          });
+        } else {
+          toast.success(`Draft submitted! ${clientFirstName} will see this in their Decision Queue.`);
+        }
       }
     } catch (err) {
       toast.error('Submission failed: ' + err.message);
@@ -102,6 +120,11 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated, clientName 
   }
 
   async function handleSendNow() {
+    if (!bodyText.trim()) {
+      setShowConfirmSend(false);
+      toast.error('Write a reply or click "AI Draft" before sending.');
+      return;
+    }
     setShowConfirmSend(false);
     setSaving(true);
     try {
@@ -110,12 +133,24 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated, clientName 
         bodyText,
       });
       if (res.ok) {
-        toast.success(
-          res.data.simulated
-            ? 'Simulated dispatch recorded in audit log (SEND_ENABLED=false)'
-            : 'Email sent successfully via Gmail API!'
-        );
-        onDraftUpdated?.(res.data.draft);
+        setStatus('sent');
+        onDraftUpdated?.(res.data?.draft);
+        if (onActionComplete) {
+          onActionComplete({
+            action: 'send',
+            thread: res.data?.thread || thread,
+            draft: res.data?.draft,
+            message: res.data?.message,
+            simulated: Boolean(res.data?.simulated),
+            previousState: res.data?.previousState,
+          });
+        } else {
+          toast.success(
+            res.data.simulated
+              ? 'Simulated dispatch recorded in audit log (SEND_ENABLED=false)'
+              : 'Email sent successfully!'
+          );
+        }
       }
     } catch (err) {
       toast.error('Send failed: ' + err.message);
@@ -234,53 +269,55 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated, clientName 
         </div>
       </div>
 
-      {/* Confirmation Modal */}
-      {showConfirmSend && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowConfirmSend(false);
-          }}
-          onWheel={(e) => {
-            if (e.target === e.currentTarget) e.preventDefault();
-          }}
-          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overscroll-contain select-none"
-        >
+      {/* Confirmation Modal (portaled onto body to prevent clipping) */}
+      {showConfirmSend &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-float border border-black/[0.06] space-y-4 overscroll-contain select-text"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowConfirmSend(false);
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overscroll-contain select-none"
           >
-            <div className="flex items-center gap-2 text-ink-900">
-              <ShieldCheck className="h-5 w-5 text-accent" />
-              <h3 className="text-base font-serif font-bold">
-                Confirm Email Dispatch
-              </h3>
-            </div>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-float border border-black/[0.06] space-y-4 overscroll-contain select-text"
+            >
+              <div className="flex items-center gap-2 text-ink-900">
+                <ShieldCheck className="h-5 w-5 text-accent" />
+                <h3 className="text-base font-serif font-bold">
+                  Confirm Email Dispatch
+                </h3>
+              </div>
 
-            <p className="text-xs text-ink-600 leading-relaxed">
-              You are authorizing transmission to <strong>{thread.participants?.[0]?.email || 'recipient'}</strong>.
-              <br />
-              <span className="text-[11px] text-amber-800 block mt-3 p-3 rounded-xl bg-amber-50/80 border border-amber-200/70">
-                Safety gate active: Prototype simulates transmission and records audit in Activity Log.
-              </span>
-            </p>
+              <p className="text-xs text-ink-600 leading-relaxed">
+                You are authorizing transmission to <strong>{thread.participants?.[0]?.email || 'recipient'}</strong>.
+                <br />
+                <span className="text-[11px] text-amber-800 block mt-3 p-3 rounded-xl bg-amber-50/80 border border-amber-200/70">
+                  Safety gate active: Prototype simulates transmission, moves thread to Waiting on Others, and lets you Undo anytime.
+                </span>
+              </p>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={() => setShowConfirmSend(false)}
-                className="px-4 py-2 rounded-full text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-100 transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSendNow}
-                className="px-5 py-2 rounded-full bg-ink-900 text-white text-xs font-semibold hover:bg-ink-800 transition cursor-pointer shadow-soft active:scale-95"
-              >
-                Confirm Dispatch
-              </button>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  onClick={() => setShowConfirmSend(false)}
+                  className="px-4 py-2 rounded-full text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-100 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSendNow}
+                  className="px-5 py-2 rounded-full bg-ink-900 text-white text-xs font-semibold hover:bg-ink-800 transition cursor-pointer shadow-soft active:scale-95"
+                >
+                  Confirm &amp; Send
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

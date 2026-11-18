@@ -8,6 +8,9 @@ import {
   overrideLabel,
   clientDecision,
   getTodaySummary,
+  composeEmail,
+  saveThreadDraft,
+  sendThreadReply,
 } from '../controllers/threadController.js';
 import {
   getPlaybook,
@@ -42,11 +45,23 @@ const OverrideLabelBodySchema = z.object({
 });
 
 const ClientDecisionBodySchema = z.object({
-  action: z.enum(['approve', 'reply_direct', 'hand_to_assistant', 'snooze', 'handled']),
+  action: z.enum(['approve', 'reply_direct', 'hand_to_assistant', 'snooze', 'handled', 'undo']),
   note: z.string().optional(),
   draftId: z.string().optional(),
   customText: z.string().optional(),
   duration: z.enum(['4h', 'tomorrow', 'next_week']).optional(),
+  previousState: z.record(z.any()).optional(),
+});
+
+const ThreadDraftBodySchema = z.object({
+  subject: z.string().trim().max(240).optional(),
+  bodyText: z.string().trim().max(15000).optional().default(''),
+  status: z.enum(['draft', 'pending_client', 'approved']).optional().default('draft'),
+});
+
+const ThreadSendBodySchema = z.object({
+  subject: z.string().trim().max(240).optional(),
+  bodyText: z.string().trim().min(1, 'Reply body cannot be empty').max(15000),
 });
 
 const PlaybookBodySchema = z.object({
@@ -77,8 +92,19 @@ const SaveDraftBodySchema = z.object({
 router.get('/assistant/today', authRequired, roleRequired(['assistant']), getTodaySummary);
 router.get('/today', authRequired, roleRequired(['assistant']), getTodaySummary);
 
+const ComposeEmailBodySchema = z.object({
+  to: z.string().trim().email('Please enter a valid recipient email address'),
+  toName: z.string().trim().max(120).optional().default(''),
+  cc: z.string().trim().max(500).optional().default(''),
+  subject: z.string().trim().min(1, 'Subject is required').max(240),
+  bodyText: z.string().trim().min(1, 'Message body cannot be empty').max(15000),
+  clientId: z.string().optional(),
+  mode: z.enum(['send', 'draft', 'request_approval']).optional().default('send'),
+});
+
 // Threads (Shared reads, role-governed actions)
 router.get('/threads', authRequired, validate(GetThreadsQuerySchema, 'query'), getThreads);
+router.post('/threads/compose', authRequired, validate(ComposeEmailBodySchema), composeEmail);
 router.get('/threads/:id', authRequired, validate(IdParamSchema, 'params'), getThreadById);
 router.patch('/threads/:id', authRequired, validate(IdParamSchema, 'params'), updateThread);
 
@@ -105,6 +131,22 @@ router.post(
   roleRequired(['assistant']),
   validate(IdParamSchema, 'params'),
   archiveThread
+);
+router.post(
+  '/threads/:id/draft',
+  authRequired,
+  roleRequired(['assistant']),
+  validate(IdParamSchema, 'params'),
+  validate(ThreadDraftBodySchema),
+  saveThreadDraft
+);
+router.post(
+  '/threads/:id/send',
+  authRequired,
+  roleRequired(['assistant']),
+  validate(IdParamSchema, 'params'),
+  validate(ThreadSendBodySchema),
+  sendThreadReply
 );
 
 // Client-only: decision actions from queue
