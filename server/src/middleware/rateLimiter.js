@@ -1,8 +1,9 @@
 import rateLimit from 'express-rate-limit';
+import { env } from '../config/env.js';
 
 export const apiRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // limit each IP to 300 requests per windowMs
+  max: process.env.NODE_ENV === 'production' && !env.DEMO_MODE ? 300 : 5000, // relaxed in demo/dev
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -16,7 +17,7 @@ export const apiRateLimiter = rateLimit({
 
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 60, // allow 60 login/signup attempts per 15 mins
+  max: process.env.NODE_ENV === 'production' && !env.DEMO_MODE ? 60 : 500, // allow 500 attempts in demo/dev
   standardHeaders: true,
   legacyHeaders: false,
   message: {

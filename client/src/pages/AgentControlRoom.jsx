@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import AccountMenu from '../components/AccountMenu.jsx';
 import { DemoWorkspaceBanner } from '../components/DemoWorkspaceBanner.jsx';
+import { AgentVsWorkflowPopover } from '../components/AgentVsWorkflowPopover.jsx';
+import { AgentTraceViewer } from '../components/AgentTraceViewer.jsx';
 import {
   Bot,
   Sparkles,
@@ -66,6 +68,26 @@ export function AgentControlRoom() {
   const [agentFilter, setAgentFilter] = useState('all');
   const [outcomeFilter, setOutcomeFilter] = useState('all');
   const [agentStatus, setAgentStatus] = useState({ isRunning: true, lastRunAt: new Date(), enabled: true });
+  const [expandedTraceRunId, setExpandedTraceRunId] = useState(null);
+  const [rerunningLiveThreadId, setRerunningLiveThreadId] = useState(null);
+
+  async function handleRerunLive(threadId) {
+    if (!threadId) return;
+    setRerunningLiveThreadId(threadId);
+    try {
+      const res = await api.post(`/agents/threads/${threadId}/rerun-live`);
+      if (res.ok) {
+        toast.success(`Re-ran live closed-loop agents (${res.data?.runsCount || 0} actions generated)`);
+        await loadData();
+      } else {
+        toast.error(res.error?.message || 'Failed to re-run live agents');
+      }
+    } catch (err) {
+      toast.error('Failed to re-run live agents: ' + err.message);
+    } finally {
+      setRerunningLiveThreadId(null);
+    }
+  }
 
   useEffect(() => {
     loadData();
@@ -363,11 +385,14 @@ export function AgentControlRoom() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-lg font-serif font-bold text-ink-900">
-                Specialized Agents
-              </h3>
+              <div className="flex items-center gap-2.5">
+                <h3 className="text-lg font-serif font-bold text-ink-900">
+                  Specialized Agents & Workflows
+                </h3>
+                <AgentVsWorkflowPopover />
+              </div>
               <p className="text-xs text-ink-500">
-                Independent autonomous modules. Configure per-client autonomy (Off / Propose / Auto).
+                Reasoning agents where judgment is needed; fixed workflows and safety checks where consistency matters.
               </p>
             </div>
 
@@ -427,10 +452,32 @@ export function AgentControlRoom() {
                           <Icon className="h-5 w-5" />
                         </div>
                         <div>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                             <h4 className="text-sm font-serif font-bold text-ink-900 tracking-tight group-hover:text-accent transition-colors">
                               {agent.name}
                             </h4>
+                            <span
+                              className={`text-[9px] font-mono px-2 py-0.5 rounded-full border font-bold ${
+                                agent.id === 'guardian'
+                                  ? 'bg-violet-50 text-violet-800 border-violet-200'
+                                  : agent.kind === 'agent'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                  : 'bg-ink-100 text-ink-700 border-ink-200'
+                              }`}
+                              title={
+                                agent.id === 'guardian'
+                                  ? 'Fixed rule safety check'
+                                  : agent.kind === 'agent'
+                                  ? 'Reasons, uses tools, loops, with limits'
+                                  : 'Fixed steps, deterministic'
+                              }
+                            >
+                              {agent.id === 'guardian'
+                                ? 'Safety Check'
+                                : agent.kind === 'agent'
+                                ? 'Agent'
+                                : 'Workflow'}
+                            </span>
                             {isFiltered && (
                               <span className="text-[10px] bg-accent/10 text-accent font-semibold px-1.5 py-0.2 rounded-full font-mono">
                                 active filter
@@ -438,7 +485,7 @@ export function AgentControlRoom() {
                             )}
                           </div>
                           <span className="text-[10px] text-ink-400 block font-mono group-hover:text-ink-600 transition-colors">
-                            id: {agent.id} · click to filter feed
+                            {agent.kind === 'agent' ? 'Iterative closed loop' : 'Fixed linear rules'} · click to filter feed
                           </span>
                         </div>
                       </button>
@@ -466,6 +513,35 @@ export function AgentControlRoom() {
                     <p className="text-xs text-ink-600 leading-relaxed min-h-[36px]">
                       {agent.description}
                     </p>
+
+                    {/* Execution Limits & Safety Guarantee */}
+                    <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-black/[0.05] space-y-1.5 text-[11px]">
+                      <div className="flex items-center justify-between text-ink-600">
+                        <span className="font-medium text-ink-400">Step Limit:</span>
+                        <span className="font-mono text-ink-800 font-semibold">
+                          {agent.limits?.maxSteps ? `${agent.limits.maxSteps} max steps` : '1 step (deterministic)'}
+                        </span>
+                      </div>
+                      <div className="flex items-start justify-between gap-2 text-ink-600">
+                        <span className="font-medium text-ink-400 flex-shrink-0">Permitted Tools:</span>
+                        <span
+                          className="font-mono text-right text-ink-700 text-[10px] truncate max-w-[170px]"
+                          title={agent.limits?.tools?.join(', ') || 'None (fixed rules)'}
+                        >
+                          {agent.limits?.tools?.length
+                            ? `${agent.limits.tools.length} tools (${agent.limits.tools.slice(0, 2).join(', ')}...)`
+                            : 'None (fixed rules)'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between pt-1 border-t border-black/[0.04]">
+                        <span className="inline-flex items-center gap-1 font-mono text-[9px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                          <Check className="h-2.5 w-2.5" /> Never sends email
+                        </span>
+                        <span className="font-mono text-[10px] text-ink-500 font-semibold">
+                          {agent.stats?.total || 0} runs · {agent.stats?.escalated || 0} escalations
+                        </span>
+                      </div>
+                    </div>
 
                     {/* Autonomy Level Segmented Control */}
                     <div className="space-y-1">
@@ -620,16 +696,32 @@ export function AgentControlRoom() {
                         <Icon className="h-4 w-4" />
                       </div>
 
-                      <div className="space-y-0.5">
+                      <div className="space-y-1 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs font-serif font-bold text-ink-900 capitalize">
-                            {run.agentId} Agent
+                            {run.agentId.replace('_', ' ')} Agent
                           </span>
                           <span
                             className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize tracking-wider ${outcomeCls}`}
                           >
                             {run.outcome.replace('_', ' ')}
                           </span>
+                          {run.kind && (
+                            <span
+                              className={`text-[9px] font-mono px-2 py-0.5 rounded border ${
+                                run.kind === 'agent'
+                                  ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                  : 'bg-ink-100 text-ink-600 border-ink-200'
+                              }`}
+                            >
+                              {run.kind === 'agent' ? 'Closed-Loop' : 'Workflow'}
+                            </span>
+                          )}
+                          {run.recordedSample && (
+                            <span className="text-[9px] font-mono bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200 font-semibold">
+                              Recorded Sample Run
+                            </span>
+                          )}
                           {run.trigger && (
                             <span className="text-[10px] font-mono text-ink-400">
                               via {run.trigger}
@@ -650,11 +742,38 @@ export function AgentControlRoom() {
                         <p className="text-xs text-ink-700 leading-normal">
                           {run.summary}
                         </p>
+
+                        {/* Interactive Agent Trace Viewer */}
+                        {run.steps && run.steps.length > 0 && (
+                          <div className="pt-2">
+                            <AgentTraceViewer
+                              run={run}
+                              onRerunSuccess={() => loadData()}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    {/* Right side: Thread link, Time, Undo button */}
-                    <div className="flex items-center gap-3 self-end sm:self-auto flex-shrink-0">
+                    {/* Right side: Re-run live, Thread link, Time, Undo button */}
+                    <div className="flex items-center gap-2 self-end sm:self-auto flex-shrink-0 flex-wrap">
+                      {run.threadId && (
+                        <button
+                          type="button"
+                          onClick={() => handleRerunLive(run.threadId)}
+                          disabled={rerunningLiveThreadId === run.threadId}
+                          className="px-2.5 py-1 rounded-full border border-black/[0.08] hover:bg-ink-100 text-xs font-semibold text-accent flex items-center gap-1 transition active:scale-95 cursor-pointer disabled:opacity-50"
+                          title="Re-run live closed-loop agents on this thread"
+                        >
+                          <RefreshCw
+                            className={`h-3 w-3 ${
+                              rerunningLiveThreadId === run.threadId ? 'animate-spin' : ''
+                            }`}
+                          />
+                          <span>Re-run Live</span>
+                        </button>
+                      )}
+
                       {run.threadId && (
                         <button
                           onClick={() => navigate(`/assistant?threadId=${run.threadId}`)}

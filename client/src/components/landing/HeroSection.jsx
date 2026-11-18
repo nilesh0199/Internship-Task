@@ -289,6 +289,14 @@ export default function HeroSection() {
             {!user && <ArrowRight className="h-4 w-4" />}
           </button>
 
+          <button
+            onClick={() => handleDemoLaunch('client')}
+            disabled={!!loadingRole}
+            className="min-h-[44px] px-6 py-3 rounded-full bg-white hover:bg-[#FDF2E9] border border-amber-300/80 text-ink-900 hover:text-accent text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-2xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          >
+            <span>{loadingRole === 'client' ? 'Booting Priya...' : 'Try Demo as Client'}</span>
+          </button>
+
           {!user && (
             <button
               onClick={() => navigate('/login')}

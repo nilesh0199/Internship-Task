@@ -7,7 +7,6 @@ import { Onboarding } from '../pages/Onboarding.jsx';
 import { AssistantDashboard } from '../pages/AssistantDashboard.jsx';
 import { ClientQueue } from '../pages/ClientQueue.jsx';
 import { AccountsPage } from '../pages/AccountsPage.jsx';
-import { PrototypeHelpPopover } from '../components/PrototypeHelpPopover.jsx';
 import { Landing } from '../pages/Landing.jsx';
 import { AgentControlRoom } from '../pages/AgentControlRoom.jsx';
 import { InviteAcceptPage } from '../pages/InviteAcceptPage.jsx';
@@ -64,26 +63,6 @@ function RootRoute() {
     );
   }
   return <Landing />;
-}
-
-function FloatingControls() {
-  const { user } = useAuth();
-  const location = useLocation();
-
-  if (!user) {
-    return null;
-  }
-
-  // Keep PrototypeHelpPopover on app pages, not on landing page or public auth pages
-  const isPublicPage =
-    ['/', '/login', '/signup', '/forgot-password'].includes(location.pathname) ||
-    location.pathname.startsWith('/invite');
-
-  if (isPublicPage) {
-    return null;
-  }
-
-  return <PrototypeHelpPopover />;
 }
 
 export function AppRoutes() {
@@ -162,7 +141,6 @@ export function AppRoutes() {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <FloatingControls />
       </AuthProvider>
     </BrowserRouter>
   );

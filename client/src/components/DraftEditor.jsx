@@ -34,14 +34,24 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
     }
   }, [existingDraft]);
 
-  async function handleGenerateAIDraft() {
+  async function handleGenerateAIDraft(tone = 'direct') {
     setLoadingAI(true);
     try {
-      const res = await api.post(`/ai/generate-draft/${thread._id}`, {});
+      const res = await api.post(`/ai/generate-draft/${thread._id}`, { tone });
       if (res.ok && res.data) {
         setBodyText(res.data.bodyText);
         setSubject(res.data.subject || `RE: ${thread.subject}`);
-        toast.success('Generated AI executive response draft');
+        const meta = res.data.aiMeta;
+        if (meta?.byokError) {
+          toast.warning(`API key fallback (${meta.byokError.code}): ${meta.byokError.message}`, {
+            description: 'Used safe template draft instead. Check Settings → AI Provider & API Key.',
+            duration: 6000,
+          });
+        } else if (meta?.provider && meta.provider !== 'template') {
+          toast.success(`Generated ${tone} draft via ${meta.provider} (${meta.model})`);
+        } else {
+          toast.success(`Generated ${tone} AI response draft`);
+        }
         onDraftUpdated?.(res.data);
       }
     } catch (err) {
@@ -134,14 +144,33 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
           )}
         </div>
 
-        <button
-          onClick={handleGenerateAIDraft}
-          disabled={loadingAI}
-          className="px-3 py-1.5 rounded-full bg-[#F0FDFA] hover:bg-[#CCFBF1] text-label-assistant border border-label-assistant/20 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
-        >
-          <Sparkles className={`h-3.5 w-3.5 ${loadingAI ? 'animate-spin' : ''}`} />
-          <span>{loadingAI ? 'Drafting...' : 'Generate with AI'}</span>
-        </button>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[10px] text-ink-400 font-mono hidden sm:inline">Tone:</span>
+          {[
+            { id: 'direct', label: 'Direct', icon: '⚡' },
+            { id: 'warm', label: 'Warm', icon: '🤝' },
+            { id: 'formal', label: 'Formal', icon: '⚖️' },
+            { id: 'decline', label: 'Decline', icon: '🚫' },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => handleGenerateAIDraft(t.id)}
+              disabled={loadingAI}
+              className="px-2 py-1 rounded-lg bg-ink-50 hover:bg-ink-100 text-ink-700 text-[10px] font-medium transition cursor-pointer border border-black/5 disabled:opacity-50"
+              title={`Draft in ${t.label} tone`}
+            >
+              <span>{t.icon}</span> <span className="ml-0.5">{t.label}</span>
+            </button>
+          ))}
+          <button
+            onClick={() => handleGenerateAIDraft('direct')}
+            disabled={loadingAI}
+            className="px-3 py-1.5 rounded-full bg-[#F0FDFA] hover:bg-[#CCFBF1] text-label-assistant border border-label-assistant/20 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-50 ml-1"
+          >
+            <Sparkles className={`h-3.5 w-3.5 ${loadingAI ? 'animate-spin' : ''}`} />
+            <span>{loadingAI ? 'Drafting...' : 'AI Draft'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Editor Inputs */}

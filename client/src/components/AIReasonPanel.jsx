@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LabelBadge } from './LabelBadge.jsx';
 import { ConfidenceDots } from './ConfidenceDots.jsx';
+import { AgentTraceViewer } from './AgentTraceViewer.jsx';
 import {
   Sparkles,
   Quote,
@@ -310,6 +311,7 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
               notesApplied: r.notesApplied,
               canUndo: r.undo && !r.undoneAt,
               isUndone: !!r.undoneAt,
+              rawRun: r,
             })),
             ...timeline.map((evt) => ({
               id: evt._id,
@@ -324,7 +326,7 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
             .map((item) => {
               if (item.type === 'agent_run') {
                 return (
-                  <div key={item.id} className="relative pl-3 text-xs space-y-1">
+                  <div key={item.id} className="relative pl-3 text-xs space-y-1.5">
                     <div className="absolute -left-[17px] top-1.5 h-2 w-2 rounded-full bg-accent ring-4 ring-[#FAF8F5]" />
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 font-semibold text-ink-900 flex-wrap">
@@ -333,6 +335,11 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
                         <span className="text-[10px] px-1.5 py-0.2 rounded font-mono font-normal uppercase bg-ink-100 text-ink-600">
                           {item.outcome.replace('_', ' ')}
                         </span>
+                        {item.rawRun?.recordedSample && (
+                          <span className="text-[9px] font-mono bg-purple-50 text-purple-700 px-1.5 py-0.2 rounded border border-purple-200">
+                            Sample
+                          </span>
+                        )}
                         {item.notesApplied && (
                           <span className="text-[10px] text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded font-mono border border-emerald-200/60">
                             {item.notesApplied}
@@ -353,6 +360,20 @@ export function AIReasonPanel({ thread, timeline = [], onThreadUpdated, onOpenPl
                       )}
                     </div>
                     <p className="text-[11px] text-ink-600 leading-normal">{item.summary}</p>
+                    
+                    {/* Embedded Agent Trace Viewer */}
+                    {item.rawRun?.steps && item.rawRun.steps.length > 0 && (
+                      <div className="pt-1">
+                        <AgentTraceViewer
+                          run={item.rawRun}
+                          onRerunSuccess={() => {
+                            loadAgentRuns();
+                            onThreadUpdated?.();
+                          }}
+                        />
+                      </div>
+                    )}
+
                     <span className="text-[10px] text-ink-400 block font-mono">
                       {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>

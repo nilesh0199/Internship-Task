@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { api } from '../lib/api.js';
 import Avatar from './Avatar.jsx';
 import {
@@ -121,10 +122,11 @@ export function ClientProfileModal({ isOpen, onClose, onClientUpdated, clientId 
 
   async function handleRevokeInvite() {
     try {
-      await api.post('/auth/revoke-invite', {});
+      await api.post('/auth/revoke-invite', { clientId });
       setInviteStatus('revoked');
       setGeneratedInviteUrl(null);
       toast.info('Client invitation revoked');
+      onClientUpdated?.();
     } catch (err) {
       toast.error('Failed to revoke invite: ' + (err.message || 'Unknown error'));
     }
@@ -138,14 +140,14 @@ export function ClientProfileModal({ isOpen, onClose, onClientUpdated, clientId 
     setTimeout(() => setCopied(false), 3000);
   }
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <div
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overscroll-contain select-none"
+      className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overscroll-contain select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -394,6 +396,7 @@ export function ClientProfileModal({ isOpen, onClose, onClientUpdated, clientId 
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

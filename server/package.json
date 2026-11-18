@@ -6,7 +6,8 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "build": "node -e \"console.log('Server build complete')\"",
-    "test": "node --test test/agents.test.js test/auth.test.js test/multi_client.test.js",
+    "test": "node --test test/agent_runtime.test.js test/agents.test.js test/auth.test.js test/multi_client.test.js test/byok.test.js",
+    "eval": "node eval/runEval.js",
     "seed": "node src/seed/index.js"
   },
   "dependencies": {

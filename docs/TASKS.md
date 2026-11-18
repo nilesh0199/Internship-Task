@@ -104,7 +104,7 @@
 
 ## Phase 8: Deployment, Demo Script Verification & Final Delivery `[M]`
 - [x] **8.1**: Configure `render.yaml` for backend deployment to Render. `[M]`
-- [x] **8.2**: Configure Vercel build settings for client deployment (`/client`). `[M]`
+- [x] **8.2**: Configure production build settings for single-service deployment. `[M]`
 - [x] **8.3**: Rehearse 3-minute demo script against `/docs/DEMO_SCRIPT.md` with simulated message injector. `[M]`
 - [x] **8.4**: Update root `README.md` with complete setup instructions, env var checklist, and demo instructions. `[M]`
 
@@ -112,7 +112,7 @@
 
 ## Phase 9: Daybook Mail Upgrade, Connectors, Security & Landing Page `[M]`
 - [x] **9.1**: Rebrand entire repo from ReplyRight to Daybook Mail ("A daybook for your inbox"), add SVG book favicon, replace hotlinked images with local initials Avatar component, and convert absolute file links to relative. `[M]`
-- [x] **9.2**: Fix deployment architecture: configure client API base with Vercel edge proxy rewrite (`/api/:path*`), implement `COOKIE_SAMESITE` (lax/none), implement storage-aware `/api/health` and lightweight `/healthz`, and enforce production secret check. `[M]`
+- [x] **9.2**: Fix deployment architecture: configure client API base for unified same-origin serving, implement `COOKIE_SAMESITE` (lax), implement storage-aware `/api/health` and lightweight `/healthz`, and enforce production secret check. `[M]`
 - [x] **9.3**: Security & Multi-tenant isolation: enforce `roleRequired` guards across all routes (assistant vs client vs shared), scope all queries/mutations by `req.user.orgId`, block registration with demo emails, implement `purgeAccountData`, and audit zero email body/token logging. `[M]`
 - [x] **9.4**: Provider connectors & Shared ingestion: build `server/src/services/ingest.js` with batch concurrency, simplify token encryption to refresh tokens, implement robust Gmail (base64/multipart, auto-client) and Outlook (Graph `/me/messages`) normalization, add account source chips & filters, and handle missing credentials gracefully in UI. `[M]`
 - [x] **9.5**: Pinterest-inspired editorial landing page: build warm, minimal landing page with floating drifting email cards, interactive triage reasoning playground, feature showcase, and suppress floating role controls on `/`. `[M]`
@@ -157,6 +157,15 @@
 - [x] **13.4**: Responsive Client View: Tablet (768px–1023px) 2-pane collapsible layout with slide-over drawer; Mobile (<768px) single column with full-width rows and sticky bottom action bar. `[M]`
 - [x] **13.5**: Toast Placement & Polish: toasts moved to `bottom-right` on desktop and `bottom-center` on mobile, capped at 3 visible, short duration (3.5s), avoiding header and user account menu. `[M]`
 - [x] **13.6**: Comprehensive Test Suite: 29 out of 29 automated tests passing across `agents.test.js`, `auth.test.js`, and `multi_client.test.js` covering memory injection sanitization, Guardian note invariance, disabled memory exclusion, background scheduler client locking, and login role mismatch handling. `[M]`
+
+---
+
+## Phase 14: Closed-Loop Agent Runtime, Honest Trace Viewer & Benchmark Evaluation Harness `[M]`
+- [x] **14.1**: Closed-Loop Agent Runtime (`server/src/agents/runtime/`): implemented `AgentRuntime.js` running strict reason $\to$ act $\to$ observe $\to$ decide loops with strict Zod JSON Action Protocol schema, repair prompt retries, tool registry (18 domain tools with observation truncation to 1500 chars and strict zero-send tool invariant), and hard stop conditions (maxSteps=5, 20s timeout, loop detection, daily per-client cap `AGENT_DAILY_RUN_CAP=25`). Upgraded `TriageInvestigator`, `SchedulingAgent`, and `DraftingAgent` to true agents (`kind: 'agent'`); kept `FollowUpAgent` and `DigestAgent` as deterministic workflows (`kind: 'workflow'`); kept `GuardianAgent` as a 100% deterministic code safety check. `[M]`
+- [x] **14.2**: Honest Badging & Agent Trace Viewer: implemented `AgentVsWorkflowPopover.jsx` ("What's the difference?") and honest badges ("Agent", "Workflow", "Safety Check") in Control Room and per-client Agents tab. Updated landing page copy to "AI agents where judgment is needed. Fixed checks where safety matters." Built `AgentTraceViewer.jsx` displaying numbered turns, thought summaries, tool calls with formatted args, observations, stop reason badges, usage metrics, recorded sample tags, and "Re-run live" with graceful workflow fallback. Embedded traces in Thread Detail, Control Room, and Assistant Today overnight feed. Added prominent escalation finding callouts ("Agent couldn't decide · Handed to Maya for human judgment") in "Needs You Now". `[M]`
+- [x] **14.3**: Honest Benchmark Evaluation Harness (`server/eval/`): created `dataset.json` (38 synthetic labeled threads across 4 categories) and `runEval.js` (`npm run eval --prefix server`), computing accuracy, escalation rates, average steps, latency, and full confusion matrices. Includes honest benchmark disclaimer and automatically writes `docs/EVAL_RESULTS.md`. `[M]`
+- [x] **14.4**: Documentation & Safety Architecture: comprehensively updated `docs/AGENTS_DESIGN.md` (agent vs workflow definition, component matrix, "Why Guardian is deliberately not an LLM agent", "How the agents stay safe"), `docs/SIMULATED.md` (pre-recorded sample traces and live re-run behavior), `docs/DEMO_SCRIPT.md` (45s spotlight on ambiguous thread, agent trace, escalation, Guardian reversal, 1-click undo), `docs/PRODUCT.md`, and `README.md`. `[M]`
+- [x] **14.5**: Comprehensive Test Suite: 43 out of 43 automated tests passing across 4 test suites (`agent_runtime.test.js`, `agents.test.js`, `auth.test.js`, `multi_client.test.js`) verifying step limits, loop detection, timeouts, repair retries, allowlists, zero-send tool absence, tenant isolation, prompt injection defense, daily cap, investigator escalation, Guardian override, cache prevention, and sample traces. `[M]`
 
 ---
 

@@ -107,14 +107,26 @@ Before beginning the walkthrough, here is the transparent breakdown of simulated
 
 ---
 
-### Scene 5B: The Agent Control Room & Zero-Trust Safety (2:15 – 2:45)
+### Scene 5B: The Agent Control Room & Closed-Loop Agent Traces (2:15 – 3:00)
 - **Visual**: In Maya's workspace (Window A), click **"Agent Control Room"** (`/agents`).
-- **Visual**: Show the top funnel strip: *"40 emails in. 24 handled by agents. 9 need you (Maya). 7 need Priya."*
-- **Action**: Highlight the 6 specialized agent cards (Triage, Scheduling, Follow-up, Drafting, Digest, Guardian).
-- **Action**: Toggle an agent's autonomy level between *Off*, *Propose*, and *Auto*.
-- **Action**: Scroll to the Live Activity Feed and point out a Guardian reversal entry: *"Guardian reversed: Auto-file blocked (Sender on VIP list)"*. Click **"Undo"** on any auto-handled action to demonstrate 1-click reversibility.
+- **Visual**: Show the top funnel strip: *"40 emails in · 24 handled by agents · 9 need Maya · 7 need Priya"*.
+- **Action**: Highlight the honest badges on each card:
+  - **Agent** (Emerald badge: closed-loop reason $\to$ act $\to$ observe $\to$ decide loop with tools and stop conditions): *Triage Investigator*, *Scheduling Agent*, *Drafting Agent*.
+  - **Workflow** (Slate badge: fixed deterministic sequence): *Follow-up Workflow*, *Digest Workflow*.
+  - **Safety Check** (Violet badge: 100% deterministic code guardrail): *Guardian Safety Check*.
+- **Action**: Click the **"What's the difference?"** popover button to explain the architectural distinction: an agent reasons, calls tools in a loop, and stops on limits; a workflow follows predefined linear steps.
+- **Action (45s Spotlight on Ambiguous Thread & Agent Trace)**:
+  1. Scroll down to the Live Activity Feed or open an ambiguous thread (`th_13` or `th_34`).
+  2. Click **"Agent Trace (3 steps)"** to expand the multi-step execution.
+  3. Show the sequential turns:
+     - *Turn 1*: Thought summary: *"Evaluating routing ambiguity; checking sender history and VIP status"* $\to$ Tool: `get_sender_history(sender: "mvance@enterprisecloud.com")` $\to$ Observation: *"Sender has 2 previous threads regarding enterprise contract terms."*
+     - *Turn 2*: Thought summary: *"Checking client playbook delegation thresholds and risk keywords"* $\to$ Tool: `check_risk_keywords(text: "discount amendment, $600k")` $\to$ Observation: *"Detected $600k contract value exceeding $1k assistant delegation limit."*
+     - *Turn 3*: Thought summary: *"Confidence 0.58 below 0.70 threshold; escalating to human review"* $\to$ Final: `outcome: "escalated"` $\to$ Stop reason: `goal_reached` $\to$ Usage: `3 steps · 2 tools · 142ms`.
+  4. Point out the honest badge: `Recorded Sample Run` (or click **"Re-run live"** to demonstrate live execution or graceful fallback to workflow if offline).
+  5. Point out a Guardian reversal entry: *"Guardian reversed: Auto-file blocked (Detected $14,500 wire routing change)"*.
+  6. Click **"Undo"** on any auto-handled action to demonstrate instant 1-click reversibility.
 - **Voice-Over**:
-  > *"Behind the scenes, inbox management isn't handled by a black box—it's run by a collective of six specialized agents. Here in the Agent Control Room, Maya oversees the team: Triage auto-files noise, Scheduling flags calendar overlaps and proposes conflict-free slots, Follow-up drafts check-ins on stale waiting threads, and Drafting prepares context-aware replies. But the crown jewel is the Guardian Agent: a zero-trust safety net that independently audits every autonomous action. If an email mentions a VIP sender, wire terms, or contract signatures, Guardian immediately reverses the auto-file and escalates it for human review. Autonomy you can actually trust."*
+  > *"Behind the scenes, inbox management isn't an opaque black box. We distinguish where AI judgment is useful from where hard safety code is required. Triage Investigator, Scheduling, and Drafting are true closed-loop agents: they run iterative reason-act-observe loops with bounded tools and stop limits. When we expand an Agent Trace, Maya sees every step: what the agent considered, which tool it called, the observation it received, and why it decided to escalate when confidence dropped below 70%. Meanwhile, Guardian is deliberately not an LLM—it is a deterministic code auditor that cannot be tricked by prompt injection. If an email mentions altered wire routing or unvetted contract terms, Guardian immediately reverses the auto-file and escalates it to Maya. Autonomy with absolute transparency and 1-click undo."*
 
 ---
 

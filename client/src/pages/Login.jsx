@@ -169,14 +169,18 @@ export function Login() {
     }
   }
 
-  async function handleDemoAssistant() {
+  async function handleDemoRole(role = 'assistant') {
     setError(null);
     setMismatchNotice(null);
     setLoading(true);
     try {
-      const res = await demoLogin('assistant');
-      const userRole = res.data?.user?.role || 'assistant';
-      toast.success('Signed in as Assistant Maya Lin');
+      const res = await demoLogin(role);
+      const userRole = res.data?.user?.role || role;
+      toast.success(
+        userRole === 'client'
+          ? 'Signed in as Founder Priya Sharma'
+          : 'Signed in as Assistant Maya Lin'
+      );
       navigate(getRedirectPath(userRole), { replace: true });
     } catch (err) {
       setError(err.message || 'Demo initialization failed');
@@ -315,23 +319,33 @@ export function Login() {
                 </button>
               </div>
 
-              {/* Demo Mode Instant Access Banner (Assistant only) */}
+              {/* Demo Mode Instant Access Banner (Assistant & Client) */}
               {demoMode && (
-                <div className="p-4 rounded-2xl bg-white border border-black/[0.06] shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-                  <div className="flex items-center gap-2.5">
+                <div className="p-4 rounded-2xl bg-white border border-black/[0.06] shadow-2xs flex flex-col gap-3 text-xs">
+                  <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                    <span className="text-ink-600">
-                      Exploring the prototype? Jump straight in as Maya Lin.
+                    <span className="text-ink-600 font-medium">
+                      Exploring the prototype? Jump straight into either demo workspace:
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleDemoAssistant}
-                    disabled={loading}
-                    className="flex-shrink-0 px-3.5 py-1.5 rounded-full bg-ink-900 text-white font-semibold hover:bg-ink-800 transition active:scale-95 cursor-pointer disabled:opacity-50"
-                  >
-                    {loading ? 'Booting...' : '1-Click Assistant Demo'}
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDemoRole('assistant')}
+                      disabled={loading}
+                      className="flex-1 min-w-[170px] px-4 py-2 rounded-full bg-ink-900 text-white font-semibold hover:bg-ink-800 transition active:scale-95 cursor-pointer disabled:opacity-50"
+                    >
+                      {loading ? 'Booting...' : '1-Click Assistant Demo'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDemoRole('client')}
+                      disabled={loading}
+                      className="flex-1 min-w-[170px] px-4 py-2 rounded-full bg-[#FDF2E9] border border-amber-300/80 text-accent font-semibold hover:bg-amber-100/70 transition active:scale-95 cursor-pointer disabled:opacity-50"
+                    >
+                      {loading ? 'Booting...' : '1-Click Client Demo'}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -477,7 +491,7 @@ export function Login() {
                   {demoMode && (
                     <button
                       type="button"
-                      onClick={handleDemoAssistant}
+                      onClick={() => handleDemoRole('assistant')}
                       disabled={loading}
                       className="w-full py-2.5 px-4 rounded-full border border-black/[0.1] bg-[#FAF8F5] hover:bg-white text-ink-800 text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                     >
@@ -494,8 +508,19 @@ export function Login() {
                   </div>
                 </div>
               ) : (
-                /* Client: NO signup, Invitation helper text and link */
+                /* Client: NO signup, 1-click Demo Decision Desk + Invitation helper */
                 <div className="space-y-3 pt-2 border-t border-black/[0.05] text-center">
+                  {demoMode && (
+                    <button
+                      type="button"
+                      onClick={() => handleDemoRole('client')}
+                      disabled={loading}
+                      className="w-full py-2.5 px-4 rounded-full border border-amber-300/80 bg-[#FDF2E9] hover:bg-amber-100/70 text-accent text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-accent" />
+                      <span>Try the demo Decision Desk (Priya Sharma)</span>
+                    </button>
+                  )}
                   <p className="text-xs text-ink-500 leading-relaxed">
                     Clients join by invitation from their assistant.
                   </p>

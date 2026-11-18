@@ -41,43 +41,88 @@ export const CHAT_TOOLS = [
   },
 ];
 
+const STOP_WORDS = new Set([
+  'show', 'me', 'find', 'search', 'get', 'list', 'all', 'any', 'the', 'a', 'an',
+  'for', 'from', 'about', 'with', 'in', 'on', 'to', 'of', 'is', 'are', 'was',
+  'were', 'what', 'which', 'who', 'where', 'email', 'emails', 'mail', 'thread',
+  'threads', 'message', 'messages', 'conversation', 'conversations', 'inbox',
+]);
+
 /**
- * Executes tool functions against the repository
+ * Executes tool functions against the repository, scoped to orgId (and optionally clientId)
+ * @param {string} toolName
+ * @param {object} args
+ * @param {{ orgId?: string, clientId?: string }} ctx
  */
-export async function executeChatTool(toolName, args = {}) {
-  const threads = await store.getThreads();
+export async function executeChatTool(toolName, args = {}, ctx = {}) {
+  const filter = {};
+  if (ctx.orgId) filter.orgId = ctx.orgId;
+  if (ctx.clientId) filter.clientId = ctx.clientId;
+  const threads = await store.getThreads(filter);
+
+  const formatThread = (t) => ({
+    _id: t._id,
+    id: t._id,
+    clientId: t.clientId || 'client_priya_001',
+    subject: t.subject,
+    sender: t.participants?.[0]?.name || t.participants?.[0]?.email || 'Unknown',
+    participants: t.participants || [],
+    label: t.currentLabel,
+    currentLabel: t.currentLabel,
+    decisionQuestion: t.aiReason?.decision?.question || null,
+    deadline: t.aiReason?.decision?.deadline || t.dueDate || null,
+    link: `[${t.subject}](/assistant/c/${t.clientId || 'client_priya_001'}/inbox?threadId=${t._id})`,
+  });
 
   if (toolName === 'search_threads') {
-    const q = (args.query || '').toLowerCase();
-    let results = threads;
+    const rawQuery = (args.query || '').toLowerCase().trim();
+    let results = threads.filter((t) => !t.isArchived);
     if (args.label) {
       results = results.filter((t) => t.currentLabel === args.label);
     }
-    if (q) {
-      results = results.filter(
-        (t) =>
-          t.subject.toLowerCase().includes(q) ||
-          t.snippet.toLowerCase().includes(q) ||
-          t.participants?.some((p) => p.name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
-      );
+    if (rawQuery) {
+      const tokens = rawQuery
+        .replace(/[^\w\s@.-]/g, ' ')
+        .split(/\s+/)
+        .filter((w) => w.length > 1 && !STOP_WORDS.has(w));
+
+      const searchTerms = tokens.length > 0 ? tokens : [rawQuery];
+
+      results = results
+        .map((t) => {
+          const haystack = [
+            t.subject || '',
+            t.snippet || '',
+            t.aiReason?.summary || '',
+            t.aiReason?.decision?.question || '',
+            ...(t.participants || []).map((p) => `${p.name || ''} ${p.email || ''}`),
+          ]
+            .join(' ')
+            .toLowerCase();
+
+          let score = 0;
+          if (haystack.includes(rawQuery)) score += 5;
+          for (const term of searchTerms) {
+            if (haystack.includes(term)) score += 2;
+          }
+          return { t, score };
+        })
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map((x) => x.t);
     }
-    return results.slice(0, args.limit || 5).map((t) => ({
-      id: t._id,
-      subject: t.subject,
-      sender: t.participants?.[0]?.name || t.participants?.[0]?.email,
-      label: t.currentLabel,
-      link: `[${t.subject}](/assistant?threadId=${t._id})`,
-    }));
+    return results.slice(0, args.limit || 6).map(formatThread);
   }
 
   if (toolName === 'get_thread') {
     const thread = await store.getThreadById(args.threadId);
     if (!thread) return { error: 'Thread not found' };
+    if (ctx.orgId && thread.orgId && thread.orgId !== ctx.orgId) {
+      return { error: 'Thread not found' };
+    }
     const messages = await store.getMessagesByThreadId(thread._id);
     return {
-      id: thread._id,
-      subject: thread.subject,
-      label: thread.currentLabel,
+      ...formatThread(thread),
       reason: thread.aiReason?.reason,
       evidence: thread.aiReason?.evidence,
       summary: thread.aiReason?.summary,
@@ -88,10 +133,10 @@ export async function executeChatTool(toolName, args = {}) {
 
   if (toolName === 'count_by_label') {
     const counts = {
-      TOTAL: threads.length,
+      TOTAL: threads.filter((t) => !t.isArchived).length,
       ASSISTANT_TO_REPLY: threads.filter((t) => t.currentLabel === 'ASSISTANT_TO_REPLY' && !t.isArchived).length,
       CLIENT_TO_REPLY: threads.filter((t) => t.currentLabel === 'CLIENT_TO_REPLY' && !t.isArchived).length,
-      NO_REPLY_NEEDED: threads.filter((t) => t.currentLabel === 'NO_REPLY_NEEDED').length,
+      NO_REPLY_NEEDED: threads.filter((t) => t.currentLabel === 'NO_REPLY_NEEDED' && !t.isArchived).length,
       NEEDS_REVIEW: threads.filter((t) => t.currentLabel === 'NEEDS_REVIEW' && !t.isArchived).length,
       WAITING: threads.filter((t) => t.isWaiting && !t.isArchived).length,
     };
@@ -100,27 +145,27 @@ export async function executeChatTool(toolName, args = {}) {
 
   if (toolName === 'list_awaiting_client') {
     const pending = threads
-      .filter((t) => t.currentLabel === 'CLIENT_TO_REPLY' && !t.isArchived)
-      .slice(0, 5)
+      .filter((t) => t.currentLabel === 'CLIENT_TO_REPLY' && !t.isArchived && t.clientStatus !== 'handled')
+      .slice(0, 6)
       .map((t) => ({
-        id: t._id,
-        subject: t.subject,
-        decisionQuestion: t.aiReason?.decision?.question || 'Review required',
+        ...formatThread(t),
+        decisionQuestion: t.aiReason?.decision?.question || t.aiReason?.summary || 'Executive review required',
         deadline: t.aiReason?.decision?.deadline || 'None stated',
-        link: `[${t.subject}](/assistant?threadId=${t._id})`,
       }));
     return pending;
   }
 
   if (toolName === 'list_deadlines') {
     const withDeadlines = threads
-      .filter((t) => t.dueDate || t.aiReason?.decision?.deadline || t.meetings?.some((m) => m.isConflict))
+      .filter(
+        (t) =>
+          !t.isArchived &&
+          (t.dueDate || t.aiReason?.decision?.deadline || t.meetings?.some((m) => m.isConflict))
+      )
+      .slice(0, 6)
       .map((t) => ({
-        id: t._id,
-        subject: t.subject,
-        deadline: t.aiReason?.decision?.deadline || t.dueDate,
+        ...formatThread(t),
         conflicts: t.meetings?.filter((m) => m.isConflict) || [],
-        link: `[${t.subject}](/assistant?threadId=${t._id})`,
       }));
     return withDeadlines;
   }

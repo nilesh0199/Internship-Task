@@ -21,6 +21,7 @@ export class FollowUpAgent extends BaseAgent {
       ],
       triggers: ['schedule_tick', 'client_action', 'manual'],
       defaultAutonomy: 'propose',
+      kind: 'workflow',
     });
   }
 

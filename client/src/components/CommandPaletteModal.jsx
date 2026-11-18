@@ -1,35 +1,93 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock.js';
 import {
-  Search,
-  MessageSquare,
   Sparkles,
   Command,
   ArrowRight,
-  ExternalLink,
   X,
   Send,
   Loader2,
+  RotateCcw,
+  AlertTriangle,
 } from 'lucide-react';
 
-export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelectThread }) {
+/**
+ * Safely renders lightweight markdown (**bold**, _italic_, and [label](url)) into React elements
+ */
+function renderFormattedLine(line, onOpenLink, keyPrefix) {
+  const tokenRegex = /(\*\*[^*]+\*\*|_[^_]+_|\[[^\]]+\]\([^)]+\))/g;
+  const parts = line.split(tokenRegex);
+
+  return parts.map((part, idx) => {
+    const key = `${keyPrefix}-${idx}`;
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const inner = part.slice(2, -2);
+      // Recursively render any inline markdown links inside bold text (e.g. **Summary of [Title](url):**)
+      if (inner.includes('[') && inner.includes('](')) {
+        return (
+          <strong key={key} className="font-semibold text-ink-900">
+            {renderFormattedLine(inner, onOpenLink, `${key}-b`)}
+          </strong>
+        );
+      }
+      return (
+        <strong key={key} className="font-semibold text-ink-900">
+          {inner}
+        </strong>
+      );
+    }
+    if (part.startsWith('_') && part.endsWith('_') && part.length > 2) {
+      return (
+        <em key={key} className="italic text-ink-700">
+          {part.slice(1, -1)}
+        </em>
+      );
+    }
+    const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (linkMatch) {
+      const [, label, href] = linkMatch;
+      return (
+        <button
+          key={key}
+          type="button"
+          onClick={() => onOpenLink(href)}
+          className="inline font-semibold text-teal-800 underline decoration-teal-400/70 underline-offset-2 hover:text-ink-900 cursor-pointer text-left"
+        >
+          {label}
+        </button>
+      );
+    }
+    return <React.Fragment key={key}>{part}</React.Fragment>;
+  });
+}
+
+export function CommandPaletteModal({
+  isOpen,
+  onClose,
+  selectedThreadId,
+  onSelectThread,
+  clientId = null,
+  clientName = null,
+}) {
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const scrollRef = useRef(null);
 
   // Lock body/background scroll while command palette is open
   useBodyScrollLock(isOpen);
 
   useEffect(() => {
+    if (!isOpen) return;
     function handleKeyDown(e) {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        if (isOpen) onClose();
+        onClose();
       }
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
         onClose();
       }
     }
@@ -37,13 +95,18 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, loading]);
+
   if (!isOpen) return null;
 
-  async function handleAsk(e) {
-    e?.preventDefault();
-    if (!query.trim() || loading) return;
+  async function submitQuery(rawText) {
+    const userQ = (rawText || '').trim();
+    if (!userQ || loading) return;
 
-    const userQ = query;
     setQuery('');
     setMessages((prev) => [...prev, { role: 'user', text: userQ }]);
     setLoading(true);
@@ -51,13 +114,22 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
     try {
       const res = await api.post('/ai/chat', {
         query: userQ,
-        threadId: selectedThreadId,
+        threadId: selectedThreadId || null,
+        clientId: clientId || null,
       });
 
       if (res.ok && res.data) {
         setMessages((prev) => [
           ...prev,
-          { role: 'assistant', text: res.data.answer, toolResult: res.data.toolResult },
+          {
+            role: 'assistant',
+            text: res.data.answer,
+            toolResult: res.data.toolResult,
+            usedAgentRuntime: Boolean(res.data.usedAgentRuntime),
+            provider: res.data.provider || null,
+            model: res.data.model || null,
+            byokError: res.data.byokError || null,
+          },
         ]);
       }
     } catch (err) {
@@ -73,9 +145,52 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
     }
   }
 
-  function handleSuggestedClick(suggested) {
-    setQuery(suggested);
+  function handleAsk(e) {
+    e?.preventDefault();
+    submitQuery(query);
   }
+
+  function handleSuggestedClick(suggested) {
+    submitQuery(suggested);
+  }
+
+  function handleJumpToThread(tId, targetClientId) {
+    if (onSelectThread && (!targetClientId || targetClientId === clientId) && clientId) {
+      onSelectThread(tId);
+    } else {
+      const destClient = targetClientId || clientId || 'client_priya_001';
+      navigate(`/assistant/c/${destClient}/inbox?threadId=${tId}`);
+    }
+    onClose();
+  }
+
+  function handleOpenMarkdownLink(href) {
+    try {
+      const url = new URL(href, window.location.origin);
+      const tId = url.searchParams.get('threadId');
+      const clientMatch = url.pathname.match(/\/assistant\/c\/([^/]+)/);
+      const targetClient = clientMatch?.[1] || clientId || 'client_priya_001';
+      if (tId) {
+        handleJumpToThread(tId, targetClient);
+        return;
+      }
+      navigate(url.pathname + url.search);
+      onClose();
+    } catch {
+      onClose();
+    }
+  }
+
+  const scopeLabel = clientName || (clientId ? 'Active Client' : 'All Clients');
+
+  const suggestions = [
+    "Show emails needing client's attention",
+    'What am I waiting on?',
+    'Summarize this conversation',
+    'Why was this assigned to client?',
+    'Upcoming deadlines and conflicts',
+    'Inbox overview & counts',
+  ];
 
   return (
     <div
@@ -85,7 +200,7 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
       onWheel={(e) => {
         if (e.target === e.currentTarget) e.preventDefault();
       }}
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-16 md:pt-20 px-4 overscroll-contain select-none"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-14 md:pt-20 px-4 overscroll-contain select-none"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -102,10 +217,24 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAsk(e)}
-            placeholder="Ask about your email or search... (e.g. 'What needs Priya's attention?')"
+            placeholder={`Ask about ${scopeLabel} or search threads... (e.g. 'Mark Suster', 'deadlines')`}
             className="w-full text-sm font-medium text-ink-900 placeholder:text-ink-400 focus:outline-none bg-transparent"
           />
+          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-ink-50 border border-black/[0.06] text-[10px] font-mono text-ink-500 flex-shrink-0">
+            {scopeLabel}
+          </span>
+          {messages.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setMessages([])}
+              className="text-ink-400 hover:text-ink-900 p-1.5 rounded-full hover:bg-ink-100 transition cursor-pointer"
+              title="Clear conversation"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </button>
+          )}
           <button
+            type="button"
             onClick={onClose}
             className="text-ink-400 hover:text-ink-900 p-1.5 rounded-full hover:bg-ink-100 transition cursor-pointer"
             title="Close (Esc)"
@@ -114,22 +243,18 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
           </button>
         </div>
 
-        {/* Suggested Queries Chips */}
+        {/* Suggested Queries Chips (1-click instant execution) */}
         <div className="px-5 py-3 bg-ink-50/60 border-b border-borderMuted/60 flex items-center gap-2 overflow-x-auto text-[11px] no-scrollbar">
           <span className="text-ink-400 font-semibold flex-shrink-0 uppercase tracking-wider text-[10px]">
-            Suggestions:
+            Ask:
           </span>
-          {[
-            "Show emails needing client's attention",
-            "What am I waiting on?",
-            "Summarize this conversation",
-            "Why was this assigned to Priya?",
-            "Upcoming deadlines and conflicts",
-          ].map((prompt, i) => (
+          {suggestions.map((prompt, i) => (
             <button
               key={i}
+              type="button"
+              disabled={loading}
               onClick={() => handleSuggestedClick(prompt)}
-              className="px-3 py-1 rounded-full bg-white hover:bg-ink-100 text-ink-700 border border-black/[0.05] shadow-2xs flex-shrink-0 transition-all cursor-pointer font-medium active:scale-95"
+              className="px-3 py-1 rounded-full bg-white hover:bg-ink-100 text-ink-700 border border-black/[0.06] shadow-2xs flex-shrink-0 transition-all cursor-pointer font-medium active:scale-95 disabled:opacity-50"
             >
               {prompt}
             </button>
@@ -137,17 +262,17 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
         </div>
 
         {/* Conversation Stream */}
-        <div className="p-5 overflow-y-auto flex-1 space-y-4 min-h-[240px]">
+        <div ref={scrollRef} className="p-5 overflow-y-auto flex-1 space-y-4 min-h-[240px]">
           {messages.length === 0 ? (
-            <div className="py-12 text-center space-y-2.5">
+            <div className="py-10 text-center space-y-2.5">
               <div className="h-12 w-12 rounded-full bg-ink-100 text-ink-400 flex items-center justify-center mx-auto">
                 <Command className="h-6 w-6" />
               </div>
               <p className="text-xs font-semibold text-ink-700">
-                Type any natural-language inquiry or click a suggested prompt above
+                Click any prompt above or ask a question about your inbox
               </p>
               <p className="text-[11px] text-ink-400 max-w-sm mx-auto leading-relaxed">
-                Powered by structured LLM tool calling over your live inbox threads, sender history, and delegation rules.
+                Searches live threads, AI reasoning, deadlines, and delegation rules. Click any matched thread to jump straight to it.
               </p>
             </div>
           ) : (
@@ -163,39 +288,71 @@ export function CommandPaletteModal({ isOpen, onClose, selectedThreadId, onSelec
                     {m.text}
                   </div>
                 ) : (
-                  <div className="rounded-2xl bg-[#F0FDFA] border border-teal-200/60 p-4 max-w-[92%] text-xs text-ink-900 space-y-3 shadow-2xs">
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-label-assistant">
-                      <Sparkles className="h-3.5 w-3.5" />
-                      <span>Daybook AI Assistant</span>
+                  <div className="rounded-2xl bg-[#F0FDFA] border border-teal-200/60 p-4 max-w-[94%] text-xs text-ink-900 space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-label-assistant">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        <span>Daybook AI Assistant</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-teal-800/70">
+                        {m.usedAgentRuntime
+                          ? m.provider
+                            ? `${m.provider} · ${m.model}`
+                            : 'Live Agent Loop'
+                          : 'Inbox Tools'}
+                      </span>
                     </div>
-                    <div className="leading-relaxed whitespace-pre-wrap">{m.text}</div>
 
-                    {/* Tool Result Structured Summary */}
+                    {m.byokError && (
+                      <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-300/80 text-[11px] text-amber-950 flex items-start gap-2">
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-700 flex-shrink-0 mt-0.5" />
+                        <div className="space-y-0.5">
+                          <div className="font-semibold">
+                            Your {m.byokError.provider || 'API'} key returned an error — answered using local Inbox Tools.
+                          </div>
+                          <div className="text-amber-900">{m.byokError.message}</div>
+                          {m.byokError.hint && <div className="text-amber-800/90">{m.byokError.hint}</div>}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="leading-relaxed space-y-1.5">
+                      {(m.text || '').split('\n').map((line, lineIdx) =>
+                        line.trim() === '' ? (
+                          <div key={lineIdx} className="h-1" />
+                        ) : (
+                          <p key={lineIdx}>
+                            {renderFormattedLine(line, handleOpenMarkdownLink, `${idx}-${lineIdx}`)}
+                          </p>
+                        )
+                      )}
+                    </div>
+
+                    {/* Tool Result Structured Clickable Cards */}
                     {m.toolResult && m.toolResult.count > 0 && (
                       <div className="p-3 bg-white/95 rounded-xl border border-teal-200/60 space-y-2 mt-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800">
                           Matched Conversations ({m.toolResult.count})
                         </span>
-                        <div className="space-y-1.5 max-h-36 overflow-y-auto">
-                          {m.toolResult.threads?.slice(0, 4).map((t) => (
-                            <div
+                        <div className="space-y-1.5 max-h-44 overflow-y-auto">
+                          {m.toolResult.threads?.slice(0, 5).map((t) => (
+                            <button
                               key={t._id}
-                              onClick={() => {
-                                onSelectThread?.(t._id);
-                                onClose();
-                              }}
-                              className="p-2 rounded-lg bg-ink-50 hover:bg-teal-50 cursor-pointer flex items-center justify-between transition"
+                              type="button"
+                              onClick={() => handleJumpToThread(t._id, t.clientId)}
+                              className="w-full text-left p-2.5 rounded-lg bg-ink-50 hover:bg-teal-50 cursor-pointer flex items-center justify-between transition"
                             >
                               <div className="truncate mr-2">
                                 <span className="font-semibold text-ink-900 block truncate">
                                   {t.subject}
                                 </span>
                                 <span className="text-[10px] text-ink-500">
-                                  {t.participants?.[0]?.name}
+                                  {t.participants?.[0]?.name || t.participants?.[0]?.email || 'Sender'}
+                                  {t.deadline ? ` · Due: ${t.deadline}` : ''}
                                 </span>
                               </div>
-                              <ArrowRight className="h-3 w-3 text-ink-400 flex-shrink-0" />
-                            </div>
+                              <ArrowRight className="h-3.5 w-3.5 text-teal-700 flex-shrink-0" />
+                            </button>
                           ))}
                         </div>
                       </div>

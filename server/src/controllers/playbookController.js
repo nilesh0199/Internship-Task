@@ -42,6 +42,58 @@ export async function updatePlaybook(req, res, next) {
   }
 }
 
+/**
+ * Updates only vipSenders and vipDomains for a client (accessible to the client for their own profile, or assistant)
+ */
+export async function updateVipContacts(req, res, next) {
+  try {
+    const targetClientId =
+      req.user?.role === 'client' ? req.user.clientId : (req.query?.clientId || req.body?.clientId);
+    const client = targetClientId
+      ? await store.getClientByOrgAndId(req.user.orgId, targetClientId)
+      : await store.getClientByOrgId(req.user.orgId);
+
+    if (!client) {
+      return res.status(404).json({ ok: false, error: { message: 'Client profile not found', code: 'NOT_FOUND' } });
+    }
+
+    const updates = {};
+    if (Array.isArray(req.body.vipSenders)) {
+      updates.vipSenders = [...new Set(req.body.vipSenders.map((s) => s.trim().toLowerCase()).filter(Boolean))];
+    }
+    if (Array.isArray(req.body.vipDomains)) {
+      updates.vipDomains = [
+        ...new Set(req.body.vipDomains.map((d) => d.trim().toLowerCase().replace(/^@/, '')).filter(Boolean)),
+      ];
+    }
+
+    const updated = await store.updatePlaybook(client._id, updates);
+
+    await store.addActivityLog({
+      orgId: req.user.orgId,
+      actorId: req.user._id,
+      actorName: req.user.name,
+      actorRole: req.user.role,
+      action: 'VIP_CONTACTS_UPDATED',
+      details: {
+        clientId: client._id,
+        vipSendersCount: updated.playbook?.vipSenders?.length || 0,
+        vipDomainsCount: updated.playbook?.vipDomains?.length || 0,
+      },
+    });
+
+    return res.status(200).json({
+      ok: true,
+      data: {
+        vipSenders: updated.playbook?.vipSenders || [],
+        vipDomains: updated.playbook?.vipDomains || [],
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function addPlaybookRule(req, res, next) {
   try {
     const { topic, disposition, description } = req.body;

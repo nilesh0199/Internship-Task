@@ -7,7 +7,7 @@ let liveFeedInterval = null;
 let injectionCount = 0;
 const MAX_DEMO_INJECTIONS = 12;
 
-const SCRIPTED_SIMULATED_EVENTS = [
+export const SCRIPTED_SIMULATED_EVENTS = [
   {
     clientId: 'client_rohan_002',
     subject: 'Carrier Rate Revision — Q4 Intermodal Lanes',

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../features/auth/AuthContext.jsx';
 import { api } from '../lib/api.js';
 import Avatar from '../components/Avatar.jsx';
 import { LabelBadge } from '../components/LabelBadge.jsx';
+import AgentTraceViewer from '../components/AgentTraceViewer.jsx';
 import {
   Calendar,
   AlertTriangle,
@@ -12,6 +14,7 @@ import {
   Clock,
   ArrowRight,
   ShieldCheck,
+  ShieldAlert,
   RotateCcw,
   Bot,
   AlertCircle,
@@ -24,9 +27,25 @@ import { toast } from 'sonner';
 
 export function AssistantTodayView({ onJumpToThread }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [undoingId, setUndoingId] = useState(null);
+  const [currentHour, setCurrentHour] = useState(() => new Date().getHours());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHour(new Date().getHours());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const greeting = useMemo(() => {
+    const name = user?.name || 'Maya Lin';
+    if (currentHour < 12) return `Good morning, ${name}.`;
+    if (currentHour < 17) return `Good afternoon, ${name}.`;
+    return `Good evening, ${name}.`;
+  }, [user, currentHour]);
 
   useEffect(() => {
     loadToday();
@@ -103,7 +122,7 @@ export function AssistantTodayView({ onJumpToThread }) {
           <span>Cross-Client Command Center</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ink-900 tracking-tight">
-          Good morning, Maya Lin.
+          {greeting}
         </h1>
         <p className="text-sm text-ink-600 font-medium">
           {data?.summarySentence || 'All client operations are synced and running.'}
@@ -124,7 +143,7 @@ export function AssistantTodayView({ onJumpToThread }) {
             return (
               <div
                 key={c._id || c.id || c.clientId || idx}
-                onClick={() => navigate(`/assistant/c/${c._id}/inbox`)}
+                onClick={() => navigate(`/assistant/c/${c.clientId || c._id || c.id}/inbox`)}
                 className="group p-5 rounded-2xl bg-white border border-black/[0.08] shadow-card hover:shadow-card-hover hover:border-black/20 transition-all cursor-pointer relative"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -284,6 +303,39 @@ export function AssistantTodayView({ onJumpToThread }) {
                   <p className="text-xs text-ink-500 line-clamp-1 truncate">
                     {t.snippet}
                   </p>
+
+                  {/* Prominent Escalation Finding Box */}
+                  {(t.currentLabel === 'NEEDS_REVIEW' ||
+                    t.urgencyReason?.toLowerCase().includes('guardian') ||
+                    t.urgencyReason?.toLowerCase().includes('review')) && (
+                    <div className="mt-3 p-3.5 rounded-xl bg-amber-50/90 border border-amber-300/80 text-xs space-y-1.5 shadow-2xs">
+                      <div className="flex items-center gap-1.5 font-bold text-amber-900 font-mono text-[11px]">
+                        <ShieldAlert className="h-3.5 w-3.5 text-amber-700 flex-shrink-0" />
+                        <span>Agent couldn't decide · Handed to Maya for human judgment</span>
+                        {t.confidence !== undefined && (
+                          <span className="text-[10px] text-amber-800 font-mono font-medium">
+                            ({Math.round(t.confidence * 100)}% confidence)
+                          </span>
+                        )}
+                      </div>
+                      {t.aiReason?.reason ? (
+                        <p className="text-ink-800 text-xs">
+                          <span className="font-semibold text-ink-900">Why escalated: </span>
+                          {t.aiReason.reason}
+                        </p>
+                      ) : (
+                        <p className="text-ink-800 text-xs">
+                          <span className="font-semibold text-ink-900">Findings: </span>
+                          Investigation completed with ambiguous confidence or safety trigger (VIP / contract / financial terms). Requires assistant sign-off.
+                        </p>
+                      )}
+                      {t.aiReason?.evidence && (
+                        <blockquote className="pl-2.5 border-l-2 border-amber-500 text-ink-700 italic text-[11px] bg-white/70 py-1 px-2.5 rounded-r">
+                          "{t.aiReason.evidence}"
+                        </blockquote>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Right: Label Badge + Action Button */}
@@ -329,37 +381,65 @@ export function AssistantTodayView({ onJumpToThread }) {
           {overnightRuns.map((run, idx) => (
             <div
               key={run._id || run.id || idx}
-              className="p-3.5 hover:bg-ink-50/50 transition-colors flex items-center justify-between gap-3 text-xs"
+              className="p-4 hover:bg-ink-50/50 transition-colors space-y-2 text-xs"
             >
-              <div className="flex items-center gap-2.5 truncate">
-                <span className="font-mono text-[10px] text-ink-400">
-                  {formatTime(run.createdAt)}
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-ink-100 text-ink-800 font-mono">
-                  {run.clientName?.split(' ')[0]}
-                </span>
-                <span className="font-semibold text-ink-900 truncate">
-                  {run.summary}
-                </span>
-                {run.notesApplied && (
-                  <span className="hidden md:inline text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 font-mono">
-                    {run.notesApplied}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 truncate flex-wrap">
+                  <span className="font-mono text-[10px] text-ink-400">
+                    {formatTime(run.createdAt)}
                   </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-ink-100 text-ink-800 font-mono">
+                    {run.clientName?.split(' ')[0]}
+                  </span>
+                  <span className="font-semibold text-ink-900 truncate">
+                    {run.summary}
+                  </span>
+                  {run.kind && (
+                    <span
+                      className={`text-[9px] font-mono px-2 py-0.5 rounded border ${
+                        run.kind === 'agent'
+                          ? 'bg-blue-50 text-blue-700 border-blue-200'
+                          : 'bg-ink-100 text-ink-600 border-ink-200'
+                      }`}
+                    >
+                      {run.kind === 'agent' ? 'Closed-Loop' : 'Workflow'}
+                    </span>
+                  )}
+                  {run.recordedSample && (
+                    <span className="text-[9px] font-mono bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200 font-semibold">
+                      Sample
+                    </span>
+                  )}
+                  {run.notesApplied && (
+                    <span className="hidden md:inline text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 font-mono">
+                      {run.notesApplied}
+                    </span>
+                  )}
+                </div>
+
+                {/* Undo action button */}
+                {run.undo && (
+                  <button
+                    type="button"
+                    disabled={undoingId === run._id}
+                    onClick={() => handleUndo(run._id)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-black/10 hover:border-black/30 bg-white text-ink-700 text-[11px] font-semibold transition active:scale-95 disabled:opacity-50 flex-shrink-0"
+                    title="Reverse this autonomous action"
+                  >
+                    <RotateCcw className={`h-3 w-3 ${undoingId === run._id ? 'animate-spin' : ''}`} />
+                    <span>Undo</span>
+                  </button>
                 )}
               </div>
 
-              {/* Undo action button */}
-              {run.undo && (
-                <button
-                  type="button"
-                  disabled={undoingId === run._id}
-                  onClick={() => handleUndo(run._id)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-black/10 hover:border-black/30 bg-white text-ink-700 text-[11px] font-semibold transition active:scale-95 disabled:opacity-50"
-                  title="Reverse this autonomous action"
-                >
-                  <RotateCcw className={`h-3 w-3 ${undoingId === run._id ? 'animate-spin' : ''}`} />
-                  <span>Undo</span>
-                </button>
+              {/* Expandable Agent Trace Viewer if steps exist */}
+              {run.steps && run.steps.length > 0 && (
+                <div className="pt-1">
+                  <AgentTraceViewer
+                    run={run}
+                    onRerunSuccess={() => loadToday()}
+                  />
+                </div>
               )}
             </div>
           ))}

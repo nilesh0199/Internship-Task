@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
+import { AgentVsWorkflowPopover } from './AgentVsWorkflowPopover.jsx';
 import {
   Layers,
   Calendar,
@@ -237,11 +238,14 @@ export function ClientAgentsTab({ clientId, clientName = 'Executive' }) {
             <Bot className="h-3.5 w-3.5" />
             <span>Agent Memory & Autonomy Controls</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-serif font-bold text-ink-900">
-            Agents for {clientName}
-          </h2>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-ink-900">
+              Agents & Workflows for {clientName}
+            </h2>
+            <AgentVsWorkflowPopover />
+          </div>
           <p className="text-xs text-ink-500 mt-0.5">
-            Shape each agent’s standing behavior, tone, and learned memory for this specific executive.
+            Configure autonomy, execution limits, and learned memory for this specific executive.
           </p>
         </div>
       </div>
@@ -269,9 +273,26 @@ export function ClientAgentsTab({ clientId, clientName = 'Executive' }) {
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="font-serif font-bold text-base text-ink-900">
-                        {agent.name}
-                      </h3>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-serif font-bold text-base text-ink-900">
+                          {agent.name}
+                        </h3>
+                        <span
+                          className={`text-[9px] font-mono px-2 py-0.5 rounded-full border font-bold ${
+                            agent.id === 'guardian'
+                              ? 'bg-violet-50 text-violet-800 border-violet-200'
+                              : agent.kind === 'agent'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              : 'bg-ink-100 text-ink-700 border-ink-200'
+                          }`}
+                        >
+                          {agent.id === 'guardian'
+                            ? 'Safety Check'
+                            : agent.kind === 'agent'
+                            ? 'Agent'
+                            : 'Workflow'}
+                        </span>
+                      </div>
                       <p className="text-xs text-ink-500 line-clamp-1">{agent.description}</p>
                     </div>
                   </div>
@@ -292,6 +313,35 @@ export function ClientAgentsTab({ clientId, clientName = 'Executive' }) {
                         {level}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                {/* Execution Limits & Never Sends Guarantee */}
+                <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-black/[0.04] space-y-1.5 text-[11px]">
+                  <div className="flex items-center justify-between text-ink-600">
+                    <span className="font-medium text-ink-400">Step Limit:</span>
+                    <span className="font-mono text-ink-800 font-semibold">
+                      {agent.limits?.maxSteps ? `${agent.limits.maxSteps} max steps` : '1 step (deterministic)'}
+                    </span>
+                  </div>
+                  <div className="flex items-start justify-between gap-2 text-ink-600">
+                    <span className="font-medium text-ink-400 flex-shrink-0">Permitted Tools:</span>
+                    <span
+                      className="font-mono text-right text-ink-700 text-[10px] truncate max-w-[200px]"
+                      title={agent.limits?.tools?.join(', ') || 'None (fixed rules)'}
+                    >
+                      {agent.limits?.tools?.length
+                        ? `${agent.limits.tools.length} tools (${agent.limits.tools.slice(0, 2).join(', ')}...)`
+                        : 'None (fixed rules)'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between pt-1 border-t border-black/[0.04]">
+                    <span className="inline-flex items-center gap-1 font-mono text-[9px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                      <Check className="h-2.5 w-2.5" /> Never sends email
+                    </span>
+                    <span className="font-mono text-[10px] text-ink-500 font-semibold">
+                      {agent.stats?.total || 0} runs · {agent.stats?.escalated || 0} escalations
+                    </span>
                   </div>
                 </div>
 

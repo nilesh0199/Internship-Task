@@ -1,35 +1,39 @@
 services:
   - type: web
-    name: daybook-server
+    name: daybook-mail
     env: node
     plan: free
     region: oregon
-    buildCommand: npm install && npm run build --workspace=server
-    startCommand: npm run start --workspace=server
-    healthCheckPath: /api/health
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 5000
-      - key: CLIENT_URL
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: SEND_ENABLED
+        value: "false"
+      - key: DEMO_MODE
+        value: "true"
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TOKEN_ENCRYPTION_KEY
         sync: false
       - key: MONGODB_URI
         sync: false
-      - key: JWT_SECRET
+      - key: CLIENT_URL
         sync: false
-      - key: TOKEN_ENCRYPTION_KEY
-        sync: false
-      - key: SEND_ENABLED
-        value: "false"
       - key: GEMINI_API_KEY
         sync: false
-      - key: GEMINI_MODEL
-        value: gemini-2.0-flash
       - key: GROQ_API_KEY
         sync: false
-      - key: GROQ_MODEL
-        value: llama-3.3-70b-versatile
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET

@@ -22,12 +22,14 @@ export class BaseAgent {
     neverDoes = [],
     triggers = [],
     defaultAutonomy = 'propose',
+    kind = 'workflow',
   }) {
     if (!id || !name) {
       throw new Error('Agent requires id and name');
     }
     this.id = id;
     this.name = name;
+    this.kind = kind; // 'agent' (closed loop) | 'workflow' (deterministic pipeline)
     this.description = description;
     this.canDo = canDo;
     this.neverDoes = neverDoes;
@@ -74,9 +76,15 @@ export class BaseAgent {
     usedLLM = false,
     fallbackUsed = false,
     durationMs = 0,
+    kind = this.kind || 'workflow',
+    steps = [],
+    stopReason = null,
+    usage = null,
+    recordedSample = false,
   }) {
     return {
       agentId: this.id,
+      kind,
       action,
       outcome,
       summary,
@@ -87,6 +95,10 @@ export class BaseAgent {
       usedLLM,
       fallbackUsed,
       durationMs,
+      steps,
+      stopReason,
+      usage,
+      recordedSample,
       startedAt: new Date(Date.now() - durationMs),
     };
   }
@@ -98,6 +110,7 @@ export class BaseAgent {
     return {
       id: this.id,
       name: this.name,
+      kind: this.kind || 'workflow',
       description: this.description,
       canDo: this.canDo,
       neverDoes: this.neverDoes,

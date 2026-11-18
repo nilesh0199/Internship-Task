@@ -4,6 +4,7 @@ import {
   updateAgentPolicy,
   getAgentRuns,
   triggerAgentRun,
+  rerunLiveAgent,
   undoAgentAction,
   getAgentSummary,
   getDailyDigest,
@@ -32,6 +33,7 @@ router.get('/summary', authRequired, roleRequired(['assistant']), getAgentSummar
 router.get('/stream', authRequired, roleRequired(['assistant']), getAgentStream);
 router.get('/runs', authRequired, roleRequired(['assistant']), getAgentRuns);
 router.post('/run', authRequired, roleRequired(['assistant']), validate(RunAgentsSchema), triggerAgentRun);
+router.post('/threads/:id/rerun-live', authRequired, roleRequired(['assistant']), rerunLiveAgent);
 router.post('/runs/:id/undo', authRequired, roleRequired(['assistant']), undoAgentAction);
 
 // Agent Memory ("Agent Notes") per Client

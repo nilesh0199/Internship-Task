@@ -3,30 +3,50 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const renderExternalUrl = (process.env.RENDER_EXTERNAL_URL || '').trim().replace(/\/+$/, '');
+const defaultClientUrl = process.env.CLIENT_URL || renderExternalUrl || 'http://localhost:5173';
+const defaultGoogleRedirectUri =
+  process.env.GOOGLE_REDIRECT_URI ||
+  (renderExternalUrl
+    ? `${renderExternalUrl}/api/auth/google/callback`
+    : 'http://localhost:5000/api/auth/google/callback');
+const defaultMicrosoftRedirectUri =
+  process.env.MICROSOFT_REDIRECT_URI ||
+  (renderExternalUrl
+    ? `${renderExternalUrl}/api/auth/microsoft/callback`
+    : 'http://localhost:5000/api/auth/microsoft/callback');
+
 const envSchema = z.object({
   PORT: z.string().default('5000').transform((val) => parseInt(val, 10)),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  CLIENT_URL: z.string().default('http://localhost:5173'),
+  CLIENT_URL: z.string().default(defaultClientUrl),
   MONGODB_URI: z.string().optional().default(''),
   JWT_SECRET: z.string().default('daybook_super_secure_jwt_secret_demo_32_characters_minimum'),
   TOKEN_ENCRYPTION_KEY: z.string().default('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'),
   SEND_ENABLED: z.string().default('false').transform((val) => val === 'true'),
   GEMINI_API_KEY: z.string().optional().default(''),
-  GEMINI_MODEL: z.string().default('gemini-2.0-flash'),
+  GEMINI_MODEL: z.string().default('gemini-3.8-flash'),
   GROQ_API_KEY: z.string().optional().default(''),
   GROQ_MODEL: z.string().default('llama-3.3-70b-versatile'),
   GOOGLE_CLIENT_ID: z.string().optional().default(''),
   GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
-  GOOGLE_REDIRECT_URI: z.string().default('http://localhost:5000/api/auth/google/callback'),
+  GOOGLE_REDIRECT_URI: z.string().default(defaultGoogleRedirectUri),
   MICROSOFT_CLIENT_ID: z.string().optional().default(''),
   MICROSOFT_CLIENT_SECRET: z.string().optional().default(''),
-  MICROSOFT_REDIRECT_URI: z.string().default('http://localhost:5000/api/auth/microsoft/callback'),
-  COOKIE_SAMESITE: z.enum(['lax', 'none', 'strict']).default(process.env.NODE_ENV === 'production' ? 'none' : 'lax'),
+  MICROSOFT_REDIRECT_URI: z.string().default(defaultMicrosoftRedirectUri),
+  COOKIE_SAMESITE: z.enum(['lax', 'none', 'strict']).default('lax'),
   DEMO_MODE: z
     .string()
     .default(process.env.NODE_ENV === 'production' ? 'false' : 'true')
     .transform((val) => val === 'true'),
   LOG_LEVEL: z.string().default('info'),
+  AGENT_MAX_STEPS: z.string().default('5').transform((val) => parseInt(val, 10)),
+  AGENT_TIMEOUT_MS: z.string().default('20000').transform((val) => parseInt(val, 10)),
+  AGENT_DAILY_RUN_CAP: z.string().default('25').transform((val) => parseInt(val, 10)),
+  ENABLE_LIVE_AGENT_LOOPS: z
+    .string()
+    .default('true')
+    .transform((val) => val === 'true'),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -58,6 +78,20 @@ if (parsed.data.NODE_ENV === 'production') {
   ) {
     throw new Error(
       '[FATAL] Production startup rejected: TOKEN_ENCRYPTION_KEY must be a unique 32-byte hex string (64 characters) for AES-256-GCM encryption.'
+    );
+  }
+
+  // Loud warning if running in production without MongoDB
+  if (!parsed.data.MONGODB_URI || parsed.data.MONGODB_URI.trim() === '') {
+    console.warn(
+      '\x1b[31m%s\x1b[0m',
+      '********************************************************************************\n' +
+      ' [LOUD WARNING] PRODUCTION RUNNING WITHOUT MONGODB_URI!\n' +
+      ' All database records (accounts, threads, drafts, agent runs, memories) are\n' +
+      ' currently stored in VOLATILE IN-MEMORY storage.\n' +
+      ' State will be completely ERASED whenever Render spins down or restarts.\n' +
+      ' Configure MONGODB_URI in your Render environment variables to enable persistence.\n' +
+      '********************************************************************************'
     );
   }
 } else {

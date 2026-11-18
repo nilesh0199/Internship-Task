@@ -329,4 +329,92 @@ describe('Multi-Client PA Architecture & Agent Notes Test Suite', () => {
     assert.equal(skippedRun.skipped, true);
     assert.equal(skippedRun.clientId, 'client_rohan_002');
   });
+
+  it('12. Assistant can create a new client with single-use invite and duplicate email returns 409', async () => {
+    const createRes = await fetch(`${baseUrl}/api/auth/clients`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${mayaToken}`,
+      },
+      body: JSON.stringify({
+        name: 'Ananya Rao',
+        email: 'ananya@meridianlabs.io',
+        title: 'Founder & CEO',
+        company: 'Meridian Labs',
+        maxAssistantApprovalUsd: 1500,
+        sendInvite: true,
+      }),
+    });
+    assert.equal(createRes.status, 201);
+    const created = await createRes.json();
+    assert.equal(created.ok, true);
+    assert.equal(created.data.client.name, 'Ananya Rao');
+    assert.equal(created.data.client.email, 'ananya@meridianlabs.io');
+    assert.equal(created.data.client.inviteStatus, 'pending');
+    assert.ok(created.data.inviteUrl.includes('/invite/'));
+
+    // Verify roster lists the new client with pending status
+    const listRes = await fetch(`${baseUrl}/api/auth/clients`, {
+      headers: { Cookie: `token=${mayaToken}` },
+    });
+    assert.equal(listRes.status, 200);
+    const listData = await listRes.json();
+    const ananya = listData.data.clients.find((c) => c.email === 'ananya@meridianlabs.io');
+    assert.ok(ananya, 'Newly created client must appear in GET /api/auth/clients');
+    assert.equal(ananya.inviteStatus, 'pending');
+
+    // Duplicate email returns 409
+    const dupRes = await fetch(`${baseUrl}/api/auth/clients`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${mayaToken}`,
+      },
+      body: JSON.stringify({
+        name: 'Ananya Duplicate',
+        email: 'ANANYA@meridianlabs.io',
+        sendInvite: true,
+      }),
+    });
+    assert.equal(dupRes.status, 409);
+
+    // Revoking Ananya's invite does NOT affect Rohan Kapoor or Priya Sharma
+    const revokeRes = await fetch(`${baseUrl}/api/auth/revoke-invite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${mayaToken}`,
+      },
+      body: JSON.stringify({ clientId: ananya._id }),
+    });
+    assert.equal(revokeRes.status, 200);
+
+    const listAfter = await (
+      await fetch(`${baseUrl}/api/auth/clients`, {
+        headers: { Cookie: `token=${mayaToken}` },
+      })
+    ).json();
+    const ananyaAfter = listAfter.data.clients.find((c) => c._id === ananya._id);
+    const rohanAfter = listAfter.data.clients.find((c) => c._id === 'client_rohan_002');
+    const priyaAfter = listAfter.data.clients.find((c) => c._id === 'client_priya_001');
+    assert.equal(ananyaAfter.inviteStatus, 'revoked');
+    assert.equal(rohanAfter.inviteStatus, 'pending', 'Rohan invite must remain untouched');
+    assert.equal(priyaAfter.inviteStatus, 'active', 'Priya active status must remain untouched');
+  });
+
+  it('13. Client role cannot create new clients (403 Forbidden)', async () => {
+    const res = await fetch(`${baseUrl}/api/auth/clients`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `token=${priyaToken}`,
+      },
+      body: JSON.stringify({
+        name: 'Unauthorized Executive',
+        email: 'unauth@example.com',
+      }),
+    });
+    assert.equal(res.status, 403);
+  });
 });

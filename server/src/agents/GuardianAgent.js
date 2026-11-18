@@ -21,6 +21,7 @@ export class GuardianAgent extends BaseAgent {
       ],
       triggers: ['ingest', 'new_message', 'schedule_tick', 'manual'],
       defaultAutonomy: 'auto',
+      kind: 'workflow',
     });
   }
 

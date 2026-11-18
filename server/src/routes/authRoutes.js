@@ -7,6 +7,7 @@ import {
   getMe,
   logout,
   getClients,
+  createClientAndInvite,
   createInvite,
   getClientProfile,
   updateClientProfile,
@@ -49,8 +50,24 @@ router.get('/status', getAuthStatus);
 router.get('/me', authRequired, getMe);
 router.post('/logout', logout);
 
+const CreateClientSchema = z.object({
+  name: z.string().trim().min(2, 'Executive full name is required').max(120),
+  email: z.string().trim().email('Please enter a valid work email'),
+  company: z.string().trim().max(120).optional().default(''),
+  title: z.string().trim().max(120).optional().default('Executive'),
+  maxAssistantApprovalUsd: z.coerce.number().min(0).max(1000000).optional().default(1000),
+  sendInvite: z.boolean().optional().default(true),
+});
+
 // Assistant Client Profile & Invite Management
 router.get('/clients', authRequired, roleRequired(['assistant']), getClients);
+router.post(
+  '/clients',
+  authRequired,
+  roleRequired(['assistant']),
+  validate(CreateClientSchema),
+  createClientAndInvite
+);
 router.get('/client-profile', authRequired, roleRequired(['assistant']), getClientProfile);
 router.put(
   '/client-profile',

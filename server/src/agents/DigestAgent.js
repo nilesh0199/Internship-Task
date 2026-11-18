@@ -23,6 +23,7 @@ export class DigestAgent extends BaseAgent {
       ],
       triggers: ['schedule_tick', 'client_action', 'manual'],
       defaultAutonomy: 'auto',
+      kind: 'workflow',
     });
   }
 

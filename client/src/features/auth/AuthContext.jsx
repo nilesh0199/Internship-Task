@@ -54,8 +54,8 @@ export function AuthProvider({ children }) {
   async function demoLogin(role = 'assistant') {
     setLoading(true);
     try {
-      // In the new product model, 1-click demo login is only available for Assistant Maya
-      const res = await api.post('/auth/demo-login', { role: 'assistant' });
+      const targetRole = role === 'client' ? 'client' : 'assistant';
+      const res = await api.post('/auth/demo-login', { role: targetRole });
       if (res.ok && res.data?.user) {
         setUser(res.data.user);
         try {

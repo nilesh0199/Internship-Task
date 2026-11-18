@@ -83,9 +83,15 @@ export async function getThreads(req, res, next) {
       );
     }
 
+    const pendingDraftIds = await store.getPendingDraftThreadIds(req.user?.orgId);
+    const enriched = threads.slice(0, parseInt(limit, 10)).map((t) => ({
+      ...t,
+      hasPendingDraft: pendingDraftIds.has(String(t._id || t.id)),
+    }));
+
     return res.status(200).json({
       ok: true,
-      data: threads.slice(0, parseInt(limit, 10)),
+      data: enriched,
       total: threads.length,
     });
   } catch (err) {
@@ -274,7 +280,7 @@ export async function overrideLabel(req, res, next) {
 export async function clientDecision(req, res, next) {
   try {
     const { id } = req.params;
-    const { action, note = '', draftId } = req.body; // 'approve', 'hand_to_assistant', 'snooze', 'handled'
+    const { action, note = '', draftId, customText, duration } = req.body;
 
     const thread = await store.getThreadById(id);
     if (
@@ -289,11 +295,13 @@ export async function clientDecision(req, res, next) {
     if (action === 'approve') {
       updates = {
         clientStatus: 'handled',
-        clientDecisionNote: 'Approved draft',
+        isCompleted: true,
+        clientDecisionNote: customText ? 'Approved edited draft' : 'Approved prepared draft',
       };
       if (draftId) {
         await store.saveDraft({
           _id: draftId,
+          ...(customText ? { bodyText: customText } : {}),
           status: 'approved',
           clientApproval: {
             approvedAt: new Date(),
@@ -309,7 +317,22 @@ export async function clientDecision(req, res, next) {
         actorRole: 'client',
         action: 'DRAFT_APPROVED',
         threadId: thread._id,
-        details: { note },
+        details: { draftId: draftId || null, editedByClient: Boolean(customText), simulated: true },
+      });
+    } else if (action === 'reply_direct') {
+      updates = {
+        clientStatus: 'handled',
+        isCompleted: true,
+        clientDecisionNote: 'Direct executive reply sent (simulated)',
+      };
+      await store.addActivityLog({
+        orgId: req.user.orgId,
+        actorId: req.user._id,
+        actorName: req.user.name || 'Priya Sharma',
+        actorRole: 'client',
+        action: 'CLIENT_DIRECT_REPLY',
+        threadId: thread._id,
+        details: { simulated: true, hasReplyContent: Boolean(note && note.trim()) },
       });
     } else if (action === 'hand_to_assistant') {
       updates = {
@@ -322,19 +345,48 @@ export async function clientDecision(req, res, next) {
         previousLabel: thread.currentLabel,
         newLabel: 'ASSISTANT_TO_REPLY',
         triggerType: 'MANUAL_OVERRIDE',
-        actorName: 'Priya Sharma (Client)',
+        actorName: `${req.user.name || 'Priya Sharma'} (Client)`,
         reason: note ? `Handed to assistant: "${note}"` : 'Delegated by client',
       });
+      await store.addActivityLog({
+        orgId: req.user.orgId,
+        actorId: req.user._id,
+        actorName: req.user.name || 'Priya Sharma',
+        actorRole: 'client',
+        action: 'HANDED_TO_ASSISTANT',
+        threadId: thread._id,
+        details: { delegated: true },
+      });
     } else if (action === 'snooze') {
+      const hours = duration === '4h' ? 4 : duration === 'next_week' ? 168 : 24;
       updates = {
         clientStatus: 'snoozed',
-        snoozedUntil: new Date(Date.now() + 24 * 3600 * 1000), // Snooze 24h
+        snoozedUntil: new Date(Date.now() + hours * 3600 * 1000),
       };
+      await store.addActivityLog({
+        orgId: req.user.orgId,
+        actorId: req.user._id,
+        actorName: req.user.name || 'Priya Sharma',
+        actorRole: 'client',
+        action: 'THREAD_SNOOZED',
+        threadId: thread._id,
+        details: { duration: duration || 'tomorrow' },
+      });
     } else if (action === 'handled') {
       updates = {
         clientStatus: 'handled',
         isCompleted: true,
+        clientDecisionNote: 'Marked handled by executive',
       };
+      await store.addActivityLog({
+        orgId: req.user.orgId,
+        actorId: req.user._id,
+        actorName: req.user.name || 'Priya Sharma',
+        actorRole: 'client',
+        action: 'THREAD_MARKED_HANDLED',
+        threadId: thread._id,
+        details: { handled: true },
+      });
     }
 
     const updated = await store.updateThread(thread._id, updates);

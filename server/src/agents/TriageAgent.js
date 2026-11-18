@@ -1,6 +1,7 @@
 import { BaseAgent } from './BaseAgent.js';
 import { runClassificationPipeline } from '../ai/pipeline.js';
 import { store } from '../services/store.js';
+import { TriageInvestigator } from './TriageInvestigator.js';
 
 export class TriageAgent extends BaseAgent {
   constructor() {
@@ -22,6 +23,7 @@ export class TriageAgent extends BaseAgent {
       ],
       triggers: ['ingest', 'new_message', 'manual'],
       defaultAutonomy: 'auto',
+      kind: 'workflow',
     });
   }
 
@@ -131,7 +133,16 @@ export class TriageAgent extends BaseAgent {
       });
     }
 
-    // 4. NEEDS_REVIEW / Ambiguous
+    // 4. NEEDS_REVIEW / Low-confidence / Trap pattern -> Closed-loop Triage Investigator
+    if ((confidence < 0.8 || label === 'NEEDS_REVIEW') && !ctx.skipInvestigator) {
+      const investigator = new TriageInvestigator();
+      const currentThread = updatedThread || thread;
+      if (investigator.canRun(currentThread, ctx)) {
+        const invResult = await investigator.run(currentThread, ctx);
+        return invResult;
+      }
+    }
+
     return this.formatResult({
       action: 'flag_human_review',
       outcome: 'escalated',

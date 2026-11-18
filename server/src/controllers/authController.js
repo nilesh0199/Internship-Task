@@ -23,15 +23,16 @@ export const LoginSchema = z.object({
 });
 
 export const DemoLoginSchema = z.object({
-  role: z.literal('assistant').default('assistant'),
+  role: z.enum(['assistant', 'client']).default('assistant'),
 });
 
 /**
  * Sets the secure JWT authentication cookie on response
  */
-function setAuthCookie(res, token) {
-  const sameSite = env.COOKIE_SAMESITE || (env.NODE_ENV === 'production' ? 'none' : 'lax');
-  const isSecure = sameSite === 'none' ? true : env.NODE_ENV === 'production';
+function setAuthCookie(res, token, req = null) {
+  const sameSite = env.COOKIE_SAMESITE || 'lax';
+  const isHttps = req ? (req.secure || req.headers?.['x-forwarded-proto'] === 'https') : (env.NODE_ENV === 'production');
+  const isSecure = sameSite === 'none' ? true : isHttps;
   res.cookie('token', token, {
     httpOnly: true,
     secure: isSecure,
@@ -108,7 +109,7 @@ export async function signup(req, res, next) {
     });
 
     const token = signToken({ userId: user._id, role: user.role, orgId: user.orgId });
-    setAuthCookie(res, token);
+    setAuthCookie(res, token, req);
 
     // Ensure demo agent runs are hydrated on first demo login
     const existingRuns = await store.getAgentRuns({ orgId: user.orgId, limit: 1 });
@@ -168,7 +169,7 @@ export async function login(req, res, next) {
     await store.updateUser?.(user._id, { lastLoginAt: new Date() }).catch(() => {});
 
     const token = signToken({ userId: user._id, role: user.role, orgId: user.orgId });
-    setAuthCookie(res, token);
+    setAuthCookie(res, token, req);
 
     // Ensure demo agent runs are hydrated on first demo login
     const existingRuns = await store.getAgentRuns({ orgId: user.orgId, limit: 1 });
@@ -214,17 +215,17 @@ export async function demoLogin(req, res, next) {
     }
 
     const role = req.body?.role || req.query?.role || 'assistant';
-    if (role !== 'assistant') {
+    if (role !== 'assistant' && role !== 'client') {
       return res.status(400).json({
         ok: false,
         error: {
-          message: '1-click demo login is only available for the Assistant demo account (Maya Lin). Clients must sign in with their password.',
-          code: 'CLIENT_DEMO_LOGIN_DISABLED',
+          message: 'Demo login role must be either "assistant" or "client".',
+          code: 'INVALID_DEMO_ROLE',
         },
       });
     }
 
-    const targetEmail = 'maya@vortexdynamics.com';
+    const targetEmail = role === 'client' ? 'priya@vortexdynamics.com' : 'maya@vortexdynamics.com';
     let user = await store.findUserByEmail(targetEmail);
 
     if (!user) {
@@ -244,7 +245,7 @@ export async function demoLogin(req, res, next) {
     await store.updateUser?.(user._id, { lastLoginAt: new Date() }).catch(() => {});
 
     const token = signToken({ userId: user._id, role: user.role, orgId: user.orgId });
-    setAuthCookie(res, token);
+    setAuthCookie(res, token, req);
 
     // Ensure demo agent runs are hydrated on first demo login
     const existingRuns = await store.getAgentRuns({ orgId: user.orgId, limit: 1 });
@@ -289,8 +290,9 @@ export async function getMe(req, res, next) {
  * Clear session cookie and logout
  */
 export function logout(req, res) {
-  const sameSite = env.COOKIE_SAMESITE || (env.NODE_ENV === 'production' ? 'none' : 'lax');
-  const isSecure = sameSite === 'none' ? true : env.NODE_ENV === 'production';
+  const sameSite = env.COOKIE_SAMESITE || 'lax';
+  const isHttps = req.secure || req.headers?.['x-forwarded-proto'] === 'https';
+  const isSecure = sameSite === 'none' ? true : isHttps;
   res.clearCookie('token', {
     path: '/',
     httpOnly: true,
@@ -308,17 +310,33 @@ export function logout(req, res) {
 export async function createInvite(req, res, next) {
   try {
     const { clientId, name, email, company, title } = req.body;
-    let client = await store.getClientByOrgId(req.user.orgId);
+    let client = null;
 
-    if (!client && clientId) {
-      client = await store.getClientById(clientId);
+    if (clientId) {
+      client = await store.getClientByOrgAndId(req.user.orgId, clientId);
+      if (!client) {
+        return res.status(404).json({
+          ok: false,
+          error: { message: 'Client profile not found', code: 'CLIENT_NOT_FOUND' },
+        });
+      }
+    } else {
+      const orgClients = await store.getClientsByOrgId(req.user.orgId);
+      if (email) {
+        client =
+          orgClients.find((c) => (c.email || '').toLowerCase() === email.toLowerCase().trim()) ||
+          orgClients[0] ||
+          null;
+      } else {
+        client = orgClients[0] || null;
+      }
     }
 
     if (!client) {
       client = await store.createClient({
         orgId: req.user.orgId,
         name: name || 'Executive Client',
-        email: email || 'client@example.com',
+        email: (email || 'client@example.com').toLowerCase().trim(),
         company: company || 'Vortex Dynamics',
         title: title || 'CEO',
       });
@@ -358,15 +376,11 @@ export async function createInvite(req, res, next) {
       expiresAt,
     });
 
-    const clientUrl = (env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
+    const originFromReq = req.get('origin') || (req.get('host') ? `${req.protocol}://${req.get('host')}` : '');
+    const clientUrl = (env.CLIENT_URL || originFromReq || 'http://localhost:5173').replace(/\/+$/, '');
     const inviteUrl = `${clientUrl}/invite/${rawToken}`;
 
-    // Zero-send compliance: when SEND_ENABLED is false, no email is sent
-    if (env.SEND_ENABLED) {
-      // In production with real send enabled, dispatch happens here
-    }
-
-    logger.info({ orgId: req.user.orgId, email: targetEmail }, '[Auth] Client invite created (token stored as SHA-256 hash)');
+    logger.info({ orgId: req.user.orgId, clientId: client._id, email: targetEmail }, '[Auth] Client invite created (token stored as SHA-256 hash)');
 
     return res.status(201).json({
       ok: true,
@@ -374,6 +388,7 @@ export async function createInvite(req, res, next) {
         token: rawToken,
         inviteUrl,
         expiresAt: invite.expiresAt,
+        inviteStatus: 'pending',
         client: {
           _id: client._id,
           name: client.name,
@@ -381,6 +396,151 @@ export async function createInvite(req, res, next) {
           title: client.title,
           company: client.company,
         },
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Create a brand-new executive client under the assistant's organization (and optionally generate a single-use invite)
+ */
+export async function createClientAndInvite(req, res, next) {
+  try {
+    const {
+      name,
+      email,
+      company = '',
+      title = 'Executive',
+      maxAssistantApprovalUsd = 1000,
+      sendInvite = true,
+    } = req.body;
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingClients = await store.getClientsByOrgId(req.user.orgId);
+    const duplicate = existingClients.find((c) => (c.email || '').toLowerCase() === normalizedEmail);
+    if (duplicate) {
+      return res.status(409).json({
+        ok: false,
+        error: {
+          code: 'CLIENT_ALREADY_EXISTS',
+          message: `${duplicate.name} (${normalizedEmail}) is already in your client roster.`,
+        },
+      });
+    }
+
+    const client = await store.createClient({
+      orgId: req.user.orgId,
+      name: name.trim(),
+      email: normalizedEmail,
+      company: company.trim() || 'Independent',
+      title: title.trim() || 'Executive',
+      avatarUrl: null,
+      playbook: {
+        name: name.trim(),
+        vipSenders: [],
+        vipDomains: [],
+        financialThresholds: {
+          maxAssistantApprovalUsd: Number(maxAssistantApprovalUsd) || 1000,
+        },
+        topicRules: [
+          {
+            topic: 'Scheduling & Calendar Logistics',
+            disposition: 'ASSISTANT_CAN_HANDLE',
+            description: 'Coordinate times and propose reschedule options.',
+          },
+          {
+            topic: 'Contracts, Legal & Financial Sign-offs',
+            disposition: 'ALWAYS_CLIENT',
+            description: 'Escalate agreements and spend above approval threshold directly to executive.',
+          },
+        ],
+        customInstructions: `Manage ${name.trim()}'s inbox with calm executive discretion.`,
+      },
+      agentConfig: {
+        autonomyLevel: {
+          triage: 'auto',
+          scheduling: 'propose',
+          followup: 'propose',
+          drafting: 'propose',
+          digest: 'auto',
+          guardian: 'auto',
+        },
+      },
+      agentMemory: {
+        triage: { instruction: '', memories: [] },
+        scheduling: { instruction: '', memories: [] },
+        drafting: { instruction: '', memories: [] },
+        followup: { instruction: '', memories: [] },
+        digest: { instruction: '', memories: [] },
+        guardian: { instruction: '', memories: [] },
+      },
+    });
+
+    let inviteUrl = null;
+    let expiresAt = null;
+    let inviteStatus = 'not_invited';
+
+    if (sendInvite) {
+      const rawToken = crypto.randomBytes(32).toString('hex');
+      const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+      expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+      await store.createInvite({
+        orgId: req.user.orgId,
+        clientId: client._id,
+        email: normalizedEmail,
+        role: 'client',
+        tokenHash,
+        status: 'pending',
+        invitedBy: req.user._id,
+        expiresAt,
+      });
+
+      const originFromReq = req.get('origin') || (req.get('host') ? `${req.protocol}://${req.get('host')}` : '');
+      const clientUrl = (env.CLIENT_URL || originFromReq || 'http://localhost:5173').replace(/\/+$/, '');
+      inviteUrl = `${clientUrl}/invite/${rawToken}`;
+      inviteStatus = 'pending';
+    }
+
+    await store.addActivityLog({
+      orgId: req.user.orgId,
+      actorId: req.user._id,
+      actorName: req.user.name || 'Assistant',
+      actorRole: 'assistant',
+      action: 'CLIENT_CREATED',
+      details: {
+        clientId: client._id,
+        clientName: client.name,
+        invited: Boolean(sendInvite),
+      },
+    });
+
+    logger.info({ orgId: req.user.orgId, clientId: client._id, invited: Boolean(sendInvite) }, '[Auth] New executive client added');
+
+    return res.status(201).json({
+      ok: true,
+      message: sendInvite
+        ? `${client.name} added and single-use invitation link generated.`
+        : `${client.name} added to your roster.`,
+      data: {
+        client: {
+          _id: client._id,
+          id: client._id,
+          name: client.name,
+          email: client.email,
+          title: client.title,
+          company: client.company,
+          inviteStatus,
+          expiresAt,
+          needsReviewCount: 0,
+          clientActionCount: 0,
+          totalThreads: 0,
+        },
+        inviteUrl,
+        expiresAt,
+        inviteStatus,
       },
     });
   } catch (err) {
@@ -404,7 +564,7 @@ export async function getClients(req, res, next) {
 
         let inviteStatus = 'not_invited';
         let expiresAt = null;
-        if (clientUser && clientUser.lastLoginAt) {
+        if (clientUser) {
           inviteStatus = 'active';
         } else if (latestInvite) {
           if (latestInvite.status === 'accepted') {
@@ -484,7 +644,7 @@ export async function getClientProfile(req, res, next) {
     let inviteStatus = 'not_invited';
     let expiresAt = null;
 
-    if (clientUser && clientUser.lastLoginAt) {
+    if (clientUser) {
       inviteStatus = 'active';
     } else if (latestInvite) {
       if (latestInvite.status === 'accepted') {
@@ -747,7 +907,7 @@ export async function acceptInvite(req, res, next) {
 
     // Sign JWT and set auth cookie
     const sessionToken = signToken({ userId: user._id, role: user.role, orgId: user.orgId });
-    setAuthCookie(res, sessionToken);
+    setAuthCookie(res, sessionToken, req);
 
     logger.info({ userId: user._id, role: user.role }, '[Auth] Client invite accepted successfully');
 

@@ -12,12 +12,14 @@ import {
 import {
   getPlaybook,
   updatePlaybook,
+  updateVipContacts,
   addPlaybookRule,
   saveDraft,
   requestClientApproval,
   sendDraft,
   getActivityLog,
 } from '../controllers/playbookController.js';
+import { resetDemoData, simulateInboundEmail } from '../controllers/demoController.js';
 import { authRequired, roleRequired, validate } from '../middleware/index.js';
 
 const router = express.Router();
@@ -40,9 +42,11 @@ const OverrideLabelBodySchema = z.object({
 });
 
 const ClientDecisionBodySchema = z.object({
-  action: z.enum(['approve', 'hand_to_assistant', 'snooze', 'handled']),
+  action: z.enum(['approve', 'reply_direct', 'hand_to_assistant', 'snooze', 'handled']),
   note: z.string().optional(),
   draftId: z.string().optional(),
+  customText: z.string().optional(),
+  duration: z.enum(['4h', 'tomorrow', 'next_week']).optional(),
 });
 
 const PlaybookBodySchema = z.object({
@@ -113,8 +117,20 @@ router.post(
   clientDecision
 );
 
+const UpdateVipsBodySchema = z.object({
+  vipSenders: z.array(z.string().email('Enter a valid email address')).max(50).optional(),
+  vipDomains: z.array(z.string().min(3).max(120)).max(30).optional(),
+  clientId: z.string().optional(),
+});
+
 // Playbook
 router.get('/playbook', authRequired, getPlaybook);
+router.put(
+  '/playbook/vips',
+  authRequired,
+  validate(UpdateVipsBodySchema),
+  updateVipContacts
+);
 router.put(
   '/playbook',
   authRequired,
@@ -155,5 +171,9 @@ router.post(
 
 // Activity Logs
 router.get('/activity', authRequired, getActivityLog);
+
+// Demo Workspace Controls
+router.post('/demo/reset', authRequired, resetDemoData);
+router.post('/demo/simulate-inbound', authRequired, simulateInboundEmail);
 
 export default router;

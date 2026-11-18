@@ -3,7 +3,6 @@ import { useSearchParams, Link, useNavigate, useLocation } from 'react-router-do
 import { useAuth } from '../features/auth/AuthContext.jsx';
 import { api } from '../lib/api.js';
 import { ThreadRow } from '../components/ThreadRow.jsx';
-import { AtAGlanceStrip } from '../components/AtAGlanceStrip.jsx';
 import { AIReasonPanel } from '../components/AIReasonPanel.jsx';
 import { DraftEditor } from '../components/DraftEditor.jsx';
 import { CommandPaletteModal } from '../components/CommandPaletteModal.jsx';
@@ -61,7 +60,8 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
 
   // Extract client ID and sub-section from /assistant/c/:clientId/:subSection
   const clientMatch = pathname.match(/\/assistant\/c\/([^/]+)(?:\/([^/]+))?/);
-  const routeClientId = clientMatch?.[1] || null;
+  const rawRouteId = clientMatch?.[1];
+  const routeClientId = (rawRouteId && rawRouteId !== 'undefined' && rawRouteId !== 'null') ? rawRouteId : null;
   const subSection = clientMatch?.[2] || 'inbox'; // 'inbox' | 'agents' | 'playbook' | 'activity'
 
   // Load clients
@@ -286,18 +286,25 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
     }
   }
 
+  // Global Command Palette Shortcut (works across Today View, Inbox, Agents, etc.)
+  useEffect(() => {
+    function handleGlobalShortcut(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener('keydown', handleGlobalShortcut);
+    return () => window.removeEventListener('keydown', handleGlobalShortcut);
+  }, []);
+
   // Keyboard Shortcuts (when in inbox)
   useEffect(() => {
     if (isTodayView || subSection !== 'inbox') return;
 
     function handleKeyDown(e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setIsCommandPaletteOpen(true);
-        return;
-      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
 
       const currentIndex = threads.findIndex((t) => t._id === selectedThreadId);
 
@@ -370,7 +377,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
         clients={clients}
         activeClientId={isTodayView ? null : activeClientId}
         activeTab={isTodayView ? 'today' : activeClientId}
-        onAddClient={() => setIsClientProfileOpen(true)}
+        onClientsChanged={loadClients}
       />
 
       {/* TODAY COMMAND CENTER VIEW */}
@@ -386,60 +393,78 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
         /* PER-CLIENT WORKSPACE */
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Client Sub-Navigation Bar */}
-          <div className="h-11 bg-white border-b border-black/[0.06] px-5 flex items-center justify-between flex-shrink-0 z-10 select-none">
+          <div className="h-11 bg-white border-b border-black/[0.06] px-3 sm:px-5 flex items-center justify-between gap-2 flex-shrink-0 z-10 select-none overflow-hidden">
             {/* Sub-nav Links: Inbox | Agents | Playbook | Activity */}
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
               <button
                 onClick={() => navigate(`/assistant/c/${activeClientId}/inbox`)}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                   subSection === 'inbox'
                     ? 'bg-ink-900 text-white shadow-xs'
                     : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50'
                 }`}
               >
-                <Inbox className="h-3.5 w-3.5" />
+                <Inbox className="h-3.5 w-3.5 flex-shrink-0" />
                 <span>Inbox</span>
               </button>
 
               <button
                 onClick={() => navigate(`/assistant/c/${activeClientId}/agents`)}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                   subSection === 'agents'
                     ? 'bg-ink-900 text-white shadow-xs'
                     : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50'
                 }`}
               >
-                <Bot className="h-3.5 w-3.5" />
+                <Bot className="h-3.5 w-3.5 flex-shrink-0" />
                 <span>Agents</span>
               </button>
 
               <button
                 onClick={() => setIsPlaybookOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 transition cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition cursor-pointer"
               >
-                <Sliders className="h-3.5 w-3.5 text-accent" />
+                <Sliders className="h-3.5 w-3.5 text-accent flex-shrink-0" />
                 <span>Playbook</span>
               </button>
 
               <button
                 onClick={() => setIsActivityOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 transition cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition cursor-pointer"
               >
-                <History className="h-3.5 w-3.5" />
+                <History className="h-3.5 w-3.5 flex-shrink-0" />
                 <span>Activity</span>
               </button>
             </div>
 
-            {/* Client Context Pill */}
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-ink-400 hidden md:inline">Managing:</span>
+            {/* Client Context Pill & Ask AI Trigger */}
+            <div className="flex items-center gap-2 sm:gap-3 text-xs min-w-0">
               <button
-                onClick={() => setIsClientProfileOpen(true)}
-                className="font-bold text-ink-900 hover:text-accent transition flex items-center gap-1 cursor-pointer"
+                type="button"
+                onClick={() => setIsCommandPaletteOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FAF8F5] hover:bg-ink-100 border border-black/[0.08] text-ink-700 hover:text-ink-900 font-medium whitespace-nowrap flex-shrink-0 transition cursor-pointer"
+                title="Open AI Command Palette (Ctrl+K)"
               >
-                <span>{activeClient.name}</span>
-                <span className="text-ink-400 font-normal">({activeClient.company})</span>
+                <Sparkles className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+                <span className="hidden sm:inline">Ask AI</span>
+                <kbd className="text-[10px] font-mono text-ink-500 bg-white px-1.5 py-0.2 rounded border border-black/[0.08]">
+                  Ctrl+K
+                </kbd>
               </button>
+
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-ink-400 hidden lg:inline flex-shrink-0">Managing:</span>
+                <button
+                  onClick={() => setIsClientProfileOpen(true)}
+                  className="font-bold text-ink-900 hover:text-accent transition flex items-center gap-1 cursor-pointer min-w-0"
+                  title={`${activeClient.name} (${activeClient.company})`}
+                >
+                  <span className="truncate">{activeClient.name}</span>
+                  <span className="text-ink-400 font-normal hidden xl:inline truncate max-w-[180px]">
+                    ({activeClient.company})
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -554,14 +579,6 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                     />
                   </div>
                 </div>
-
-                {/* Filter Strip */}
-                <AtAGlanceStrip
-                  counts={counts}
-                  activeSegment={activeSegment}
-                  onSelectSegment={handleSelectSegment}
-                  conflicts={conflicts}
-                />
 
                 {/* Threads Scroll List */}
                 <div className="flex-1 overflow-y-auto app-pane-scroll divide-y divide-black/[0.05]">
@@ -759,8 +776,10 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
       <CommandPaletteModal
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
-        selectedThreadId={selectedThreadId}
+        selectedThreadId={isTodayView ? null : selectedThreadId}
         onSelectThread={handleSelectThread}
+        clientId={isTodayView ? null : activeClientId}
+        clientName={isTodayView ? 'All Clients' : activeClient.name}
       />
 
       <PlaybookModal

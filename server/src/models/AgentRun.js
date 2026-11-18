@@ -9,8 +9,13 @@ const AgentRunSchema = new mongoose.Schema(
   {
     agentId: {
       type: String,
-      enum: ['triage', 'scheduling', 'followup', 'drafting', 'digest', 'guardian'],
       required: true,
+      index: true,
+    },
+    kind: {
+      type: String,
+      enum: ['agent', 'workflow'],
+      default: 'workflow',
       index: true,
     },
     orgId: { type: String, required: true, index: true },
@@ -47,6 +52,10 @@ const AgentRunSchema = new mongoose.Schema(
     usedLLM: { type: Boolean, default: false },
     fallbackUsed: { type: Boolean, default: false },
     notesApplied: { type: String, default: null },
+    steps: { type: Array, default: [] },
+    stopReason: { type: String, default: null },
+    usage: { type: mongoose.Schema.Types.Mixed, default: null },
+    recordedSample: { type: Boolean, default: false },
     durationMs: { type: Number, default: 0 },
     startedAt: { type: Date, default: Date.now },
   },

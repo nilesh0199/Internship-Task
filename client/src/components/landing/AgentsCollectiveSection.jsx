@@ -24,60 +24,66 @@ import {
 const AGENTS = [
   {
     id: 'triage',
-    name: 'Triage Agent',
+    name: 'Triage Investigator',
+    kind: 'agent',
     icon: Layers,
     color: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    role: 'Routes lanes & auto-files noise',
+    role: 'Closed-loop investigator for ambiguous threads',
   },
   {
     id: 'scheduling',
     name: 'Scheduling Agent',
+    kind: 'agent',
     icon: Calendar,
     color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    role: 'Detects double-bookings & proposes alternatives',
-  },
-  {
-    id: 'followup',
-    name: 'Follow-up Agent',
-    icon: Clock,
-    color: 'bg-amber-50 text-amber-700 border-amber-200',
-    role: 'Nudges stale waiting threads after 3 days',
+    role: 'Resolves double-bookings via tool loops',
   },
   {
     id: 'drafting',
     name: 'Drafting Agent',
+    kind: 'agent',
     icon: FileEdit,
     color: 'bg-blue-50 text-blue-700 border-blue-200',
-    role: 'Pre-drafts context replies in client’s tone',
+    role: 'Drafts & fact-checks against thread context',
+  },
+  {
+    id: 'followup',
+    name: 'Follow-up Workflow',
+    kind: 'workflow',
+    icon: Clock,
+    color: 'bg-amber-50 text-amber-700 border-amber-200',
+    role: 'Deterministic 3-day stale waiting rules',
   },
   {
     id: 'digest',
-    name: 'Digest Agent',
+    name: 'Digest Workflow',
+    kind: 'workflow',
     icon: Newspaper,
     color: 'bg-rose-50 text-rose-700 border-rose-200',
-    role: 'Synthesizes daily morning briefings',
+    role: 'Fixed aggregation for morning briefings',
   },
   {
     id: 'guardian',
-    name: 'Guardian Agent',
+    name: 'Guardian Safety Check',
+    kind: 'workflow',
     icon: ShieldCheck,
     color: 'bg-violet-50 text-violet-700 border-violet-200',
-    role: 'Zero-trust safety auditor & auto-undo',
+    role: 'Zero-trust deterministic safety auditor',
   },
 ];
 
 const AGENT_PROFILES = {
   triage: {
     id: 'triage',
-    name: 'Triage Agent',
-    tagline: 'Inbound Routing & Quiet Folder Auto-Filer',
+    name: 'Triage Investigator',
+    tagline: 'Closed-Loop Ambiguity Investigator Agent',
     icon: Layers,
     iconColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    autonomyBadge: 'AUTO · Applies with 1-Click Undo',
+    autonomyBadge: 'AGENT · Max 4 Steps with Tool Loop',
     autonomyStyle: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-    trigger: 'Inbound message sync & provider webhook',
+    trigger: 'Runs when fast-path classification is unsure (<0.8 conf)',
     overview:
-      'Evaluates every inbound email against client playbook rules. Routinely auto-files bulk newsletters, marketing promotions, and receipts to the Quiet Folder, and routes actionable tasks to the proper workspace lane.',
+      'Gathers evidence sequentially across sender history, client playbooks, recent corrections, and past threads to resolve ambiguous routing before escalating.',
     scenario: {
       inputSubject: 'Weekly Product Substack #42: Design Systems in 2026',
       inputSender: 'Substack Digest <digest@substack.com>',
@@ -109,11 +115,11 @@ const AGENT_PROFILES = {
   scheduling: {
     id: 'scheduling',
     name: 'Scheduling Agent',
-    tagline: 'Calendar Intelligence & Double-Booking Resolver',
+    tagline: 'Calendar Intelligence & Conflict Resolver Agent',
     icon: Calendar,
     iconColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    autonomyBadge: 'PROPOSE · Queued for Assistant Review',
-    autonomyStyle: 'bg-blue-50 text-blue-800 border-blue-200',
+    autonomyBadge: 'AGENT · Closed Loop (Max 5 Steps)',
+    autonomyStyle: 'bg-emerald-50 text-emerald-800 border-emerald-200',
     trigger: 'Inbound calendar invites & meeting inquiries',
     overview:
       'Parses meeting requests, cross-references Priya’s calendar for overlapping engagements, and drafts conflict-free alternate time proposals for Maya to approve with one click.',
@@ -146,11 +152,11 @@ const AGENT_PROFILES = {
   },
   followup: {
     id: 'followup',
-    name: 'Follow-up Agent',
-    tagline: 'Stale Thread Monitor & Nudge Generator',
+    name: 'Follow-up Workflow',
+    tagline: 'Stale Thread Monitor & Nudge Workflow',
     icon: Clock,
     iconColor: 'bg-amber-50 text-amber-700 border-amber-200',
-    autonomyBadge: 'PROPOSE · Queued for Assistant Approval',
+    autonomyBadge: 'WORKFLOW · Deterministic 3-Day Rule',
     autonomyStyle: 'bg-amber-50 text-amber-800 border-amber-200',
     trigger: 'Daily schedule tick (every 5 min / 9:00 AM)',
     overview:
@@ -185,11 +191,11 @@ const AGENT_PROFILES = {
   drafting: {
     id: 'drafting',
     name: 'Drafting Agent',
-    tagline: 'Executive Voice Mimic & Pre-Composer',
+    tagline: 'Executive Voice & Fact-Checked Draft Agent',
     icon: FileEdit,
     iconColor: 'bg-blue-50 text-blue-700 border-blue-200',
-    autonomyBadge: 'PROPOSE · Zero-Send Human Gate',
-    autonomyStyle: 'bg-purple-50 text-purple-800 border-purple-200',
+    autonomyBadge: 'AGENT · Self-Review with Fact-Checking (Max 5 Steps)',
+    autonomyStyle: 'bg-emerald-50 text-emerald-800 border-emerald-200',
     trigger: 'Ingest & thread reclassification',
     overview:
       'Drafts context-aware responses in Priya’s executive voice according to delegation playbook guidelines, placing the draft into the assistant queue for one-click approval or refinement.',
@@ -222,11 +228,11 @@ const AGENT_PROFILES = {
   },
   digest: {
     id: 'digest',
-    name: 'Digest Agent',
-    tagline: 'Morning Briefing & Operations Synthesizer',
+    name: 'Digest Workflow',
+    tagline: 'Morning Briefing & Operations Synthesizer Workflow',
     icon: Newspaper,
     iconColor: 'bg-rose-50 text-rose-700 border-rose-200',
-    autonomyBadge: 'AUTO · Synthesized at 8:00 AM',
+    autonomyBadge: 'WORKFLOW · Deterministic Aggregation',
     autonomyStyle: 'bg-rose-50 text-rose-800 border-rose-200',
     trigger: 'Daily 8:00 AM tick & client queue boot',
     overview:
@@ -260,11 +266,11 @@ const AGENT_PROFILES = {
   },
   guardian: {
     id: 'guardian',
-    name: 'Guardian Agent',
-    tagline: 'Zero-Trust Safety Auditor & Auto-Undo',
+    name: 'Guardian Safety Check',
+    tagline: 'Zero-Trust Deterministic Safety Auditor',
     icon: ShieldCheck,
     iconColor: 'bg-violet-50 text-violet-700 border-violet-200',
-    autonomyBadge: 'AUTO · Continuous Risk Oversight',
+    autonomyBadge: 'SAFETY CHECK · Deterministic Rule Engine',
     autonomyStyle: 'bg-violet-50 text-violet-800 border-violet-200',
     trigger: 'Continuous audit on all agent executions',
     overview:
@@ -321,18 +327,18 @@ export default function AgentsCollectiveSection() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-black/[0.08] shadow-xs text-xs font-semibold text-ink-700">
             <Bot className="h-3.5 w-3.5 text-accent" />
-            <span>Specialized Autonomous Collective</span>
+            <span>AI Agents & Deterministic Workflows</span>
           </div>
 
           <h2
             className="font-serif font-bold text-ink-900 tracking-tight leading-[1.12]"
             style={{ fontSize: 'clamp(2rem, 4vw, 3.25rem)' }}
           >
-            A small team of agents, one rule: a human approves what gets sent.
+            AI agents where judgment is needed. Fixed checks where safety matters.
           </h2>
 
           <p className="text-sm md:text-base text-ink-600 leading-relaxed max-w-2xl mx-auto">
-            Instead of a monolithic black box, Daybook deploys six specialized agents with strictly isolated responsibilities, verifiable audit trails, and zero-send autonomy.
+            Instead of an unaccountable black box, Daybook separates judgment from safety: closed-loop agents investigate, schedule, and draft with strict limits; deterministic workflows and zero-trust safety checks audit every action with human approval.
           </p>
         </div>
 
@@ -369,6 +375,17 @@ export default function AgentsCollectiveSection() {
                 >
                   <Icon className={`h-4 w-4 ${isSelected ? 'text-white' : 'text-accent'}`} />
                   <span>{agent.name}</span>
+                  <span
+                    className={`text-[9px] px-1.5 py-0.2 rounded font-mono ${
+                      isSelected
+                        ? 'bg-white/20 text-white font-bold'
+                        : agent.kind === 'agent'
+                        ? 'bg-emerald-50 text-emerald-800 font-semibold'
+                        : 'bg-ink-100 text-ink-600 font-medium'
+                    }`}
+                  >
+                    {agent.kind === 'agent' ? 'Agent' : 'Workflow'}
+                  </span>
                   {isSelected && (
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   )}
@@ -377,7 +394,7 @@ export default function AgentsCollectiveSection() {
             })}
           </div>
           <p className="text-center text-[11px] text-ink-400 font-mono">
-            Click any agent to inspect live scenarios, autonomy gates, and strict safety guardrails
+            Click any component to inspect live reasoning loops, deterministic fallbacks, and safety guardrails
           </p>
         </div>
 

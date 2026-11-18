@@ -26,14 +26,15 @@ export const AGENT_REGISTRY = [
 ];
 
 /**
- * Executes a single agent with strict 5000ms timeout
+ * Executes a single agent with configurable timeout based on agent kind
  */
-async function executeAgentWithTimeout(agent, thread, ctx, timeoutMs = 5000) {
+async function executeAgentWithTimeout(agent, thread, ctx, timeoutMs = null) {
+  const actualTimeoutMs = timeoutMs || (agent.kind === 'agent' ? 25000 : 8000);
   let timer;
   const timeoutPromise = new Promise((_, reject) => {
     timer = setTimeout(() => {
-      reject(new Error(`Agent ${agent.name} timed out after ${timeoutMs}ms`));
-    }, timeoutMs);
+      reject(new Error(`Agent ${agent.name} timed out after ${actualTimeoutMs}ms`));
+    }, actualTimeoutMs);
   });
 
   try {
@@ -127,6 +128,7 @@ export async function runAgentsForThread(thread, trigger = 'ingest', overrideCtx
       // 3. Persist AgentRun record in store
       const runRecord = await store.addAgentRun({
         agentId: agent.id,
+        kind: result.kind || agent.kind || 'workflow',
         orgId,
         clientId: client?._id || thread.clientId,
         threadId: thread._id || thread.id,
@@ -142,6 +144,10 @@ export async function runAgentsForThread(thread, trigger = 'ingest', overrideCtx
         fallbackUsed: !!result.fallbackUsed,
         notesApplied,
         durationMs: result.durationMs || Date.now() - startedAt.getTime(),
+        steps: result.steps || [],
+        stopReason: result.stopReason || null,
+        usage: result.usage || null,
+        recordedSample: !!result.recordedSample,
         startedAt,
       });
 
@@ -268,21 +274,95 @@ export async function getAgentRegistryWithStats(orgId, client) {
   const stats = await store.getAgentStats(orgId, 24);
   const runs = await store.getAgentRuns({ orgId, limit: 100 });
 
+  const TOOL_ALLOWLISTS = {
+    triage: [
+      'get_thread',
+      'get_sender_history',
+      'search_client_threads',
+      'get_playbook',
+      'get_corrections',
+      'get_agent_notes',
+      'propose_classification',
+    ],
+    scheduling: [
+      'get_thread',
+      'find_meetings',
+      'check_conflicts',
+      'suggest_free_slots',
+      'get_agent_notes',
+      'propose_reschedule',
+    ],
+    drafting: [
+      'get_thread',
+      'get_past_replies',
+      'get_agent_notes',
+      'check_facts',
+      'propose_draft',
+    ],
+  };
+
   return AGENT_REGISTRY.map((agent) => {
     const autonomy = getAgentAutonomy(client, agent.id);
     const isEnabled = autonomy !== 'off';
     const agentStats = stats.byAgent[agent.id] || { total: 0, handled: 0, proposed: 0, escalated: 0, reversed: 0 };
     const lastRun = runs.find((r) => r.agentId === agent.id);
 
+    // Precise kind differentiation
+    const isAgent = agent.kind === 'agent' || agent.id === 'scheduling' || agent.id === 'drafting';
+    const kind = isAgent ? 'agent' : 'workflow';
+
+    // Component limits definition
+    let limits = {
+      maxSteps: 1,
+      tools: [],
+      neverSends: true,
+      executionModel: 'deterministic_workflow',
+    };
+
+    if (agent.id === 'scheduling') {
+      limits = {
+        maxSteps: 5,
+        timeoutMs: 20000,
+        tools: TOOL_ALLOWLISTS.scheduling,
+        neverSends: true,
+        executionModel: 'closed_loop_agent',
+      };
+    } else if (agent.id === 'drafting') {
+      limits = {
+        maxSteps: 5,
+        timeoutMs: 20000,
+        tools: TOOL_ALLOWLISTS.drafting,
+        neverSends: true,
+        executionModel: 'closed_loop_agent',
+      };
+    } else if (agent.id === 'triage') {
+      limits = {
+        maxSteps: 4,
+        timeoutMs: 15000,
+        tools: TOOL_ALLOWLISTS.triage,
+        neverSends: true,
+        executionModel: 'fast_path_workflow_with_investigator_agent',
+      };
+    } else if (agent.id === 'guardian') {
+      limits = {
+        maxSteps: 1,
+        tools: [],
+        neverSends: true,
+        executionModel: 'zero_trust_safety_check',
+      };
+    }
+
     return {
       id: agent.id,
       name: agent.name,
+      kind,
       description: agent.description,
       canDo: agent.canDo,
       neverDoes: agent.neverDoes,
       triggers: agent.triggers,
       autonomy,
       enabled: isEnabled,
+      limits,
       lastRunAt: lastRun ? lastRun.createdAt : null,
       stats: {
         handled: agentStats.handled,

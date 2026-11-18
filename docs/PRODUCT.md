@@ -161,14 +161,14 @@ Every thread includes an auditable history pane showing its complete lifecycle:
 A distilled greeting at the top of Priya's decision queue:
 > *"Good morning, Priya. Today: **3 decisions** require your signoff, **12 threads** were resolved autonomously by Maya, and **5 threads** are waiting on external replies."*
 
-### 6.12. Specialized Autonomous Agent Collective
-Instead of a monolithic black-box classifier, Daybook Mail operates six specialized autonomous agents:
-1. **Triage Agent (`triage`)**: Routes incoming messages, assigns queue owners, and auto-files newsletters/receipts to Quiet Folder.
-2. **Scheduling Agent (`scheduling`)**: Extracts meeting times, identifies calendar conflicts, and prepares draft reschedule notices.
-3. **Follow-Up Agent (`followup`)**: Monitors stale threads in "Waiting for Response" and drafts check-in nudges.
-4. **Drafting Agent (`drafting`)**: Pre-drafts routine administrative responses for assistant one-click approval.
-5. **Digest Agent (`digest`)**: Prepares the client morning decision brief and daily executive briefing summaries.
-6. **Guardian Agent (`guardian`)**: Zero-trust compliance auditor that audits all auto-handled actions against VIP lists and risk keywords (wire, contract, $500+), instantly reversing risky actions to `NEEDS_REVIEW`.
+### 6.12. Specialized Autonomous Agents, Workflows & Safety Checks
+Instead of a monolithic black-box classifier, Daybook Mail separates dynamic reasoning from fixed safety rules:
+1. **Triage Investigator (`triage`)**: **Closed-Loop Agent** (max 4 steps) that investigates ambiguous threads across sender history, client playbooks, and past threads before escalating.
+2. **Scheduling Agent (`scheduling`)**: **Closed-Loop Agent** (max 4 steps) that extracts meeting requests, queries calendar availability, and resolves calendar collisions.
+3. **Drafting Agent (`drafting`)**: **Closed-Loop Agent** (max 5 steps) that pre-drafts responses in executive voice and executes a `check_facts` self-review against thread facts.
+4. **Follow-Up Workflow (`followup`)**: **Deterministic Workflow** (1 step) that monitors outbound threads waiting on third parties (>3 days).
+5. **Digest Workflow (`digest`)**: **Deterministic Workflow** (1 step) that computes morning decision brief aggregations.
+6. **Guardian Safety Check (`guardian`)**: **Deterministic Safety Check** (0 LLM calls, 100% code) that audits every auto-handled action against VIP lists and financial risk keywords ($500+, wire, contracts), instantly reversing risky actions to `NEEDS_REVIEW`.
 
 ### 6.13. Agent Control Room (`/agents`)
 A centralized management console for assistants:

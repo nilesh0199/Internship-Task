@@ -17,6 +17,7 @@ export const UpdateAgentPolicySchema = z.object({
 
 export const RunAgentsSchema = z.object({
   threadId: z.string().optional(),
+  forceLive: z.boolean().optional(),
 });
 
 /**
@@ -187,6 +188,42 @@ export async function triggerAgentRun(req, res, next) {
       ok: true,
       message: `Executed agents across ${result.threadsProcessed} threads (${result.runsGenerated} actions taken)`,
       data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/agents/threads/:id/rerun-live
+ * Re-runs live closed-loop agents on a specific thread, bypassing cache
+ */
+export async function rerunLiveAgent(req, res, next) {
+  try {
+    const { id } = req.params;
+    const orgId = req.user?.orgId || 'org_vortex_001';
+
+    const thread = await store.getThreadById(id);
+    if (!thread || (thread.orgId && thread.orgId !== orgId)) {
+      return res.status(404).json({
+        ok: false,
+        error: { message: 'Thread not found', code: 'THREAD_NOT_FOUND' },
+      });
+    }
+
+    const runs = await runAgentsForThread(thread, 'manual', {
+      forceInvestigate: true,
+      skipCache: true,
+    });
+
+    return res.status(200).json({
+      ok: true,
+      message: `Re-ran live agents for thread "${thread.subject}"`,
+      data: {
+        threadId: thread._id,
+        runsCount: runs.length,
+        runs,
+      },
     });
   } catch (err) {
     next(err);
