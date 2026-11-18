@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext.jsx';
 import MiniEmailCard from './MiniEmailCard.jsx';
-import { Sparkles, ArrowRight, UserCheck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 
@@ -235,14 +235,6 @@ export default function HeroSection() {
         animate="visible"
         className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-7"
       >
-        {/* Pill Tag */}
-        <motion.div variants={itemVariants} className="inline-flex justify-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-black/[0.08] shadow-xs text-xs font-semibold text-ink-700">
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
-            <span>AI Inbox Orchestration · For Assistants & Founders</span>
-          </div>
-        </motion.div>
-
         {/* H1 Display: Fraunces fluid optical sizing */}
         <motion.div variants={itemVariants} className="overflow-hidden">
           <h1

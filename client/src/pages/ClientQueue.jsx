@@ -558,12 +558,24 @@ export function ClientQueue() {
           </div>
         </div>
 
-        {/* Right: Live Sync Pill + Compose + Refresh + Settings + Account Menu */}
+        {/* Right: Sync Status + Refresh | Compose + Settings + Account Menu */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="hidden xl:flex items-center gap-1.5 text-[11px] text-ink-500 font-mono whitespace-nowrap">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Synced {Math.max(0, Math.floor((Date.now() - lastSyncedAt.getTime()) / 60000))}m ago</span>
+          <div className="flex items-center gap-1">
+            <div className="hidden xl:flex items-center gap-1.5 text-[11px] text-ink-500 font-mono whitespace-nowrap">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Synced {Math.max(0, Math.floor((Date.now() - lastSyncedAt.getTime()) / 60000))}m ago</span>
+            </div>
+
+            <button
+              onClick={() => loadThreads(false)}
+              className="p-1.5 rounded-full hover:bg-ink-100 text-ink-500 hover:text-ink-900 transition cursor-pointer active:scale-95"
+              title="Refresh queue"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
+
+          <div className="h-4 w-px bg-black/[0.08] hidden sm:block flex-shrink-0" />
 
           <button
             type="button"
@@ -573,14 +585,6 @@ export function ClientQueue() {
           >
             <PenSquare className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Compose</span>
-          </button>
-
-          <button
-            onClick={() => loadThreads(false)}
-            className="p-1.5 rounded-full hover:bg-ink-100 text-ink-500 hover:text-ink-900 transition cursor-pointer active:scale-95"
-            title="Refresh queue"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
 
           <button
