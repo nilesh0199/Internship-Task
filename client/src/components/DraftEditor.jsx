@@ -4,7 +4,8 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock.js';
 import { Sparkles, Send, CheckCircle2, AlertCircle, Clock, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
+export function DraftEditor({ thread, existingDraft, onDraftUpdated, clientName = 'Client' }) {
+  const clientFirstName = (clientName || 'Client').split(' ')[0];
   const [subject, setSubject] = useState(existingDraft?.subject || `RE: ${thread.subject}`);
   const [bodyText, setBodyText] = useState(existingDraft?.bodyText || '');
   const [status, setStatus] = useState(existingDraft?.status || 'draft');
@@ -89,7 +90,7 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
         status: 'pending_client',
       });
       if (res.ok) {
-        toast.success("Draft submitted! Priya will see this in her Decision Queue.");
+        toast.success(`Draft submitted! ${clientFirstName} will see this in their Decision Queue.`);
         setStatus('pending_client');
         onDraftUpdated?.(res.data);
       }
@@ -124,22 +125,22 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
   }
 
   return (
-    <div className="bg-white border border-black/[0.05] rounded-2xl p-5 shadow-card space-y-4">
+    <div className="bg-white border border-black/[0.05] rounded-2xl p-3.5 sm:p-5 shadow-card space-y-4">
       {/* Draft Header Strip */}
-      <div className="flex items-center justify-between pb-3 border-b border-borderMuted/60">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-borderMuted/60">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-semibold text-ink-900 tracking-tight">
             Reply Composer
           </span>
           {status === 'pending_client' && (
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60 font-medium">
-              Awaiting Priya's Signoff
+              Awaiting {clientFirstName}'s Signoff
             </span>
           )}
           {status === 'approved' && (
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-medium flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-              <span>Approved by Priya</span>
+              <span>Approved by {clientFirstName}</span>
             </span>
           )}
         </div>
@@ -202,7 +203,7 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-1">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
         <button
           onClick={handleSaveDraft}
           disabled={saving}
@@ -216,9 +217,9 @@ export function DraftEditor({ thread, existingDraft, onDraftUpdated }) {
             <button
               onClick={handleRequestApproval}
               disabled={saving}
-              className="px-5 py-2 rounded-full bg-label-client text-white text-xs font-semibold hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-soft active:scale-95"
+              className="px-4 sm:px-5 py-2 rounded-full bg-label-client text-white text-xs font-semibold hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-soft active:scale-95"
             >
-              <span>Submit for Priya's Approval</span>
+              <span>Submit for {clientFirstName}'s Approval</span>
             </button>
           ) : (
             <button

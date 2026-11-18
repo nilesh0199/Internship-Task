@@ -106,7 +106,9 @@ export function startDemoLiveFeed() {
         snippet: eventTemplate.snippet,
         bodyText: eventTemplate.bodyText,
         direction: 'INBOUND',
+        date: now,
         receivedAt: now,
+        createdAt: now,
       });
 
       logger.info(

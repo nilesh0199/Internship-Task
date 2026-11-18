@@ -65,7 +65,7 @@ export default function AccountMenu() {
           {user.name}
         </span>
         <span
-          className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+          className={`hidden sm:inline-flex text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
             isAssistant
               ? 'bg-label-assistantBg text-label-assistant border-label-assistant/20'
               : 'bg-label-clientBg text-label-client border-label-client/20'

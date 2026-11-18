@@ -118,13 +118,13 @@ export function AccountsPage() {
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-ink-900 font-sans select-none">
       <DemoWorkspaceBanner />
-      <div className="max-w-4xl mx-auto p-6 md:p-12 space-y-8">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-12 space-y-6 sm:space-y-8">
         {/* Navigation Bar */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link
               to="/"
-              className="flex items-center gap-2 group hover:opacity-85 transition cursor-pointer"
+              className="flex items-center gap-2 group hover:opacity-85 transition cursor-pointer flex-shrink-0"
               title="Daybook Mail — Return to home"
             >
               <div className="h-8 w-8 rounded-xl bg-ink-900 text-white flex items-center justify-center font-serif font-bold text-sm shadow-soft group-hover:scale-105 transition-transform">
@@ -134,18 +134,19 @@ export function AccountsPage() {
                 Daybook Mail
               </span>
             </Link>
-            <div className="h-4 w-px bg-borderMuted hidden sm:block" />
+            <div className="h-4 w-px bg-borderMuted hidden sm:block flex-shrink-0" />
             <Link
               to="/assistant"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-black/[0.06] shadow-soft text-xs font-semibold text-ink-700 hover:text-ink-900 hover:bg-ink-50 transition active:scale-95"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white border border-black/[0.06] shadow-soft text-xs font-semibold text-ink-700 hover:text-ink-900 hover:bg-ink-50 transition active:scale-95 whitespace-nowrap"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Workspace</span>
+              <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Back to Workspace</span>
+              <span className="sm:hidden">Back</span>
             </Link>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-black/[0.06] shadow-soft text-ink-700 text-xs font-semibold">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-black/[0.06] shadow-soft text-ink-700 text-xs font-semibold">
               <ShieldCheck className="h-3.5 w-3.5 text-accent" />
               <span>AES-256-GCM Encrypted Token Storage</span>
             </div>
@@ -155,7 +156,7 @@ export function AccountsPage() {
 
         {/* Header */}
         <div className="space-y-1">
-          <h1 className="text-3xl font-serif font-bold text-ink-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ink-900 tracking-tight">
             Connected Accounts & Mailbox Ingestion
           </h1>
           <p className="text-xs text-ink-500 max-w-xl leading-relaxed">
@@ -167,22 +168,22 @@ export function AccountsPage() {
         {storageMode === 'in-memory' && (
           <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-200/80 shadow-xs flex items-start gap-3">
             <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-amber-900 leading-relaxed">
+            <div className="text-xs text-amber-900 leading-relaxed min-w-0">
               <strong className="font-semibold">Demo storage: in-memory.</strong> Connected accounts persist for this session only. To persist permanently, set <code className="bg-white/80 px-1.5 py-0.5 rounded font-mono text-[11px] border border-amber-200 text-amber-800">MONGODB_URI</code>.
             </div>
           </div>
         )}
 
         {/* Connected Accounts Card List */}
-        <div className="bg-white border border-black/[0.06] rounded-3xl p-7 md:p-8 shadow-card space-y-5">
-          <div className="flex items-center justify-between pb-4 border-b border-borderMuted/70">
+        <div className="bg-white border border-black/[0.06] rounded-3xl p-4 sm:p-7 md:p-8 shadow-card space-y-5">
+          <div className="flex items-center justify-between gap-2 pb-4 border-b border-borderMuted/70">
             <h2 className="text-xs font-bold uppercase tracking-wider text-ink-500">
               Active Mailboxes ({accounts.length})
             </h2>
             <button
               onClick={loadAccounts}
               disabled={loading}
-              className="text-xs font-semibold text-ink-600 hover:text-ink-900 px-3 py-1 rounded-full bg-ink-50 hover:bg-ink-100 transition flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="text-xs font-semibold text-ink-600 hover:text-ink-900 px-3 py-1 rounded-full bg-ink-50 hover:bg-ink-100 transition flex items-center gap-1.5 cursor-pointer active:scale-95 flex-shrink-0"
             >
               <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin text-accent' : ''}`} />
               <span>Refresh</span>
@@ -200,16 +201,18 @@ export function AccountsPage() {
                 const isError = acc.status === 'error';
                 return (
                   <div key={acc._id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3.5">
+                    <div className="flex items-start gap-3 sm:gap-3.5 min-w-0 flex-1">
                       <div className="h-10 w-10 rounded-2xl bg-ink-100 flex items-center justify-center text-ink-900 font-bold text-sm shadow-2xs flex-shrink-0">
                         {acc.provider === 'gmail' ? 'G' : acc.provider === 'outlook' ? 'O' : 'D'}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-sm font-bold text-ink-900 tracking-tight">{acc.emailAddress}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-ink-900 tracking-tight break-all sm:break-normal">
+                            {acc.emailAddress}
+                          </span>
                           {/* Status Pill */}
                           <span
-                            className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
+                            className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0 ${
                               isError
                                 ? 'bg-red-50 text-red-700 border border-red-200/60'
                                 : isSyncing
@@ -218,7 +221,7 @@ export function AccountsPage() {
                             }`}
                           >
                             <span
-                              className={`h-1.5 w-1.5 rounded-full ${
+                              className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${
                                 isError ? 'bg-red-500' : isSyncing ? 'bg-accent' : 'bg-emerald-500'
                               }`}
                             />
@@ -227,7 +230,7 @@ export function AccountsPage() {
                             </span>
                           </span>
                         </div>
-                        <div className="text-xs text-ink-500 mt-1 flex items-center gap-3">
+                        <div className="text-xs text-ink-500 mt-1 flex items-center gap-2 sm:gap-3 flex-wrap">
                           <span className="capitalize">Provider: {acc.provider}</span>
                           <span>•</span>
                           <span className="font-mono text-[11px]">

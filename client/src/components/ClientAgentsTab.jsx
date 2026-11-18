@@ -267,12 +267,12 @@ export function ClientAgentsTab({ clientId, clientName = 'Executive' }) {
             >
               <div className="space-y-4">
                 {/* Agent Header & Autonomy Switcher */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-ink-50 text-ink-800">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="p-2.5 rounded-xl bg-ink-50 text-ink-800 flex-shrink-0">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-serif font-bold text-base text-ink-900">
                           {agent.name}

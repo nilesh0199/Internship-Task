@@ -225,7 +225,7 @@ export function AssistantTopBar({
           {/* Control Room Link */}
           <Link
             to="/agents"
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${
+            className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${
               isControlRoom
                 ? 'bg-ink-900 text-white font-semibold'
                 : 'text-ink-700 hover:text-ink-900 hover:bg-ink-50'
@@ -233,26 +233,26 @@ export function AssistantTopBar({
             title="Cross-client Autonomous Agents Control Room"
           >
             <Bot className="h-3.5 w-3.5 text-accent flex-shrink-0" />
-            <span className="hidden md:inline">Control Room</span>
+            <span className="hidden lg:inline">Control Room</span>
           </Link>
 
           {/* Accounts Link */}
           <Link
             to="/accounts"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-ink-700 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition"
+            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-ink-700 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition"
             title="Connected Gmail & Outlook Accounts"
           >
-            <span className="hidden lg:inline">Accounts</span>
+            <span>Accounts</span>
           </Link>
 
           {/* Settings Button */}
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-ink-700 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition cursor-pointer"
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-medium text-ink-700 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition cursor-pointer"
             title="Workspace Settings, AI API Keys, Playbooks & Demo Controls"
           >
             <Settings className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="hidden md:inline">Settings</span>
+            <span className="hidden lg:inline">Settings</span>
           </button>
 
           {/* Account Profile Menu */}

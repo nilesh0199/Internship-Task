@@ -131,11 +131,11 @@ export function AssistantTodayView({ onJumpToThread }) {
 
       {/* 2. Executive Client Summary Cards */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <h2 className="text-xs font-mono uppercase tracking-wider text-ink-500 font-bold">
             Executive Clients Overview ({clientCards.length})
           </h2>
-          <span className="text-xs text-ink-500">Click any client to open their full workspace</span>
+          <span className="hidden sm:inline text-xs text-ink-500">Click any client to open their full workspace</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -172,7 +172,7 @@ export function AssistantTodayView({ onJumpToThread }) {
                 </div>
 
                 {/* Metrics Grid */}
-                <div className="grid grid-cols-4 gap-2 mt-5 pt-4 border-t border-black/[0.06] text-center">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 sm:mt-5 pt-4 border-t border-black/[0.06] text-center">
                   <div className="p-2 rounded-xl bg-[#FAF8F5]">
                     <div className="text-lg font-bold font-mono text-amber-900">
                       {c.needsMaya}
@@ -256,14 +256,14 @@ export function AssistantTodayView({ onJumpToThread }) {
 
       {/* 4. Single Prioritized "Needs You Now" Stack */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Flame className="h-4 w-4 text-amber-600" />
             <h2 className="text-xs font-mono uppercase tracking-wider text-ink-900 font-bold">
               Needs You Now ({needsYouNow.length})
             </h2>
           </div>
-          <span className="text-xs text-ink-500 font-medium">
+          <span className="hidden sm:inline text-xs text-ink-500 font-medium">
             Prioritized by deadlines, VIP status & risk flags
           </span>
         </div>
@@ -383,15 +383,15 @@ export function AssistantTodayView({ onJumpToThread }) {
               key={run._id || run.id || idx}
               className="p-4 hover:bg-ink-50/50 transition-colors space-y-2 text-xs"
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 truncate flex-wrap">
+              <div className="flex items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
                   <span className="font-mono text-[10px] text-ink-400">
                     {formatTime(run.createdAt)}
                   </span>
                   <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-ink-100 text-ink-800 font-mono">
                     {run.clientName?.split(' ')[0]}
                   </span>
-                  <span className="font-semibold text-ink-900 truncate">
+                  <span className="font-semibold text-ink-900 break-words">
                     {run.summary}
                   </span>
                   {run.kind && (

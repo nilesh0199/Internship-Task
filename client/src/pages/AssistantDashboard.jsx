@@ -36,6 +36,8 @@ import {
   ShieldCheck,
   Bot,
   ArrowRight,
+  ArrowLeft,
+  PanelLeft,
   Layers,
   X,
 } from 'lucide-react';
@@ -117,7 +119,63 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
   const [isPlaybookOpen, setIsPlaybookOpen] = useState(initialOpenPlaybook);
   const [isClientProfileOpen, setIsClientProfileOpen] = useState(false);
   const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [collapsedMessages, setCollapsedMessages] = useState({});
+
+  const segments = useMemo(
+    () => [
+      { id: 'all', label: 'All Inbox', icon: Inbox, count: counts.TOTAL },
+      {
+        id: 'client',
+        label: `${activeClient.name.split(' ')[0]} to Reply`,
+        icon: UserCheck,
+        count: counts.CLIENT_TO_REPLY,
+        color: 'text-label-client',
+      },
+      {
+        id: 'assistant',
+        label: 'Assistant Queue',
+        icon: CheckSquare,
+        count: counts.ASSISTANT_TO_REPLY,
+        color: 'text-label-assistant',
+      },
+      { id: 'proposals', label: 'Agent Proposals', icon: Sparkles, count: 3, color: 'text-accent' },
+      {
+        id: 'no_reply',
+        label: 'Quiet Folder',
+        icon: Archive,
+        count: counts.NO_REPLY_NEEDED,
+        color: 'text-label-noReply',
+      },
+      { id: 'waiting', label: 'Waiting on Others', icon: Clock, count: counts.WAITING, color: 'text-amber-600' },
+      {
+        id: 'needs_review',
+        label: 'Needs Review',
+        icon: AlertTriangle,
+        count: counts.NEEDS_REVIEW,
+        color: 'text-label-review',
+      },
+      { id: 'meetings', label: 'Meetings Strip', icon: Calendar, count: counts.MEETINGS },
+      { id: 'important', label: 'Important / VIP', icon: Star, count: 4, color: 'text-amber-500' },
+      { id: 'archived', label: 'Archived', icon: Archive },
+    ],
+    [activeClient.name, counts]
+  );
+
+  const activeSegmentObj = useMemo(
+    () => segments.find((s) => s.id === activeSegment) || segments[0],
+    [segments, activeSegment]
+  );
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+    setIsAiPanelOpen(false);
+  }, [activeClientId, subSection]);
+
+  useEffect(() => {
+    setIsAiPanelOpen(false);
+  }, [selectedThreadId]);
 
   // "Remember for Agent" Modal State
   const [rememberModalData, setRememberModalData] = useState({
@@ -212,12 +270,21 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
     nextParams.set('segment', segmentId);
     nextParams.delete('threadId');
     setSearchParams(nextParams);
+    setIsSidebarOpen(false);
   }
 
   function handleSelectThread(threadId) {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set('threadId', threadId);
     setSearchParams(nextParams);
+    setIsSidebarOpen(false);
+  }
+
+  function handleClearThread() {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('threadId');
+    setSearchParams(nextParams);
+    setIsAiPanelOpen(false);
   }
 
   async function handleToggleRead(thread) {
@@ -368,8 +435,108 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
 
   const conflicts = threads.flatMap((t) => t.meetings?.filter((m) => m.isConflict) || []);
 
+  function renderSidebarContent(isDrawer = false) {
+    return (
+      <>
+        {isDrawer && (
+          <div className="px-3.5 py-3 bg-white border-b border-black/[0.06] flex items-center justify-between flex-shrink-0">
+            <div className="flex items-center gap-2 text-xs font-serif font-bold text-ink-900">
+              <PanelLeft className="h-3.5 w-3.5 text-accent" />
+              <span>Folders & Side Options</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-1.5 rounded-full text-ink-500 hover:text-ink-900 hover:bg-ink-100 transition cursor-pointer"
+              aria-label="Close side options"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Client Profile Card in Sidebar */}
+        <button
+          type="button"
+          onClick={() => {
+            setIsSidebarOpen(false);
+            setIsClientProfileOpen(true);
+          }}
+          className="m-3 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card hover:border-black/15 transition-all text-left group cursor-pointer active:scale-98 flex-shrink-0"
+          title={`Manage ${activeClient.name}'s Profile & Invitation`}
+        >
+          <div className="flex items-center gap-2.5">
+            <Avatar name={activeClient.name} email={activeClient.email} size="md" />
+            <div className="truncate flex-1">
+              <div className="text-xs font-bold text-ink-900 truncate tracking-tight group-hover:text-accent transition-colors flex items-center justify-between">
+                <span>{activeClient.name}</span>
+                <span className="text-[10px] text-accent font-medium font-mono hidden group-hover:inline">
+                  Profile →
+                </span>
+              </div>
+              <div className="text-[11px] text-ink-500 truncate">{activeClient.title}</div>
+            </div>
+          </div>
+        </button>
+
+        {/* Segments Navigation List */}
+        <nav className="flex-1 overflow-y-auto app-pane-scroll px-2.5 py-1 space-y-1 text-xs">
+          {segments.map((seg) => {
+            const Icon = seg.icon;
+            const isActive = activeSegment === seg.id;
+            return (
+              <button
+                key={seg.id}
+                onClick={() => handleSelectSegment(seg.id)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all duration-150 cursor-pointer text-left active:scale-[0.99] ${
+                  isActive
+                    ? 'bg-ink-900 font-semibold text-white shadow-soft'
+                    : 'text-ink-700 hover:bg-white hover:text-ink-900 hover:shadow-xs'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 truncate">
+                  <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white' : seg.color || 'text-ink-500'}`} />
+                  <span className="truncate tracking-tight">{seg.label}</span>
+                </div>
+                {typeof seg.count === 'number' && (
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-ink-100 text-ink-600'
+                    }`}
+                  >
+                    {seg.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Agent Control Room Shortcut */}
+        <div className="p-3 mx-2.5 mb-2 rounded-2xl bg-gradient-to-br from-white to-amber-50/40 border border-black/[0.06] shadow-xs space-y-1.5 flex-shrink-0">
+          <div className="flex items-center justify-between text-xs font-serif font-bold text-ink-900">
+            <div className="flex items-center gap-1.5">
+              <Bot className="h-3.5 w-3.5 text-accent" />
+              <span>{activeClient.name.split(' ')[0]}'s Agents</span>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setIsSidebarOpen(false);
+              navigate(`/assistant/c/${activeClientId}/agents`);
+            }}
+            className="w-full flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-ink-900 hover:bg-ink-800 text-white text-[11px] font-semibold transition active:scale-[0.98] cursor-pointer"
+          >
+            <span>Tune Agent Notes</span>
+            <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
+      </>
+    );
+  }
+
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#FAF8F5] text-ink-900 font-sans overflow-hidden">
+    <div className="h-[100dvh] w-full flex flex-col bg-[#FAF8F5] text-ink-900 font-sans overflow-hidden">
       <DemoWorkspaceBanner />
 
       {/* Persistent Assistant Top Bar with Workspace Tabs */}
@@ -391,14 +558,33 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
         </div>
       ) : (
         /* PER-CLIENT WORKSPACE */
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           {/* Client Sub-Navigation Bar */}
-          <div className="h-11 bg-white border-b border-black/[0.06] px-3 sm:px-5 flex items-center justify-between gap-2 flex-shrink-0 z-10 select-none overflow-hidden">
-            {/* Sub-nav Links: Inbox | Agents | Playbook | Activity */}
-            <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+          <div className="h-11 bg-white border-b border-black/[0.06] px-2.5 sm:px-5 flex items-center justify-between gap-2 flex-shrink-0 z-10 select-none">
+            {/* Left: Side-Options Toggle Tag (< lg) + Sub-nav Links (horizontally scrollable on small phones) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar min-w-0 flex-1 py-1">
+              {subSection === 'inbox' && (
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarOpen((v) => !v)}
+                  className="lg:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 hover:bg-amber-100 border border-amber-300/70 text-amber-950 text-xs font-semibold whitespace-nowrap flex-shrink-0 transition cursor-pointer active:scale-95"
+                  title="Toggle side options & folders"
+                  aria-label="Toggle side options"
+                  aria-expanded={isSidebarOpen}
+                >
+                  <PanelLeft className="h-3.5 w-3.5 text-amber-800 flex-shrink-0" />
+                  <span>{activeSegmentObj.label}</span>
+                  {typeof activeSegmentObj.count === 'number' && (
+                    <span className="text-[10px] font-mono bg-amber-200/80 text-amber-950 px-1.5 rounded-full">
+                      {activeSegmentObj.count}
+                    </span>
+                  )}
+                </button>
+              )}
+
               <button
                 onClick={() => navigate(`/assistant/c/${activeClientId}/inbox`)}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 transition cursor-pointer ${
                   subSection === 'inbox'
                     ? 'bg-ink-900 text-white shadow-xs'
                     : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50'
@@ -410,7 +596,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
 
               <button
                 onClick={() => navigate(`/assistant/c/${activeClientId}/agents`)}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap flex-shrink-0 transition cursor-pointer ${
                   subSection === 'agents'
                     ? 'bg-ink-900 text-white shadow-xs'
                     : 'text-ink-600 hover:text-ink-900 hover:bg-ink-50'
@@ -422,7 +608,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
 
               <button
                 onClick={() => setIsPlaybookOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition cursor-pointer"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap flex-shrink-0 transition cursor-pointer"
               >
                 <Sliders className="h-3.5 w-3.5 text-accent flex-shrink-0" />
                 <span>Playbook</span>
@@ -430,7 +616,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
 
               <button
                 onClick={() => setIsActivityOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap transition cursor-pointer"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-xs font-medium text-ink-600 hover:text-ink-900 hover:bg-ink-50 whitespace-nowrap flex-shrink-0 transition cursor-pointer"
               >
                 <History className="h-3.5 w-3.5 flex-shrink-0" />
                 <span>Activity</span>
@@ -438,21 +624,22 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
             </div>
 
             {/* Client Context Pill & Ask AI Trigger */}
-            <div className="flex items-center gap-2 sm:gap-3 text-xs min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-3 text-xs flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setIsCommandPaletteOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FAF8F5] hover:bg-ink-100 border border-black/[0.08] text-ink-700 hover:text-ink-900 font-medium whitespace-nowrap flex-shrink-0 transition cursor-pointer"
+                className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-[#FAF8F5] hover:bg-ink-100 border border-black/[0.08] text-ink-700 hover:text-ink-900 font-medium whitespace-nowrap flex-shrink-0 transition cursor-pointer"
                 title="Open AI Command Palette (Ctrl+K)"
+                aria-label="Ask AI"
               >
                 <Sparkles className="h-3.5 w-3.5 text-accent flex-shrink-0" />
                 <span className="hidden sm:inline">Ask AI</span>
-                <kbd className="text-[10px] font-mono text-ink-500 bg-white px-1.5 py-0.2 rounded border border-black/[0.08]">
+                <kbd className="hidden sm:inline text-[10px] font-mono text-ink-500 bg-white px-1.5 py-0.2 rounded border border-black/[0.08]">
                   Ctrl+K
                 </kbd>
               </button>
 
-              <div className="flex items-center gap-1.5 min-w-0">
+              <div className="hidden md:flex items-center gap-1.5 min-w-0">
                 <span className="text-ink-400 hidden lg:inline flex-shrink-0">Managing:</span>
                 <button
                   onClick={() => setIsClientProfileOpen(true)}
@@ -474,99 +661,36 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
               <ClientAgentsTab clientId={activeClientId} clientName={activeClient.name} />
             </div>
           ) : (
-            /* 3-PANE INBOX */
-            <div className="flex-1 flex overflow-hidden">
-              {/* PANE 1: Navigation & Segments Sidebar (240px) */}
-              <aside className="w-60 bg-[#FAF8F5] border-r border-borderMuted/70 flex flex-col flex-shrink-0 select-none">
-                {/* Client Profile Card in Sidebar */}
-                <button
-                  type="button"
-                  onClick={() => setIsClientProfileOpen(true)}
-                  className="m-3 p-3.5 rounded-2xl bg-white border border-black/[0.05] shadow-card hover:border-black/15 transition-all text-left group cursor-pointer active:scale-98"
-                  title={`Manage ${activeClient.name}'s Profile & Invitation`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Avatar name={activeClient.name} email={activeClient.email} size="md" />
-                    <div className="truncate flex-1">
-                      <div className="text-xs font-bold text-ink-900 truncate tracking-tight group-hover:text-accent transition-colors flex items-center justify-between">
-                        <span>{activeClient.name}</span>
-                        <span className="text-[10px] text-accent font-medium font-mono hidden group-hover:inline">
-                          Profile →
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-ink-500 truncate">
-                        {activeClient.title}
-                      </div>
-                    </div>
-                  </div>
-                </button>
-
-                {/* Segments Navigation List */}
-                <nav className="flex-1 overflow-y-auto app-pane-scroll px-2.5 py-1 space-y-1 text-xs">
-                  {[
-                    { id: 'all', label: 'All Inbox', icon: Inbox, count: counts.TOTAL },
-                    { id: 'client', label: `${activeClient.name.split(' ')[0]} to Reply`, icon: UserCheck, count: counts.CLIENT_TO_REPLY, color: 'text-label-client' },
-                    { id: 'assistant', label: 'Assistant Queue', icon: CheckSquare, count: counts.ASSISTANT_TO_REPLY, color: 'text-label-assistant' },
-                    { id: 'proposals', label: 'Agent Proposals', icon: Sparkles, count: 3, color: 'text-accent' },
-                    { id: 'no_reply', label: 'Quiet Folder', icon: Archive, count: counts.NO_REPLY_NEEDED, color: 'text-label-noReply' },
-                    { id: 'waiting', label: 'Waiting on Others', icon: Clock, count: counts.WAITING, color: 'text-amber-600' },
-                    { id: 'needs_review', label: 'Needs Review', icon: AlertTriangle, count: counts.NEEDS_REVIEW, color: 'text-label-review' },
-                    { id: 'meetings', label: 'Meetings Strip', icon: Calendar, count: counts.MEETINGS },
-                    { id: 'important', label: 'Important / VIP', icon: Star, count: 4, color: 'text-amber-500' },
-                    { id: 'archived', label: 'Archived', icon: Archive },
-                  ].map((seg) => {
-                    const Icon = seg.icon;
-                    const isActive = activeSegment === seg.id;
-                    return (
-                      <button
-                        key={seg.id}
-                        onClick={() => handleSelectSegment(seg.id)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all duration-150 cursor-pointer text-left active:scale-[0.99] ${
-                          isActive
-                            ? 'bg-ink-900 font-semibold text-white shadow-soft'
-                            : 'text-ink-700 hover:bg-white hover:text-ink-900 hover:shadow-xs'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 truncate">
-                          <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white' : seg.color || 'text-ink-500'}`} />
-                          <span className="truncate tracking-tight">{seg.label}</span>
-                        </div>
-                        {typeof seg.count === 'number' && (
-                          <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                              isActive ? 'bg-white/20 text-white' : 'bg-ink-100 text-ink-600'
-                            }`}
-                          >
-                            {seg.count}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </nav>
-
-                {/* Agent Control Room Shortcut */}
-                <div className="p-3 mx-2.5 mb-2 rounded-2xl bg-gradient-to-br from-white to-amber-50/40 border border-black/[0.06] shadow-xs space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-serif font-bold text-ink-900">
-                    <div className="flex items-center gap-1.5">
-                      <Bot className="h-3.5 w-3.5 text-accent" />
-                      <span>{activeClient.name.split(' ')[0]}'s Agents</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => navigate(`/assistant/c/${activeClientId}/agents`)}
-                    className="w-full flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-ink-900 hover:bg-ink-800 text-white text-[11px] font-semibold transition active:scale-[0.98] cursor-pointer"
-                  >
-                    <span>Tune Agent Notes</span>
-                    <ArrowRight className="h-3 w-3" />
-                  </button>
-                </div>
+            /* RESPONSIVE 3-PANE (lg+) / 2-PANE (md) / 1-PANE (< md) INBOX */
+            <div className="flex-1 flex overflow-hidden min-h-0 relative">
+              {/* PANE 1 (Desktop >= lg): Persistent Side Options Sidebar */}
+              <aside className="hidden lg:flex w-56 xl:w-60 bg-[#FAF8F5] border-r border-borderMuted/70 flex-col flex-shrink-0 select-none">
+                {renderSidebarContent(false)}
               </aside>
 
-              {/* PANE 2: Thread List (380px) */}
-              <section className="w-96 bg-white border-r border-borderMuted/70 flex flex-col flex-shrink-0 select-none">
+              {/* PANE 1 (Mobile & Tablet < lg): Slide-Over Side Options Drawer */}
+              {isSidebarOpen && (
+                <div
+                  className="fixed inset-0 z-50 lg:hidden bg-black/40 backdrop-blur-[1px] flex"
+                  onClick={() => setIsSidebarOpen(false)}
+                >
+                  <aside
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-72 max-w-[85vw] h-full bg-[#FAF8F5] border-r border-borderMuted shadow-2xl flex flex-col select-none animate-in slide-in-from-left duration-150"
+                  >
+                    {renderSidebarContent(true)}
+                  </aside>
+                </div>
+              )}
+
+              {/* PANE 2: Thread List (Full-width on mobile when no thread selected; hidden on mobile when reading an email) */}
+              <section
+                className={`${
+                  selectedThreadId ? 'hidden md:flex' : 'flex'
+                } w-full md:w-72 lg:w-80 2xl:w-96 bg-white border-r border-borderMuted/70 flex-col flex-shrink-0 select-none min-h-0`}
+              >
                 {/* Search Bar */}
-                <div className="p-3 border-b border-borderMuted/70">
+                <div className="p-2.5 sm:p-3 border-b border-borderMuted/70 flex-shrink-0">
                   <div className="relative">
                     <Search className="h-3.5 w-3.5 text-ink-400 absolute left-3 top-2.5" />
                     <input
@@ -606,8 +730,12 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                 </div>
               </section>
 
-              {/* PANE 3: Thread Detail & AI Panel */}
-              <main className="flex-1 bg-[#FAF8F5] flex flex-col overflow-hidden">
+              {/* PANE 3: Thread Detail & AI Panel (Full-width on mobile when thread selected) */}
+              <main
+                className={`${
+                  selectedThreadId ? 'flex' : 'hidden md:flex'
+                } flex-1 min-w-0 bg-[#FAF8F5] flex-col overflow-hidden min-h-0`}
+              >
                 {!selectedThreadId ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center p-8 select-none">
                     <div className="h-12 w-12 rounded-2xl bg-white shadow-soft border border-borderMuted/80 flex items-center justify-center text-ink-400 mb-3">
@@ -621,23 +749,61 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                     </p>
                   </div>
                 ) : loadingDetail || !selectedThreadData ? (
-                  <div className="flex-1 flex items-center justify-center text-xs text-ink-400">
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                      <span>Loading conversation...</span>
+                  <div className="flex-1 flex flex-col">
+                    <div className="md:hidden px-3 py-2 bg-white border-b border-black/[0.06] flex items-center">
+                      <button
+                        type="button"
+                        onClick={handleClearThread}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-ink-700 hover:text-ink-900 cursor-pointer"
+                      >
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                        <span>Back to Inbox</span>
+                      </button>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center text-xs text-ink-400">
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                        <span>Loading conversation...</span>
+                      </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 flex overflow-hidden">
+                  <div className="flex-1 flex flex-col xl:flex-row overflow-hidden min-h-0">
+                    {/* Mobile & Tablet (< xl) Thread Toolbar: Back to List + AI Analysis Drawer Toggle */}
+                    <div className="xl:hidden px-3 py-2 bg-white border-b border-black/[0.06] flex items-center justify-between gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <button
+                          type="button"
+                          onClick={handleClearThread}
+                          className="md:hidden flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#FAF8F5] hover:bg-ink-100 border border-black/[0.08] text-xs font-semibold text-ink-800 flex-shrink-0 cursor-pointer active:scale-95"
+                        >
+                          <ArrowLeft className="h-3.5 w-3.5" />
+                          <span>Back</span>
+                        </button>
+                        <span className="text-xs text-ink-500 truncate hidden sm:inline">
+                          {selectedThreadData.thread.subject}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsAiPanelOpen(true)}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ink-900 hover:bg-ink-800 text-white text-xs font-semibold whitespace-nowrap flex-shrink-0 transition cursor-pointer active:scale-95"
+                      >
+                        <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                        <span>AI Analysis & Override</span>
+                      </button>
+                    </div>
+
                     {/* Thread Reading & Action Pane */}
-                    <div className="flex-1 overflow-y-auto app-pane-scroll p-6 space-y-5">
+                    <div className="flex-1 min-w-0 overflow-y-auto app-pane-scroll p-3 sm:p-5 lg:p-6 space-y-4 sm:space-y-5">
                       {/* Thread Header */}
-                      <div className="bg-white rounded-2xl border border-borderMuted/70 p-5 shadow-card space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <h2 className="font-serif font-bold text-xl text-ink-900 tracking-tight leading-snug">
+                      <div className="bg-white rounded-2xl border border-borderMuted/70 p-3.5 sm:p-5 shadow-card space-y-3">
+                        <div className="flex items-start justify-between gap-2.5 flex-wrap">
+                          <h2 className="font-serif font-bold text-base sm:text-xl text-ink-900 tracking-tight leading-snug break-words min-w-0 flex-1">
                             {selectedThreadData.thread.subject}
                           </h2>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <LabelBadge label={selectedThreadData.thread.currentLabel} />
                             <button
                               onClick={() => handleToggleArchive(selectedThreadData.thread)}
@@ -651,9 +817,9 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
 
                         {/* Participants Row & Aging Nudge */}
                         <div className="flex items-center justify-between text-xs text-ink-500 flex-wrap gap-2">
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                             <span className="text-ink-400">Participants:</span>
-                            <span className="text-ink-900 font-semibold">
+                            <span className="text-ink-900 font-semibold break-words">
                               {(selectedThreadData.thread.participants || [])
                                 .map((p) => p.name || p.email)
                                 .join(', ')}
@@ -673,7 +839,7 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                       </div>
 
                       {/* Messages Stream */}
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4">
                         {(selectedThreadData.messages || []).map((msg, idx) => {
                           const isCollapsed = !!collapsedMessages[msg._id];
                           const isLast = idx === selectedThreadData.messages.length - 1;
@@ -693,32 +859,40 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                                     [msg._id]: !isCollapsed,
                                   }))
                                 }
-                                className="p-4 flex items-center justify-between cursor-pointer select-none"
+                                className="p-3 sm:p-4 flex items-center justify-between gap-2 cursor-pointer select-none"
                               >
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                                   <div className="h-8 w-8 rounded-full bg-ink-100 text-ink-800 font-bold text-xs flex items-center justify-center flex-shrink-0 ring-2 ring-white">
                                     {(msg.from?.name || msg.from?.email || 'U')[0].toUpperCase()}
                                   </div>
-                                  <div>
-                                    <span className="text-xs font-bold text-ink-900 tracking-tight">
-                                      {msg.from?.name || msg.from?.email}
-                                    </span>
-                                    <span className="text-[11px] text-ink-400 ml-2">
-                                      to {msg.to?.[0]?.name || msg.to?.[0]?.email || activeClient.name.split(' ')[0]}
-                                    </span>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-baseline gap-1.5 flex-wrap">
+                                      <span className="text-xs font-bold text-ink-900 tracking-tight truncate">
+                                        {msg.from?.name || msg.from?.email}
+                                      </span>
+                                      <span className="text-[11px] text-ink-400 truncate">
+                                        to {msg.to?.[0]?.name || msg.to?.[0]?.email || activeClient.name.split(' ')[0]}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 text-xs text-ink-400">
-                                  <span className="text-[11px] font-mono">
-                                    {new Date(msg.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                <div className="flex items-center gap-1.5 text-xs text-ink-400 flex-shrink-0">
+                                  <span className="text-[10px] sm:text-[11px] font-mono">
+                                    {(() => {
+                                      const rawDate = msg.date || msg.receivedAt || msg.sentAt || msg.createdAt;
+                                      const parsed = rawDate ? new Date(rawDate) : null;
+                                      return parsed && !Number.isNaN(parsed.getTime())
+                                        ? parsed.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })
+                                        : 'Just now';
+                                    })()}
                                   </span>
                                   {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                                 </div>
                               </div>
 
                               {!isCollapsed && (
-                                <div className="px-5 pb-5 pt-1 text-xs text-ink-800 leading-relaxed border-t border-borderMuted/30 whitespace-pre-wrap font-sans">
+                                <div className="px-3.5 sm:px-5 pb-4 sm:pb-5 pt-2 text-xs text-ink-800 leading-relaxed border-t border-borderMuted/30 whitespace-pre-wrap break-words font-sans">
                                   {msg.bodyText || msg.snippet}
                                 </div>
                               )}
@@ -728,10 +902,11 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                       </div>
 
                       {/* Assistant Draft Composer Area */}
-                      <div className="pt-2">
+                      <div className="pt-1 pb-4">
                         <DraftEditor
                           thread={selectedThreadData.thread}
                           existingDraft={selectedThreadData.drafts?.[0]}
+                          clientName={activeClient.name}
                           onDraftUpdated={(updated) => {
                             setSelectedThreadData((prev) => ({
                               ...prev,
@@ -742,8 +917,8 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                       </div>
                     </div>
 
-                    {/* AI Reasoning Inspector Column (320px) */}
-                    <div className="w-80 border-l border-borderMuted/70 flex-shrink-0">
+                    {/* AI Reasoning Inspector Column (Desktop >= xl) */}
+                    <div className="hidden xl:block w-72 2xl:w-80 border-l border-borderMuted/70 flex-shrink-0">
                       <AIReasonPanel
                         thread={selectedThreadData.thread}
                         timeline={selectedThreadData.timeline || []}
@@ -753,7 +928,6 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                             thread: updated,
                           }));
                           loadThreads();
-                          // Offer remember note
                           toast.success('Classification updated', {
                             action: {
                               label: 'Remember for Agent?',
@@ -764,6 +938,57 @@ export function AssistantDashboard({ initialOpenPlaybook = false }) {
                         onOpenPlaybook={() => setIsPlaybookOpen(true)}
                       />
                     </div>
+
+                    {/* AI Reasoning Inspector Slide-Over Drawer (Mobile & Tablet < xl) */}
+                    {isAiPanelOpen && (
+                      <div
+                        className="fixed inset-0 z-50 xl:hidden bg-black/40 backdrop-blur-[1px] flex justify-end"
+                        onClick={() => setIsAiPanelOpen(false)}
+                      >
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-[90vw] max-w-sm h-full bg-white shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-150"
+                        >
+                          <div className="px-4 py-3 border-b border-black/[0.06] flex items-center justify-between flex-shrink-0 bg-[#FAF8F5]">
+                            <div className="flex items-center gap-2 text-xs font-serif font-bold text-ink-900">
+                              <Sparkles className="h-3.5 w-3.5 text-accent" />
+                              <span>AI Analysis & Override</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setIsAiPanelOpen(false)}
+                              className="p-1.5 rounded-full text-ink-500 hover:text-ink-900 hover:bg-ink-100 transition cursor-pointer"
+                              aria-label="Close AI analysis panel"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <div className="flex-1 overflow-hidden">
+                            <AIReasonPanel
+                              thread={selectedThreadData.thread}
+                              timeline={selectedThreadData.timeline || []}
+                              onThreadUpdated={(updated) => {
+                                setSelectedThreadData((prev) => ({
+                                  ...prev,
+                                  thread: updated,
+                                }));
+                                loadThreads();
+                                toast.success('Classification updated', {
+                                  action: {
+                                    label: 'Remember for Agent?',
+                                    onClick: () => handlePromptRememberNote(updated, updated.currentLabel),
+                                  },
+                                });
+                              }}
+                              onOpenPlaybook={() => {
+                                setIsAiPanelOpen(false);
+                                setIsPlaybookOpen(true);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </main>

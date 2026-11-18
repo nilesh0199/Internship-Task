@@ -643,15 +643,22 @@ export function ClientQueue() {
               Prepared by Maya with Daybook agents. Nothing sends without your tap.
             </p>
 
-            <div className="text-[10px] text-ink-400 font-mono space-y-1">
-              <div className="flex items-center justify-between">
-                <span>j / k</span>
-                <span>navigate</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>a · r · h · s · d</span>
-                <span>approve · reply · hand · snooze · done</span>
-              </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px] text-ink-500">
+              {[
+                { key: 'J / K', label: 'Navigate' },
+                { key: 'A', label: 'Approve' },
+                { key: 'R', label: 'Reply' },
+                { key: 'H', label: 'Hand off' },
+                { key: 'S', label: 'Snooze' },
+                { key: 'D', label: 'Done' },
+              ].map((s) => (
+                <div key={s.key} className="flex items-center gap-1.5 min-w-0">
+                  <kbd className="px-1.5 py-0.5 rounded bg-white border border-black/[0.08] font-mono text-[9px] font-semibold text-ink-700 shadow-2xs flex-shrink-0">
+                    {s.key}
+                  </kbd>
+                  <span className="text-ink-500 truncate">{s.label}</span>
+                </div>
+              ))}
             </div>
           </div>
         </aside>
