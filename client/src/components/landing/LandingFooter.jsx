@@ -155,7 +155,7 @@ export default function LandingFooter() {
         </div>
 
         <div className="text-center text-[11px] text-ink-400">
-          An internship assignment project by Nilesh. Prototype quality built for live demonstration.
+          Project by Nilesh Thipe.
         </div>
       </div>
     </footer>
